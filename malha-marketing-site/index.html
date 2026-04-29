@@ -4,11 +4,54 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta
+      id="metaDescription"
       name="description"
       content="Malha is a calm crafting companion for knitting and crochet projects, materials, progress, and AI-assisted planning."
     >
+    <meta
+      name="keywords"
+      content="Malha, knitting app, crochet app, project tracker, yarn stash, craft app, knitting planner, crochet planner, AI craft assistant"
+    >
+    <meta name="author" content="Malha">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#315c4b">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Malha">
+    <meta id="ogTitle" property="og:title" content="Malha | Finish more handmade projects">
+    <meta
+      id="ogDescription"
+      property="og:description"
+      content="A calm app for finishing knitting and crochet projects. Track rows, organize yarn, plan from your stash, and get ready for Aidi."
+    >
+    <meta property="og:image" content="assets/malha-mark.svg">
+    <meta name="twitter:card" content="summary">
+    <meta id="twitterTitle" name="twitter:title" content="Malha | Finish more handmade projects">
+    <meta
+      id="twitterDescription"
+      name="twitter:description"
+      content="A calm app for finishing knitting and crochet projects, planned for a first version in June 2026."
+    >
+    <link rel="alternate" hreflang="en" href="./index.html">
+    <link rel="alternate" hreflang="pt-PT" href="./index.html?lang=pt-PT">
+    <link rel="alternate" hreflang="x-default" href="./index.html">
     <title>Malha | Finish more handmade projects</title>
     <script>document.documentElement.classList.add("has-js");</script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Malha",
+        "applicationCategory": "LifestyleApplication",
+        "operatingSystem": "Android",
+        "description": "Malha is a calm knitting and crochet companion for project tracking, yarn stash planning, offline progress, and future AI assistance.",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "EUR"
+        },
+        "releaseNotes": "First version planned for June 2026."
+      }
+    </script>
     <link rel="stylesheet" href="styles.css">
   </head>
   <body>
@@ -24,6 +67,10 @@
         <a href="#faq">FAQ</a>
         <a href="#future">Roadmap</a>
       </nav>
+      <div class="language-switcher" aria-label="Language selector">
+        <button type="button" class="is-active" data-lang="en" aria-pressed="true">EN</button>
+        <button type="button" data-lang="pt-PT" aria-pressed="false">PT</button>
+      </div>
       <a class="nav-cta" href="#waitlist">Join testers</a>
     </header>
 

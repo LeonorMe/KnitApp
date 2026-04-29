@@ -129,7 +129,8 @@ a {
 
 .nav-cta,
 .button,
-.signup-form button {
+.signup-form button,
+.language-switcher button {
   border: 0;
   border-radius: 999px;
   font: inherit;
@@ -150,6 +151,33 @@ a {
   background: #264a3c;
   box-shadow: 0 14px 34px rgba(49, 92, 75, 0.25);
   transform: translateY(-2px);
+}
+
+.language-switcher {
+  display: inline-flex;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 250, 242, 0.72);
+}
+
+.language-switcher button {
+  min-width: 2.35rem;
+  min-height: 2rem;
+  color: var(--muted);
+  background: transparent;
+  font-size: 0.82rem;
+  font-weight: 900;
+  transition: color 220ms ease, background 220ms ease, transform 220ms ease;
+}
+
+.language-switcher button:hover,
+.language-switcher button:focus-visible,
+.language-switcher button.is-active {
+  color: var(--paper);
+  background: var(--sage);
+  transform: translateY(-1px);
 }
 
 .hero {
@@ -1278,6 +1306,10 @@ h3 {
     order: 3;
     width: 100%;
     justify-content: space-between;
+  }
+
+  .language-switcher {
+    margin-left: auto;
   }
 
   .nav-cta {
