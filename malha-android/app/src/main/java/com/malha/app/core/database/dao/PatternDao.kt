@@ -19,6 +19,9 @@ interface PatternDao {
     @Query("SELECT COUNT(*) FROM patterns")
     suspend fun countPatterns(): Int
 
+    @Query("SELECT id FROM patterns ORDER BY title ASC LIMIT 1")
+    suspend fun getFirstPatternId(): String?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertPatterns(patterns: List<PatternEntity>)
 

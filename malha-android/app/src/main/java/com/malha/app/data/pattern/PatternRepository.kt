@@ -5,5 +5,6 @@ import kotlinx.coroutines.flow.Flow
 
 interface PatternRepository {
     fun observePatterns(): Flow<List<Pattern>>
+    suspend fun getFirstPatternId(): String?
     suspend fun createManualPattern(title: String, instructions: List<String>)
 }

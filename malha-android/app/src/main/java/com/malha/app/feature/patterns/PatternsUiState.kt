@@ -4,6 +4,7 @@ import com.malha.app.domain.model.Pattern
 
 data class PatternsUiState(
     val isLoading: Boolean = true,
-    val patterns: List<Pattern> = emptyList()
+    val patterns: List<Pattern> = emptyList(),
+    val isCreating: Boolean = false,
+    val errorMessage: String? = null
 )
-

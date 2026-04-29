@@ -9,7 +9,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -50,55 +52,80 @@ fun ListScreen(
     subtitle: String,
     items: List<String>,
     emptyText: String,
+    errorMessage: String? = null,
+    actionLabel: String? = null,
+    onActionClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
-    Surface(
+    Scaffold(
         modifier = modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background
-    ) {
-        LazyColumn(
-            modifier = Modifier.padding(PaddingValues(horizontal = 24.dp, vertical = 28.dp)),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+        floatingActionButton = {
+            if (actionLabel != null && onActionClick != null) {
+                ExtendedFloatingActionButton(
+                    onClick = onActionClick,
+                    text = { Text(actionLabel) }
+                )
+            }
+        }
+    ) { innerPadding ->
+        Surface(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
+            color = MaterialTheme.colorScheme.background
         ) {
-            item {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.headlineLarge,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-            }
-            item {
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            if (items.isEmpty()) {
+            LazyColumn(
+                modifier = Modifier.padding(PaddingValues(horizontal = 24.dp, vertical = 28.dp)),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
                 item {
                     Text(
-                        text = emptyText,
+                        text = title,
+                        style = MaterialTheme.typography.headlineLarge,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                }
+                item {
+                    Text(
+                        text = subtitle,
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-            } else {
-                items(items) { label ->
-                    Card(
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant
-                        )
-                    ) {
+                if (errorMessage != null) {
+                    item {
                         Text(
-                            text = label,
-                            modifier = Modifier.padding(16.dp),
+                            text = errorMessage,
                             style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurface
+                            color = MaterialTheme.colorScheme.error
                         )
+                    }
+                }
+                if (items.isEmpty()) {
+                    item {
+                        Text(
+                            text = emptyText,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                } else {
+                    items(items) { label ->
+                        Card(
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant
+                            )
+                        ) {
+                            Text(
+                                text = label,
+                                modifier = Modifier.padding(16.dp),
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
                     }
                 }
             }
         }
     }
 }
-

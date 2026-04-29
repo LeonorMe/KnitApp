@@ -17,6 +17,10 @@ class RoomPatternRepository(
             .map { patterns -> patterns.map { it.toDomain() } }
     }
 
+    override suspend fun getFirstPatternId(): String? {
+        return patternDao.getFirstPatternId()
+    }
+
     override suspend fun createManualPattern(title: String, instructions: List<String>) {
         val now = System.currentTimeMillis()
         val patternId = UUID.randomUUID().toString()
