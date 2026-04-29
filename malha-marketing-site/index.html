@@ -18,11 +18,13 @@
         <span>Malha</span>
       </a>
       <nav class="nav-links" aria-label="Page sections">
+        <a href="#audience">For who</a>
         <a href="#features">Features</a>
         <a href="#aidi">Aidi</a>
+        <a href="#faq">FAQ</a>
         <a href="#future">Roadmap</a>
       </nav>
-      <a class="nav-cta" href="#waitlist">Get updates</a>
+      <a class="nav-cta" href="#waitlist">Join testers</a>
     </header>
 
     <main id="top">
@@ -36,11 +38,12 @@
           <p class="eyebrow">A calm operating system for handmade creation</p>
           <h1 id="hero-title">Turn scattered yarn plans into finished work.</h1>
           <p class="hero-copy">
-            Malha helps knitters and crocheters plan projects, track progress,
-            manage materials, and return to every stitch with confidence.
+            The calm app for finishing knitting and crochet projects. Plan your
+            work, track every row, use your stash, and return to every stitch
+            with confidence.
           </p>
           <div class="hero-actions">
-            <a class="button primary" href="#waitlist">Follow the launch</a>
+            <a class="button primary" href="#waitlist">Join early testers</a>
             <a class="button secondary" href="#features">Explore the idea</a>
           </div>
         </div>
@@ -88,6 +91,79 @@
         </p>
       </section>
 
+      <section class="section problem-section" aria-labelledby="problem-title">
+        <div class="section-heading reveal">
+          <p class="eyebrow">The problem</p>
+          <h2 id="problem-title">Too many patterns, too much yarn, too many unfinished projects?</h2>
+        </div>
+        <div class="problem-grid">
+          <article class="reveal">
+            <strong>Lose the row</strong>
+            <span>Progress gets scattered across paper notes, PDFs, photos, and memory.</span>
+          </article>
+          <article class="reveal">
+            <strong>Buy twice</strong>
+            <span>Materials are easy to forget when the stash is not visible during planning.</span>
+          </article>
+          <article class="reveal">
+            <strong>Pause forever</strong>
+            <span>Projects become harder to resume when the next step is unclear.</span>
+          </article>
+        </div>
+      </section>
+
+      <section class="section audience-section" id="audience" aria-labelledby="audience-title">
+        <div class="section-heading reveal">
+          <p class="eyebrow">Who it is for</p>
+          <h2 id="audience-title">Made for makers who want calm progress.</h2>
+        </div>
+        <div class="audience-grid">
+          <article class="reveal">
+            <h3>Beginners</h3>
+            <p>Simple steps, clearer instructions, and future Aidi explanations when a technique feels confusing.</p>
+          </article>
+          <article class="reveal">
+            <h3>Intermediate crafters</h3>
+            <p>Project state, materials, notes, and variants kept organized as work becomes more ambitious.</p>
+          </article>
+          <article class="reveal">
+            <h3>Stash owners</h3>
+            <p>A planning-first workflow that helps users see what they own before buying more.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section screenshots-section" aria-labelledby="screens-title">
+        <div class="section-heading reveal">
+          <p class="eyebrow">Concept screens</p>
+          <h2 id="screens-title">A preview of the workflows Malha will connect.</h2>
+        </div>
+        <div class="screen-gallery">
+          <article class="mock-screen reveal">
+            <span class="mock-label">Projects</span>
+            <strong>3 active projects</strong>
+            <div class="mock-line long"></div>
+            <div class="mock-line medium"></div>
+            <div class="mock-progress"><span style="width: 72%"></span></div>
+          </article>
+          <article class="mock-screen reveal">
+            <span class="mock-label">Stash</span>
+            <strong>Enough yarn found</strong>
+            <div class="mock-yarn-row">
+              <span></span><span></span><span></span>
+            </div>
+            <div class="mock-line short"></div>
+          </article>
+          <article class="mock-screen reveal">
+            <span class="mock-label">Current row</span>
+            <strong>Knit 24, increase 1</strong>
+            <div class="mock-step-controls">
+              <span></span><span></span><span></span>
+            </div>
+          </article>
+        </div>
+      </section>
+
       <section class="section" id="features" aria-labelledby="features-title">
         <div class="section-heading reveal">
           <p class="eyebrow">What Malha organizes</p>
@@ -95,22 +171,30 @@
         </div>
         <div class="feature-grid">
           <article class="reveal">
-            <span class="feature-icon">01</span>
+            <span class="feature-icon" aria-hidden="true">
+              <img src="assets/icon-project.svg" alt="" width="54" height="54">
+            </span>
             <h3>Project tracking</h3>
             <p>Resume the exact row, step, note, and progress state without searching through scattered notes.</p>
           </article>
           <article class="reveal">
-            <span class="feature-icon">02</span>
+            <span class="feature-icon" aria-hidden="true">
+              <img src="assets/icon-materials.svg" alt="" width="54" height="54">
+            </span>
             <h3>Material awareness</h3>
             <p>Catalog yarn, tools, purchases, and stash age so future projects begin with what users already own.</p>
           </article>
           <article class="reveal">
-            <span class="feature-icon">03</span>
+            <span class="feature-icon" aria-hidden="true">
+              <img src="assets/icon-voice.svg" alt="" width="54" height="54">
+            </span>
             <h3>Hands-free flow</h3>
             <p>Designed for large readable steps, quick actions, and future voice commands while both hands are busy.</p>
           </article>
           <article class="reveal">
-            <span class="feature-icon">04</span>
+            <span class="feature-icon" aria-hidden="true">
+              <img src="assets/icon-community.svg" alt="" width="54" height="54">
+            </span>
             <h3>Community trust</h3>
             <p>Future pattern sharing will prioritize verified completions, variants, corrections, and real outcomes.</p>
           </article>
@@ -131,13 +215,30 @@
             remains reliable offline, while advanced intelligence supports
             planning, learning, and discovery when users want it.
           </p>
+          <p class="brand-note">
+            In Portuguese, "perdi o fio a meada" means losing the thread of the
+            story. Malha is built to help makers keep that thread.
+          </p>
         </div>
         <div class="aidi-panel reveal">
           <img src="assets/aidi-sprite.svg" alt="Aidi, a small yarn-inspired assistant mascot" width="132" height="132">
           <div>
             <span class="quote-mark">"</span>
-            <p>You already own yarn that matches this project. Want to plan it from your stash?</p>
+            <p id="aidiQuote">You already own yarn that matches this project. Want to plan it from your stash?</p>
           </div>
+        </div>
+      </section>
+
+      <section class="section benefits-section" aria-labelledby="benefits-title">
+        <div class="section-heading reveal">
+          <p class="eyebrow">Why people will return</p>
+          <h2 id="benefits-title">A calmer way to make progress visible.</h2>
+        </div>
+        <div class="benefit-list">
+          <div class="reveal"><strong>Finish more</strong><span>See the next step without rebuilding context.</span></div>
+          <div class="reveal"><strong>Spend smarter</strong><span>Plan with owned materials before buying new yarn.</span></div>
+          <div class="reveal"><strong>Never lose your row</strong><span>Progress, notes, and current step stay together.</span></div>
+          <div class="reveal"><strong>Use AI carefully</strong><span>Aidi explains and suggests, while users stay in control.</span></div>
         </div>
       </section>
 
@@ -148,35 +249,120 @@
         </div>
         <div class="roadmap">
           <div class="reveal">
+            <span class="roadmap-icon" aria-hidden="true">
+              <img src="assets/icon-foundation.svg" alt="" width="46" height="46">
+            </span>
+            <small class="status planned">Planned</small>
             <strong>Foundation</strong>
             <span>Projects, patterns, materials, offline progress.</span>
           </div>
           <div class="reveal">
+            <span class="roadmap-icon" aria-hidden="true">
+              <img src="assets/icon-intelligence.svg" alt="" width="46" height="46">
+            </span>
+            <small class="status future">Future</small>
             <strong>Intelligence</strong>
             <span>Aidi recommendations, yarn estimation, pattern help.</span>
           </div>
           <div class="reveal">
+            <span class="roadmap-icon" aria-hidden="true">
+              <img src="assets/icon-economy.svg" alt="" width="46" height="46">
+            </span>
+            <small class="status future">Future</small>
             <strong>Economy</strong>
             <span>Gentle rewards for consistency, completion, and stash use.</span>
           </div>
           <div class="reveal">
+            <span class="roadmap-icon" aria-hidden="true">
+              <img src="assets/icon-ecosystem.svg" alt="" width="46" height="46">
+            </span>
+            <small class="status future">Future</small>
             <strong>Ecosystem</strong>
             <span>Community validation, pattern variants, marketplace.</span>
           </div>
         </div>
       </section>
 
+      <section class="section trust-section" aria-labelledby="trust-title">
+        <div class="section-heading reveal">
+          <p class="eyebrow">Trust first</p>
+          <h2 id="trust-title">Offline when it matters. Transparent when AI helps.</h2>
+        </div>
+        <div class="trust-grid">
+          <article class="reveal">
+            <h3>Offline-first core</h3>
+            <p>Project execution should work even without internet, because crafting cannot depend on signal.</p>
+          </article>
+          <article class="reveal">
+            <h3>AI is labeled</h3>
+            <p>Aidi suggestions will be clearly marked, editable, and supported by confidence signals.</p>
+          </article>
+          <article class="reveal">
+            <h3>Users control data</h3>
+            <p>Material tracking, project history, and future AI context should be understandable and exportable.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section vote-section" aria-labelledby="vote-title">
+        <div class="section-heading reveal">
+          <p class="eyebrow">Help shape Malha</p>
+          <h2 id="vote-title">Vote for what should come first.</h2>
+        </div>
+        <div class="vote-options" aria-label="Feature voting placeholder">
+          <button type="button" class="reveal">Pattern tracker</button>
+          <button type="button" class="reveal">Stash inventory</button>
+          <button type="button" class="reveal">Voice commands</button>
+          <button type="button" class="reveal">Aidi planning</button>
+        </div>
+        <p class="vote-message reveal" id="voteMessage" role="status" aria-live="polite">Voting is a placeholder for now.</p>
+      </section>
+
+      <section class="section faq-section" id="faq" aria-labelledby="faq-title">
+        <div class="section-heading reveal">
+          <p class="eyebrow">FAQ</p>
+          <h2 id="faq-title">Questions early users may ask.</h2>
+        </div>
+        <div class="faq-list">
+          <details class="reveal" open>
+            <summary>When will Malha be available?</summary>
+            <p>There is no public release date yet. This page is the first marketing placeholder for the project.</p>
+          </details>
+          <details class="reveal">
+            <summary>Will it be Android or iOS?</summary>
+            <p>The current technical direction starts with Android. Other platforms can come later if there is demand.</p>
+          </details>
+          <details class="reveal">
+            <summary>Will AI generate full patterns?</summary>
+            <p>AI will be positioned as an assistant for explanations, estimates, and drafts. Verified human feedback stays central.</p>
+          </details>
+          <details class="reveal">
+            <summary>Will the app work offline?</summary>
+            <p>The core project tracker, row progress, notes, and materials system are planned as offline-first features.</p>
+          </details>
+          <details class="reveal">
+            <summary>Will there be a free version?</summary>
+            <p>The intended direction is a useful free core, with premium AI and marketplace features later.</p>
+          </details>
+        </div>
+      </section>
+
       <section class="waitlist" id="waitlist" aria-labelledby="waitlist-title">
         <div class="reveal">
-          <p class="eyebrow">Launch placeholder</p>
+          <p class="eyebrow">Early testers</p>
           <h2 id="waitlist-title">Malha is still being stitched together.</h2>
           <p>
             The app download link, screenshots, demo video, and mailing list can
             be added here when they are ready.
           </p>
+          <div class="contact-links" aria-label="Future community links">
+            <a href="mailto:hello@example.com">Email placeholder</a>
+            <a href="#" aria-disabled="true">GitHub coming soon</a>
+            <a href="#" aria-disabled="true">Instagram coming soon</a>
+          </div>
         </div>
         <form class="signup-form reveal" aria-label="Launch updates placeholder">
-          <label for="email">Email for future updates</label>
+          <label for="email">Email for early tester updates</label>
           <div>
             <input id="email" type="email" placeholder="you@example.com" autocomplete="email">
             <button type="button" id="notifyButton">Notify me</button>
@@ -189,6 +375,7 @@
     <footer class="site-footer">
       <span>Malha</span>
       <span>Finish more. Buy smarter. Create better.</span>
+      <span>&copy 2026 Malha. All rights reserved.</span>
     </footer>
 
     <script src="script.js"></script>

@@ -1,0 +1,8 @@
+<svg width="96" height="96" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Economy icon">
+  <circle cx="48" cy="48" r="28" fill="#DCE8DD" stroke="#315C4B" stroke-width="5"/>
+  <circle cx="48" cy="48" r="16" fill="#FFF7EA" stroke="#B8795F" stroke-width="5"/>
+  <path d="M48 37V59" stroke="#42486F" stroke-width="5" stroke-linecap="round"/>
+  <path d="M39 45C42 39 54 39 57 45C60 52 49 52 44 54C40 56 41 61 49 61C53 61 56 59 58 56" stroke="#42486F" stroke-width="4" stroke-linecap="round"/>
+  <path d="M24 72L18 80" stroke="#315C4B" stroke-width="5" stroke-linecap="round"/>
+  <path d="M72 72L78 80" stroke="#315C4B" stroke-width="5" stroke-linecap="round"/>
+</svg>
