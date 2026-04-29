@@ -1,8 +1,8 @@
 package com.malha.app.data.pattern
 
 import com.malha.app.domain.model.Pattern
+import kotlinx.coroutines.flow.Flow
 
 interface PatternRepository {
-    suspend fun getPatterns(): List<Pattern>
+    fun observePatterns(): Flow<List<Pattern>>
 }
-
