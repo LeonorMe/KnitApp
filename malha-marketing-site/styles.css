@@ -770,6 +770,28 @@ h3 {
   transition: transform 320ms ease;
 }
 
+.card-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 3.4rem;
+  height: 3.4rem;
+  margin-bottom: 1rem;
+  border: 1px solid rgba(49, 92, 75, 0.16);
+  border-radius: 1rem;
+  background:
+    linear-gradient(145deg, rgba(255, 250, 242, 0.92), rgba(220, 232, 221, 0.62)),
+    var(--paper);
+  box-shadow: 0 12px 24px rgba(49, 92, 75, 0.09);
+  transition: transform 280ms ease, box-shadow 280ms ease, background 280ms ease;
+}
+
+.card-icon img {
+  display: block;
+  width: 2.55rem;
+  height: 2.55rem;
+  transition: transform 320ms ease;
+}
+
 .feature-grid article:hover .feature-icon {
   background:
     linear-gradient(145deg, rgba(255, 250, 242, 0.96), rgba(216, 205, 231, 0.72)),
@@ -779,6 +801,24 @@ h3 {
 }
 
 .feature-grid article:hover .feature-icon img {
+  transform: scale(1.08) rotate(3deg);
+}
+
+.problem-grid article:hover .card-icon,
+.audience-grid article:hover .card-icon,
+.benefit-list > div:hover .card-icon,
+.trust-grid article:hover .card-icon {
+  background:
+    linear-gradient(145deg, rgba(255, 250, 242, 0.98), rgba(216, 205, 231, 0.62)),
+    var(--paper);
+  box-shadow: 0 16px 32px rgba(49, 92, 75, 0.14);
+  transform: translateY(-3px) rotate(-2deg);
+}
+
+.problem-grid article:hover .card-icon img,
+.audience-grid article:hover .card-icon img,
+.benefit-list > div:hover .card-icon img,
+.trust-grid article:hover .card-icon img {
   transform: scale(1.08) rotate(3deg);
 }
 
@@ -966,8 +1006,26 @@ h3 {
 }
 
 .faq-list summary {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.85rem;
+  align-items: center;
   cursor: pointer;
   font-weight: 850;
+}
+
+.faq-list summary img {
+  width: 2.15rem;
+  height: 2.15rem;
+  padding: 0.28rem;
+  border: 1px solid rgba(66, 72, 111, 0.14);
+  border-radius: 0.8rem;
+  background: rgba(255, 250, 242, 0.78);
+  transition: transform 260ms ease;
+}
+
+.faq-list details:hover summary img {
+  transform: rotate(-3deg) scale(1.06);
 }
 
 .faq-list p {
