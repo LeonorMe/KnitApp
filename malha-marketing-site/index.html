@@ -8,6 +8,7 @@
       content="Malha is a calm crafting companion for knitting and crochet projects, materials, progress, and AI-assisted planning."
     >
     <title>Malha | Finish more handmade projects</title>
+    <script>document.documentElement.classList.add("has-js");</script>
     <link rel="stylesheet" href="styles.css">
   </head>
   <body>
@@ -26,7 +27,12 @@
 
     <main id="top">
       <section class="hero" aria-labelledby="hero-title">
-        <div class="hero-text">
+        <div class="thread-ribbons" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        <div class="hero-text reveal">
           <p class="eyebrow">A calm operating system for handmade creation</p>
           <h1 id="hero-title">Turn scattered yarn plans into finished work.</h1>
           <p class="hero-copy">
@@ -39,7 +45,7 @@
           </div>
         </div>
 
-        <div class="hero-visual" aria-label="Malha app preview illustration">
+        <div class="hero-visual reveal" aria-label="Malha app preview illustration">
           <div class="phone-shell">
             <div class="phone-screen">
               <div class="screen-top">
@@ -74,7 +80,7 @@
         </div>
       </section>
 
-      <section class="intro-band" aria-label="Product promise">
+      <section class="intro-band reveal" aria-label="Product promise">
         <p>
           Built around a simple principle: reward creation, not consumption.
           Malha keeps the joy of craft while helping users finish more, buy
@@ -83,27 +89,27 @@
       </section>
 
       <section class="section" id="features" aria-labelledby="features-title">
-        <div class="section-heading">
+        <div class="section-heading reveal">
           <p class="eyebrow">What Malha organizes</p>
           <h2 id="features-title">One quiet place for the full project lifecycle.</h2>
         </div>
         <div class="feature-grid">
-          <article>
+          <article class="reveal">
             <span class="feature-icon">01</span>
             <h3>Project tracking</h3>
             <p>Resume the exact row, step, note, and progress state without searching through scattered notes.</p>
           </article>
-          <article>
+          <article class="reveal">
             <span class="feature-icon">02</span>
             <h3>Material awareness</h3>
             <p>Catalog yarn, tools, purchases, and stash age so future projects begin with what users already own.</p>
           </article>
-          <article>
+          <article class="reveal">
             <span class="feature-icon">03</span>
             <h3>Hands-free flow</h3>
             <p>Designed for large readable steps, quick actions, and future voice commands while both hands are busy.</p>
           </article>
-          <article>
+          <article class="reveal">
             <span class="feature-icon">04</span>
             <h3>Community trust</h3>
             <p>Future pattern sharing will prioritize verified completions, variants, corrections, and real outcomes.</p>
@@ -112,7 +118,7 @@
       </section>
 
       <section class="split-section" id="aidi" aria-labelledby="aidi-title">
-        <div>
+        <div class="reveal">
           <p class="eyebrow">Meet Aidi</p>
           <h2 id="aidi-title">AI assistance that stays calm and useful.</h2>
           <p>
@@ -126,7 +132,7 @@
             planning, learning, and discovery when users want it.
           </p>
         </div>
-        <div class="aidi-panel">
+        <div class="aidi-panel reveal">
           <img src="assets/aidi-sprite.svg" alt="Aidi, a small yarn-inspired assistant mascot" width="132" height="132">
           <div>
             <span class="quote-mark">"</span>
@@ -136,24 +142,24 @@
       </section>
 
       <section class="section muted" id="future" aria-labelledby="future-title">
-        <div class="section-heading">
+        <div class="section-heading reveal">
           <p class="eyebrow">Future app link coming later</p>
           <h2 id="future-title">Built now as a marketing page, ready to connect later.</h2>
         </div>
         <div class="roadmap">
-          <div>
+          <div class="reveal">
             <strong>Foundation</strong>
             <span>Projects, patterns, materials, offline progress.</span>
           </div>
-          <div>
+          <div class="reveal">
             <strong>Intelligence</strong>
             <span>Aidi recommendations, yarn estimation, pattern help.</span>
           </div>
-          <div>
+          <div class="reveal">
             <strong>Economy</strong>
             <span>Gentle rewards for consistency, completion, and stash use.</span>
           </div>
-          <div>
+          <div class="reveal">
             <strong>Ecosystem</strong>
             <span>Community validation, pattern variants, marketplace.</span>
           </div>
@@ -161,7 +167,7 @@
       </section>
 
       <section class="waitlist" id="waitlist" aria-labelledby="waitlist-title">
-        <div>
+        <div class="reveal">
           <p class="eyebrow">Launch placeholder</p>
           <h2 id="waitlist-title">Malha is still being stitched together.</h2>
           <p>
@@ -169,7 +175,7 @@
             be added here when they are ready.
           </p>
         </div>
-        <form class="signup-form" aria-label="Launch updates placeholder">
+        <form class="signup-form reveal" aria-label="Launch updates placeholder">
           <label for="email">Email for future updates</label>
           <div>
             <input id="email" type="email" placeholder="you@example.com" autocomplete="email">

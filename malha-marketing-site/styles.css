@@ -10,6 +10,7 @@
   --muted: #66736d;
   --line: rgba(36, 50, 46, 0.14);
   --shadow: 0 22px 60px rgba(49, 92, 75, 0.18);
+  --shadow-lift: 0 28px 80px rgba(49, 92, 75, 0.24);
 }
 
 * {
@@ -31,6 +32,19 @@ body {
   line-height: 1.5;
 }
 
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  opacity: 0.42;
+  background:
+    linear-gradient(120deg, transparent 0 42%, rgba(184, 121, 95, 0.08) 48%, transparent 55%),
+    linear-gradient(45deg, transparent 0 50%, rgba(49, 92, 75, 0.08) 55%, transparent 62%);
+  background-size: 180% 180%, 160% 160%;
+  animation: wovenLight 24s ease-in-out infinite alternate;
+}
+
 a {
   color: inherit;
   text-decoration: none;
@@ -49,6 +63,7 @@ a {
   background: rgba(255, 250, 242, 0.82);
   border-bottom: 1px solid var(--line);
   backdrop-filter: blur(18px);
+  animation: headerDrop 700ms ease both;
 }
 
 .brand,
@@ -68,6 +83,15 @@ a {
   font-weight: 800;
 }
 
+.brand img {
+  transition: transform 450ms ease;
+}
+
+.brand:hover img,
+.brand:focus-visible img {
+  transform: rotate(-8deg) scale(1.08);
+}
+
 .nav-links {
   gap: clamp(0.75rem, 3vw, 2rem);
   color: var(--muted);
@@ -77,6 +101,30 @@ a {
 .nav-links a:hover,
 .nav-links a:focus-visible {
   color: var(--sage);
+}
+
+.nav-links a {
+  position: relative;
+  padding-bottom: 0.2rem;
+}
+
+.nav-links a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--clay);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 260ms ease;
+}
+
+.nav-links a:hover::after,
+.nav-links a:focus-visible::after {
+  transform: scaleX(1);
 }
 
 .nav-cta,
@@ -93,6 +141,15 @@ a {
   padding: 0.7rem 1rem;
   color: var(--paper);
   background: var(--sage);
+  box-shadow: 0 10px 24px rgba(49, 92, 75, 0.16);
+  transition: transform 220ms ease, box-shadow 220ms ease, background 220ms ease;
+}
+
+.nav-cta:hover,
+.nav-cta:focus-visible {
+  background: #264a3c;
+  box-shadow: 0 14px 34px rgba(49, 92, 75, 0.25);
+  transform: translateY(-2px);
 }
 
 .hero {
@@ -115,12 +172,54 @@ a {
   background-size: cover;
   background-position: center;
   pointer-events: none;
+  animation: slowDrift 22s ease-in-out infinite alternate;
+}
+
+.thread-ribbons {
+  position: absolute;
+  inset: 7% -12% auto -12%;
+  height: 34rem;
+  pointer-events: none;
+}
+
+.thread-ribbons span {
+  position: absolute;
+  left: 0;
+  width: 125%;
+  height: 9rem;
+  border: 2px solid transparent;
+  border-top-color: rgba(184, 121, 95, 0.3);
+  border-radius: 50%;
+  transform: rotate(-8deg);
+  animation: ribbonFloat 12s ease-in-out infinite;
+}
+
+.thread-ribbons span:nth-child(2) {
+  top: 7rem;
+  border-top-color: rgba(49, 92, 75, 0.24);
+  animation-delay: -3s;
+  animation-duration: 15s;
+}
+
+.thread-ribbons span:nth-child(3) {
+  top: 14rem;
+  border-top-color: rgba(66, 72, 111, 0.2);
+  animation-delay: -6s;
+  animation-duration: 18s;
 }
 
 .hero-text,
 .hero-visual {
   position: relative;
   z-index: 1;
+}
+
+.hero-text {
+  animation: heroCopyIn 850ms ease 120ms both;
+}
+
+.hero-visual {
+  animation: heroPhoneIn 950ms cubic-bezier(0.2, 0.78, 0.24, 1) 260ms both;
 }
 
 .eyebrow {
@@ -177,11 +276,39 @@ h3 {
   justify-content: center;
   min-height: 48px;
   padding: 0.85rem 1.2rem;
+  position: relative;
+  overflow: hidden;
+  transition: transform 220ms ease, box-shadow 220ms ease, background 220ms ease;
+}
+
+.button::after,
+.signup-form button::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 0 35%, rgba(255, 255, 255, 0.28) 50%, transparent 65% 100%);
+  transform: translateX(-120%);
+  transition: transform 650ms ease;
+}
+
+.button:hover,
+.button:focus-visible,
+.signup-form button:hover,
+.signup-form button:focus-visible {
+  transform: translateY(-2px);
+}
+
+.button:hover::after,
+.button:focus-visible::after,
+.signup-form button:hover::after,
+.signup-form button:focus-visible::after {
+  transform: translateX(120%);
 }
 
 .button.primary {
   color: var(--paper);
   background: var(--sage);
+  box-shadow: 0 16px 34px rgba(49, 92, 75, 0.2);
 }
 
 .button.secondary {
@@ -200,6 +327,14 @@ h3 {
   border-radius: 2.1rem;
   background: #27332f;
   box-shadow: var(--shadow);
+  transform-style: preserve-3d;
+  animation: phoneFloat 6s ease-in-out infinite;
+  transition: transform 450ms ease, box-shadow 450ms ease;
+}
+
+.hero-visual:hover .phone-shell {
+  box-shadow: var(--shadow-lift);
+  transform: translateY(-8px) rotateX(2deg) rotateY(-4deg);
 }
 
 .phone-screen {
@@ -209,6 +344,18 @@ h3 {
   padding: 1.15rem;
   border-radius: 1.45rem;
   background: linear-gradient(180deg, #fffaf2, #f3eadc);
+  overflow: hidden;
+  position: relative;
+}
+
+.phone-screen::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 0 28%, rgba(255, 255, 255, 0.52) 42%, transparent 56% 100%);
+  transform: translateX(-130%);
+  animation: screenSheen 7s ease-in-out infinite;
+  pointer-events: none;
 }
 
 .screen-top {
@@ -239,11 +386,13 @@ h3 {
 .signup-form {
   border: 1px solid var(--line);
   background: rgba(255, 250, 242, 0.78);
+  transition: transform 260ms ease, box-shadow 260ms ease, border-color 260ms ease, background 260ms ease;
 }
 
 .project-card {
   padding: 1rem;
   border-radius: 1.15rem;
+  animation: cardPulse 5s ease-in-out infinite;
 }
 
 .project-card strong {
@@ -264,6 +413,8 @@ h3 {
   height: 100%;
   border-radius: inherit;
   background: var(--sage);
+  transform-origin: left;
+  animation: progressGrow 1.4s cubic-bezier(0.2, 0.8, 0.2, 1) 700ms both;
 }
 
 .current-step {
@@ -295,6 +446,15 @@ h3 {
   border-radius: 1rem;
 }
 
+.mini-grid > div:hover,
+.feature-grid article:hover,
+.roadmap > div:hover,
+.signup-form:hover {
+  border-color: rgba(49, 92, 75, 0.28);
+  box-shadow: 0 18px 48px rgba(49, 92, 75, 0.12);
+  transform: translateY(-5px);
+}
+
 .mini-grid strong {
   display: block;
   margin-top: 0.3rem;
@@ -307,6 +467,13 @@ h3 {
   border-radius: 1rem;
   color: #36395c;
   background: rgba(216, 205, 231, 0.45);
+  animation: noteBreathe 4.5s ease-in-out infinite;
+}
+
+.aidi-note img,
+.aidi-panel img {
+  filter: drop-shadow(0 12px 22px rgba(66, 72, 111, 0.14));
+  animation: aidiBob 4.8s ease-in-out infinite;
 }
 
 .aidi-note p {
@@ -318,6 +485,18 @@ h3 {
   padding: clamp(1.5rem, 4vw, 3rem) clamp(1rem, 5vw, 5rem);
   color: var(--paper);
   background: var(--sage);
+  position: relative;
+  overflow: hidden;
+}
+
+.intro-band::after {
+  content: "";
+  position: absolute;
+  inset: auto -10% -6rem -10%;
+  height: 11rem;
+  border-radius: 50%;
+  border-top: 2px solid rgba(255, 250, 242, 0.22);
+  animation: ribbonFloat 14s ease-in-out infinite reverse;
 }
 
 .intro-band p {
@@ -332,6 +511,32 @@ h3 {
 .split-section,
 .waitlist {
   padding: clamp(4rem, 8vw, 7rem) clamp(1rem, 5vw, 5rem);
+}
+
+.has-js .reveal {
+  opacity: 0;
+  transform: translateY(26px);
+  transition: opacity 700ms ease, transform 700ms cubic-bezier(0.2, 0.78, 0.24, 1);
+}
+
+.has-js .reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.has-js .feature-grid article.reveal:not(.is-visible):nth-child(2),
+.has-js .roadmap > div.reveal:not(.is-visible):nth-child(2) {
+  transition-delay: 90ms;
+}
+
+.has-js .feature-grid article.reveal:not(.is-visible):nth-child(3),
+.has-js .roadmap > div.reveal:not(.is-visible):nth-child(3) {
+  transition-delay: 180ms;
+}
+
+.has-js .feature-grid article.reveal:not(.is-visible):nth-child(4),
+.has-js .roadmap > div.reveal:not(.is-visible):nth-child(4) {
+  transition-delay: 270ms;
 }
 
 .section-heading {
@@ -353,6 +558,29 @@ h3 {
   min-height: 260px;
   padding: 1.25rem;
   border-radius: 0.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.feature-grid article::before,
+.roadmap > div::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(220, 232, 221, 0.7), transparent 52%);
+  opacity: 0;
+  transition: opacity 260ms ease;
+}
+
+.feature-grid article:hover::before,
+.roadmap > div:hover::before {
+  opacity: 1;
+}
+
+.feature-grid article > *,
+.roadmap > div > * {
+  position: relative;
+  z-index: 1;
 }
 
 .feature-icon {
@@ -389,6 +617,18 @@ h3 {
   border-radius: 0.5rem;
   text-align: center;
   background: linear-gradient(180deg, rgba(216, 205, 231, 0.65), rgba(255, 250, 242, 0.92));
+  overflow: hidden;
+  position: relative;
+}
+
+.aidi-panel::before {
+  content: "";
+  position: absolute;
+  inset: 1rem;
+  border: 1px solid rgba(66, 72, 111, 0.14);
+  border-radius: 999px;
+  transform: rotate(-14deg);
+  animation: orbitThread 10s linear infinite;
 }
 
 .quote-mark {
@@ -420,6 +660,8 @@ h3 {
   min-height: 170px;
   padding: 1.15rem;
   border-radius: 0.5rem;
+  position: relative;
+  overflow: hidden;
 }
 
 .roadmap strong,
@@ -473,12 +715,15 @@ h3 {
   padding: 0.8rem 1rem;
   color: var(--paper);
   background: var(--indigo);
+  position: relative;
+  overflow: hidden;
 }
 
 .form-message {
   min-height: 1.4rem;
   margin: 0;
   font-size: 0.92rem;
+  transition: color 180ms ease;
 }
 
 .site-footer {
@@ -492,6 +737,136 @@ h3 {
 .site-footer span:first-child {
   color: var(--ink);
   font-weight: 850;
+}
+
+@keyframes headerDrop {
+  from {
+    opacity: 0;
+    transform: translateY(-18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes wovenLight {
+  from {
+    background-position: 0% 30%, 80% 20%;
+  }
+  to {
+    background-position: 100% 70%, 10% 90%;
+  }
+}
+
+@keyframes slowDrift {
+  from {
+    transform: scale(1.02) translateX(-1rem);
+  }
+  to {
+    transform: scale(1.06) translateX(1rem);
+  }
+}
+
+@keyframes ribbonFloat {
+  0%,
+  100% {
+    transform: translateX(-2%) translateY(0) rotate(-8deg);
+  }
+  50% {
+    transform: translateX(3%) translateY(1rem) rotate(-6deg);
+  }
+}
+
+@keyframes heroCopyIn {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes heroPhoneIn {
+  from {
+    opacity: 0;
+    transform: translateY(38px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes phoneFloat {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(0.6deg);
+  }
+}
+
+@keyframes screenSheen {
+  0%,
+  55% {
+    transform: translateX(-130%);
+  }
+  78%,
+  100% {
+    transform: translateX(130%);
+  }
+}
+
+@keyframes progressGrow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes cardPulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 rgba(49, 92, 75, 0);
+  }
+  50% {
+    box-shadow: 0 16px 36px rgba(49, 92, 75, 0.12);
+  }
+}
+
+@keyframes noteBreathe {
+  0%,
+  100% {
+    background: rgba(216, 205, 231, 0.45);
+  }
+  50% {
+    background: rgba(216, 205, 231, 0.68);
+  }
+}
+
+@keyframes aidiBob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-6px) rotate(-2deg);
+  }
+}
+
+@keyframes orbitThread {
+  from {
+    transform: rotate(-14deg);
+  }
+  to {
+    transform: rotate(346deg);
+  }
 }
 
 @media (max-width: 980px) {
@@ -555,5 +930,21 @@ h3 {
   .site-footer {
     align-items: flex-start;
     flex-direction: column;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 1ms !important;
+  }
+
+  .has-js .reveal {
+    opacity: 1;
+    transform: none;
   }
 }
