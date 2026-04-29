@@ -1,0 +1,12 @@
+<svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Aidi yarn assistant mascot">
+  <circle cx="90" cy="92" r="58" fill="#D8CDE7"/>
+  <path d="M45 82C62 57 99 52 124 68C143 80 149 104 137 124C125 145 94 153 68 141C43 129 33 101 45 82Z" fill="#FFF7EA"/>
+  <path d="M47 88C78 101 103 101 135 86" stroke="#B8795F" stroke-width="7" stroke-linecap="round"/>
+  <path d="M50 113C77 126 104 126 132 111" stroke="#315C4B" stroke-width="7" stroke-linecap="round"/>
+  <circle cx="73" cy="93" r="6" fill="#24322E"/>
+  <circle cx="107" cy="93" r="6" fill="#24322E"/>
+  <path d="M81 112C87 117 95 117 101 112" stroke="#24322E" stroke-width="5" stroke-linecap="round"/>
+  <path d="M35 57C23 48 21 32 31 24C45 36 51 49 47 65" fill="#315C4B"/>
+  <path d="M145 57C157 48 159 32 149 24C135 36 129 49 133 65" fill="#315C4B"/>
+  <path d="M138 132C151 136 159 146 158 158" stroke="#B8795F" stroke-width="7" stroke-linecap="round"/>
+</svg>
