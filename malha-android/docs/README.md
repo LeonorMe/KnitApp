@@ -6,6 +6,11 @@ The official product direction for this project is:
 
 - App name: **Malha**
 - AI assistant / mascot: **Aidi**
+- Platform: **native Android**
+- Language: **Kotlin**
+- UI: **Jetpack Compose**
+- Design system: **Material 3**
+- Google services: **Firebase Authentication / Google Sign-In** and **Cloud Firestore**
 
 Implementation should still keep app display strings centralized, but Malha/Aidi is the correct brand pair for the Android app.
 

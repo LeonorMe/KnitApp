@@ -6,6 +6,9 @@ This plan converts the product docs into an implementation sequence for the Andr
 
 Build the offline-first MVP foundation:
 
+- Native Android app in Kotlin.
+- Jetpack Compose UI.
+- Material 3 design system.
 - Local data persistence.
 - Starter patterns.
 - Project progress tracking.
@@ -127,6 +130,23 @@ Acceptance:
 
 - Voice is optional and every action has a manual fallback.
 
+## Phase 8: Google Services Integration
+
+Deliverables:
+
+- Firebase project configuration.
+- Firebase Authentication dependency.
+- Google Sign-In flow.
+- Cloud Firestore dependency.
+- Repository sync layer behind existing repository interfaces.
+- Firestore document mapping for projects, patterns, materials, variants, and reviews.
+
+Acceptance:
+
+- User can sign in with Google.
+- Local Room data can sync to Firestore after authentication.
+- App remains usable offline when signed out or without network.
+
 ## Implementation Order
 
 1. Build Room foundation.
@@ -137,4 +157,4 @@ Acceptance:
 6. Add project execution.
 7. Add Aidi local insights.
 8. Add voice commands.
-
+9. Add Google Authentication and Firestore sync.

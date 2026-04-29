@@ -23,6 +23,11 @@ interface PatternDao {
     suspend fun insertPatterns(patterns: List<PatternEntity>)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertSteps(steps: List<PatternStepEntity>)
-}
+    suspend fun insertPattern(pattern: PatternEntity)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertSteps(steps: List<PatternStepEntity>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertStep(step: PatternStepEntity)
+}

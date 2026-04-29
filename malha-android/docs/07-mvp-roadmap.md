@@ -12,7 +12,7 @@ Deliverables:
 
 - Kotlin Android project.
 - Jetpack Compose setup.
-- Material 3 theme.
+- Material 3 theme and components.
 - Navigation structure.
 - Basic package architecture.
 

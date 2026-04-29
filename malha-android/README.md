@@ -10,15 +10,16 @@ Android app workspace for **Malha**, a knitting and crochet companion with offli
 
 ## Current State
 
-This is the initial scaffold:
+This is the initial offline-first foundation:
 
 - Kotlin Android app
 - Jetpack Compose UI
 - Material 3 theme
 - Bottom navigation
-- Placeholder screens for Home, Projects, Patterns, Materials, and Settings
+- Data-backed screens for Home, Projects, Patterns, and Materials
 - Initial domain models and repository interfaces
+- Room database entities, DAOs, repository implementations, and starter seed data
 
 ## Next Implementation Step
 
-Add the local Room database and wire real project/pattern/material data into the placeholder screens.
+Add create/edit UI flows for projects, patterns, and materials.

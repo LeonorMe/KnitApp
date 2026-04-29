@@ -17,5 +17,10 @@ interface ProjectDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertProjects(projects: List<ProjectEntity>)
-}
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertProject(project: ProjectEntity)
+
+    @Query("UPDATE projects SET status = 'archived', updatedAt = :updatedAt WHERE id = :projectId")
+    suspend fun archiveProject(projectId: String, updatedAt: Long)
+}

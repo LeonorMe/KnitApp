@@ -71,31 +71,46 @@ Fine-tuning can come later, after enough high-quality validated data exists.
 
 ## Backend Phases
 
-## Phase 1: No Backend
+## Phase 1: Local-First Foundation
 
-MVP is local-only:
+MVP can start local-only while the app foundation is built:
 
 - Room database.
 - No accounts.
 - No sync.
 - Included starter patterns.
 
-## Phase 2: Basic Backend
+## Phase 2: Google Services Backend
 
 Add:
 
-- Accounts.
+- Firebase Authentication.
+- Google Sign-In.
+- Cloud Firestore sync.
 - Cloud backup.
 - Pattern sharing.
 - Reviews.
 - Public/friends visibility.
 
-Suggested stack:
+Selected stack:
 
-- Node.js with TypeScript or Kotlin Ktor.
-- PostgreSQL.
-- Object storage for images.
-- REST API first.
+- Android native app in Kotlin.
+- Firebase Authentication for identity.
+- Cloud Firestore for cloud data and shared state.
+- Firebase Storage later for images and project photos.
+- Cloud Functions later if server-side validation, marketplace logic, or AI request mediation is needed.
+
+Firestore collections can start with:
+
+- users
+- projects
+- patterns
+- patternSteps
+- materials
+- projectMaterials
+- variants
+- reviews
+- aiRequests
 
 ## Phase 3: Community And Marketplace
 
@@ -117,18 +132,18 @@ Add:
 - Stash planner.
 - Image analysis beta.
 
-## API Categories
+## Firebase Data Categories
 
-Future backend APIs:
+Future Firestore-backed data areas:
 
-- Auth API
-- User preferences API
-- Project sync API
-- Pattern API
-- Variant API
-- Review API
-- Material backup API
-- AI request API
+- Authentication and user profile.
+- User preferences.
+- Project sync.
+- Pattern sharing.
+- Variants and forks.
+- Reviews and validation.
+- Material backup.
+- AI request audit trail.
 
 ## Privacy Guidelines
 

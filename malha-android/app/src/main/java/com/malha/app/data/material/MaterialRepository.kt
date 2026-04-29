@@ -5,4 +5,5 @@ import kotlinx.coroutines.flow.Flow
 
 interface MaterialRepository {
     fun observeMaterials(): Flow<List<Material>>
+    suspend fun createYarn(name: String, quantity: Double, unit: String)
 }

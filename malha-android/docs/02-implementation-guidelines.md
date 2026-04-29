@@ -12,9 +12,12 @@
 ## Android Engineering Rules
 
 - Language: Kotlin.
-- UI: Jetpack Compose.
+- UI: Jetpack Compose. This is mandatory for all Android UI work.
+- Design system: Material 3. New screens and components must use Material 3 Compose APIs.
 - Architecture: MVVM with clear domain/data boundaries.
 - Local database: Room.
+- Authentication: Firebase Authentication with Google Sign-In.
+- Cloud data: Cloud Firestore.
 - Async state: Kotlin coroutines and StateFlow.
 - Background sync: WorkManager.
 - Dependency injection: Hilt or Koin, chosen once project setup begins.

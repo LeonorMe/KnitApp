@@ -2,7 +2,7 @@
 
 ## High-Level Approach
 
-The Android app should be offline-first. The local database is the source of truth, and future backend sync should be added behind repository interfaces.
+The Android app is a native Android project written in Kotlin. It should be offline-first: the local database is the source of truth for the crafting workflow, and Google/Firebase services provide authentication, cloud sync, and shared data when online.
 
 ```text
 Jetpack Compose UI
@@ -15,19 +15,27 @@ Repositories
         |
 Room Database
         |
-Future Remote Sync
+Firebase Sync Layer
+        |
+Google Authentication + Firestore
 ```
 
 ## Recommended Stack
 
 - Kotlin
-- Jetpack Compose
+- Jetpack Compose, mandatory for all UI
 - Navigation Compose
 - Room
+- Firebase Authentication / Google Sign-In
+- Cloud Firestore
 - Coroutines
 - StateFlow
 - WorkManager
-- Material 3
+- Material 3, mandatory design system
+
+## UI Requirement
+
+All Android screens must be implemented with Jetpack Compose and Material 3. XML layouts should not be introduced for app screens. Any reusable UI should live as Compose components under the design/core UI package.
 
 ## Suggested Modules
 
@@ -113,12 +121,24 @@ Voice control should start narrow:
 
 The command parser should map recognized text to local actions. Do not rely on AI for MVP voice control.
 
-## Future Sync
+## Google Services
 
-Prepare local entities with sync-friendly fields:
+This project uses Google services for online identity and data:
+
+- **Firebase Authentication** for user accounts.
+- **Google Sign-In** as the primary sign-in option.
+- **Cloud Firestore** for synced projects, patterns, materials, reviews, variants, and community state.
+- **Firebase Storage** can be added later for project photos, pattern images, and generated assets.
+
+Room remains the local source of truth during the MVP. Firestore should be introduced behind repository interfaces so screens do not depend directly on Firebase APIs.
+
+## Sync Strategy
+
+Prepare local entities with Firestore-friendly fields:
 
 - localId
-- remoteId nullable
+- remoteId nullable, mapped to Firestore document ID
+- ownerUserId nullable until signed in
 - createdAt
 - updatedAt
 - deletedAt nullable
