@@ -1,12 +1,14 @@
 package com.malha.app.core.design.component
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -55,6 +57,7 @@ fun ListScreen(
     errorMessage: String? = null,
     actionLabel: String? = null,
     onActionClick: (() -> Unit)? = null,
+    onItemClick: ((Int) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -110,11 +113,16 @@ fun ListScreen(
                         )
                     }
                 } else {
-                    items(items) { label ->
+                    itemsIndexed(items) { index, label ->
                         Card(
                             colors = CardDefaults.cardColors(
                                 containerColor = MaterialTheme.colorScheme.surfaceVariant
-                            )
+                            ),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable(enabled = onItemClick != null) {
+                                    onItemClick?.invoke(index)
+                                }
                         ) {
                             Text(
                                 text = label,

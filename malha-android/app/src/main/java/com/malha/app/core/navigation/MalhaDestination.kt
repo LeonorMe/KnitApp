@@ -9,9 +9,13 @@ sealed class MalhaDestination(
     data object Patterns : MalhaDestination("patterns", "Patterns")
     data object Materials : MalhaDestination("materials", "Materials")
     data object Settings : MalhaDestination("settings", "Settings")
+    data object ProjectExecution : MalhaDestination("project/{projectId}", "Project")
 
     companion object {
         val topLevel = listOf(Home, Projects, Patterns, Materials, Settings)
+
+        fun projectExecutionRoute(projectId: String): String {
+            return "project/$projectId"
+        }
     }
 }
-

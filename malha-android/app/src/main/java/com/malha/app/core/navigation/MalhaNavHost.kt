@@ -3,8 +3,11 @@ package com.malha.app.core.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
+import com.malha.app.feature.execution.ProjectExecutionScreen
 import com.malha.app.feature.home.HomeScreen
 import com.malha.app.feature.materials.MaterialsScreen
 import com.malha.app.feature.patterns.PatternsScreen
@@ -25,7 +28,11 @@ fun MalhaNavHost(
             HomeScreen()
         }
         composable(MalhaDestination.Projects.route) {
-            ProjectsScreen()
+            ProjectsScreen(
+                onOpenProject = { projectId ->
+                    navController.navigate(MalhaDestination.projectExecutionRoute(projectId))
+                }
+            )
         }
         composable(MalhaDestination.Patterns.route) {
             PatternsScreen()
@@ -36,6 +43,16 @@ fun MalhaNavHost(
         composable(MalhaDestination.Settings.route) {
             SettingsScreen()
         }
+        composable(
+            route = MalhaDestination.ProjectExecution.route,
+            arguments = listOf(
+                navArgument("projectId") {
+                    type = NavType.StringType
+                }
+            )
+        ) { entry ->
+            val projectId = entry.arguments?.getString("projectId").orEmpty()
+            ProjectExecutionScreen(projectId = projectId)
+        }
     }
 }
-

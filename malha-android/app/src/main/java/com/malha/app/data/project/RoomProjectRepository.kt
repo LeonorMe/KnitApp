@@ -16,6 +16,11 @@ class RoomProjectRepository(
             .map { projects -> projects.map { it.toDomain() } }
     }
 
+    override fun observeProject(projectId: String): Flow<Project?> {
+        return projectDao.observeProject(projectId)
+            .map { project -> project?.toDomain() }
+    }
+
     override suspend fun createProject(name: String, patternId: String?) {
         val now = System.currentTimeMillis()
         projectDao.insertProject(
@@ -38,6 +43,19 @@ class RoomProjectRepository(
     override suspend fun archiveProject(projectId: String) {
         projectDao.archiveProject(
             projectId = projectId,
+            updatedAt = System.currentTimeMillis()
+        )
+    }
+
+    override suspend fun updateProgress(
+        projectId: String,
+        stepIndex: Int,
+        progressPercent: Int
+    ) {
+        projectDao.updateProgress(
+            projectId = projectId,
+            stepIndex = stepIndex,
+            progressPercent = progressPercent,
             updatedAt = System.currentTimeMillis()
         )
     }

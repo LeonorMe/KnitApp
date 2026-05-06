@@ -17,6 +17,11 @@ class RoomPatternRepository(
             .map { patterns -> patterns.map { it.toDomain() } }
     }
 
+    override fun observePattern(patternId: String): Flow<Pattern?> {
+        return patternDao.observePattern(patternId)
+            .map { pattern -> pattern?.toDomain() }
+    }
+
     override suspend fun getFirstPatternId(): String? {
         return patternDao.getFirstPatternId()
     }

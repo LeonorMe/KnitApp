@@ -14,7 +14,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.malha.app.core.design.component.ListScreen
 
 @Composable
-fun ProjectsScreen(viewModel: ProjectsViewModel = viewModel()) {
+fun ProjectsScreen(
+    onOpenProject: (String) -> Unit,
+    viewModel: ProjectsViewModel = viewModel()
+) {
     val uiState by viewModel.uiState.collectAsState()
     var showCreateDialog by remember { mutableStateOf(false) }
 
@@ -30,6 +33,11 @@ fun ProjectsScreen(viewModel: ProjectsViewModel = viewModel()) {
         onActionClick = {
             viewModel.clearError()
             showCreateDialog = true
+        },
+        onItemClick = { index ->
+            uiState.projects.getOrNull(index)?.let { project ->
+                onOpenProject(project.id)
+            }
         }
     )
 

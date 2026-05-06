@@ -14,6 +14,7 @@ fun ProjectEntity.toDomain(): Project {
     return Project(
         id = id,
         name = name,
+        patternId = patternId,
         progressPercent = progressPercent,
         currentStepIndex = currentStepIndex
     )
@@ -52,4 +53,3 @@ fun MaterialEntity.toDomain(): Material {
         unit = unit
     )
 }
-

@@ -16,6 +16,10 @@ interface PatternDao {
     @Query("SELECT * FROM patterns ORDER BY title ASC")
     fun observePatterns(): Flow<List<PatternWithSteps>>
 
+    @Transaction
+    @Query("SELECT * FROM patterns WHERE id = :patternId LIMIT 1")
+    fun observePattern(patternId: String): Flow<PatternWithSteps?>
+
     @Query("SELECT COUNT(*) FROM patterns")
     suspend fun countPatterns(): Int
 

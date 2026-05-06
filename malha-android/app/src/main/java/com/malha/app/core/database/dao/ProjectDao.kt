@@ -12,6 +12,9 @@ interface ProjectDao {
     @Query("SELECT * FROM projects WHERE status != 'archived' ORDER BY updatedAt DESC")
     fun observeActiveProjects(): Flow<List<ProjectEntity>>
 
+    @Query("SELECT * FROM projects WHERE id = :projectId LIMIT 1")
+    fun observeProject(projectId: String): Flow<ProjectEntity?>
+
     @Query("SELECT COUNT(*) FROM projects")
     suspend fun countProjects(): Int
 
@@ -23,4 +26,20 @@ interface ProjectDao {
 
     @Query("UPDATE projects SET status = 'archived', updatedAt = :updatedAt WHERE id = :projectId")
     suspend fun archiveProject(projectId: String, updatedAt: Long)
+
+    @Query(
+        """
+        UPDATE projects
+        SET currentStepIndex = :stepIndex,
+            progressPercent = :progressPercent,
+            updatedAt = :updatedAt
+        WHERE id = :projectId
+        """
+    )
+    suspend fun updateProgress(
+        projectId: String,
+        stepIndex: Int,
+        progressPercent: Int,
+        updatedAt: Long
+    )
 }
