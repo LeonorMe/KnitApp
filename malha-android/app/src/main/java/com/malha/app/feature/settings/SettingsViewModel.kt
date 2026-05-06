@@ -1,0 +1,64 @@
+package com.malha.app.feature.settings
+
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import com.malha.app.core.app.appContainer
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+
+class SettingsViewModel(application: Application) : AndroidViewModel(application) {
+    private val _uiState = MutableStateFlow(
+        SettingsUiState(user = appContainer.authService.currentUser)
+    )
+    val uiState: StateFlow<SettingsUiState> = _uiState
+
+    fun signInWithGoogleToken(idToken: String?) {
+        if (idToken.isNullOrBlank()) {
+            _uiState.update {
+                it.copy(errorMessage = "Google sign-in did not return an ID token.")
+            }
+            return
+        }
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(isSigningIn = true, errorMessage = null) }
+
+            runCatching {
+                val user = appContainer.authService.signInWithGoogleIdToken(idToken)
+                appContainer.cloudDataService.upsertUserProfile(user)
+                user
+            }.onSuccess { user ->
+                _uiState.update {
+                    it.copy(user = user, isSigningIn = false, errorMessage = null)
+                }
+            }.onFailure { error ->
+                _uiState.update {
+                    it.copy(
+                        isSigningIn = false,
+                        errorMessage = error.message ?: "Could not sign in with Google."
+                    )
+                }
+            }
+        }
+    }
+
+    fun signOut() {
+        appContainer.authService.signOut()
+        _uiState.update {
+            SettingsUiState(user = null)
+        }
+    }
+
+    fun showSignInError(message: String) {
+        _uiState.update {
+            it.copy(isSigningIn = false, errorMessage = message)
+        }
+    }
+
+    fun clearError() {
+        _uiState.update { it.copy(errorMessage = null) }
+    }
+}

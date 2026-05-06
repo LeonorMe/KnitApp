@@ -9,6 +9,6 @@ data class AuthUser(
 interface AuthService {
     val currentUser: AuthUser?
     fun isSignedIn(): Boolean
+    suspend fun signInWithGoogleIdToken(idToken: String): AuthUser
     fun signOut()
 }
-

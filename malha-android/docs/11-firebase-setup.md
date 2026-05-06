@@ -42,7 +42,7 @@ The project currently includes a Firebase auth wrapper:
 - `AuthService`
 - `FirebaseAuthService`
 
-Google Sign-In UI is not implemented yet. The wrapper is ready for the next auth screen.
+Google Sign-In UI is implemented on the Settings/Profile screen. It uses the `default_web_client_id` generated from the real `google-services.json`, then signs into Firebase with the Google ID token.
 
 ## Firestore
 
@@ -85,4 +85,3 @@ And depends on:
 - Firebase Auth
 - Cloud Firestore
 - kotlinx-coroutines-play-services
-
