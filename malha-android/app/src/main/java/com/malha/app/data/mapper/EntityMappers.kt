@@ -3,12 +3,14 @@ package com.malha.app.data.mapper
 import com.malha.app.core.database.entity.MaterialEntity
 import com.malha.app.core.database.entity.PatternStepEntity
 import com.malha.app.core.database.entity.ProjectEntity
+import com.malha.app.core.database.entity.ProjectStepProgressEntity
 import com.malha.app.core.database.relation.PatternWithSteps
 import com.malha.app.domain.model.Material
 import com.malha.app.domain.model.MaterialType
 import com.malha.app.domain.model.Pattern
 import com.malha.app.domain.model.PatternStep
 import com.malha.app.domain.model.Project
+import com.malha.app.domain.model.ProjectStepProgress
 
 fun ProjectEntity.toDomain(): Project {
     return Project(
@@ -51,5 +53,15 @@ fun MaterialEntity.toDomain(): Material {
         },
         quantity = quantity,
         unit = unit
+    )
+}
+
+fun ProjectStepProgressEntity.toDomain(): ProjectStepProgress {
+    return ProjectStepProgress(
+        id = id,
+        projectId = projectId,
+        patternStepId = patternStepId,
+        isDone = isDone,
+        note = note
     )
 }

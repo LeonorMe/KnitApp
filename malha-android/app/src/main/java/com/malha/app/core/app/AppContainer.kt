@@ -13,7 +13,10 @@ import com.malha.app.data.project.RoomProjectRepository
 class AppContainer(context: Context) {
     private val database = DatabaseProvider.getDatabase(context)
 
-    val projectRepository: ProjectRepository = RoomProjectRepository(database.projectDao())
+    val projectRepository: ProjectRepository = RoomProjectRepository(
+        projectDao = database.projectDao(),
+        projectStepProgressDao = database.projectStepProgressDao()
+    )
     val patternRepository: PatternRepository = RoomPatternRepository(database.patternDao())
     val materialRepository: MaterialRepository = RoomMaterialRepository(database.materialDao())
 
@@ -23,4 +26,3 @@ class AppContainer(context: Context) {
         materialDao = database.materialDao()
     )
 }
-

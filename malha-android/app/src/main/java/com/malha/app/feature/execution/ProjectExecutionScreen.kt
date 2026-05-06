@@ -6,17 +6,23 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -31,6 +37,7 @@ fun ProjectExecutionScreen(
     val uiState by viewModel.uiState.collectAsState()
     val project = uiState.project
     val currentStep = uiState.currentStep
+    var showNoteDialog by remember { mutableStateOf(false) }
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -80,7 +87,12 @@ fun ProjectExecutionScreen(
             )
 
             Text(
-                text = "Step ${uiState.currentStepNumber} of ${uiState.totalSteps.coerceAtLeast(1)}",
+                text = buildString {
+                    append("Step ${uiState.currentStepNumber} of ${uiState.totalSteps.coerceAtLeast(1)}")
+                    if (uiState.isCurrentStepDone) {
+                        append(" - done")
+                    }
+                },
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onBackground
             )
@@ -107,6 +119,35 @@ fun ProjectExecutionScreen(
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurface
                     )
+                }
+            }
+
+            Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                ),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = "Step note",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = uiState.currentNote ?: "No note for this step yet.",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    TextButton(
+                        onClick = { showNoteDialog = true },
+                        enabled = currentStep != null
+                    ) {
+                        Text(if (uiState.currentNote == null) "Add note" else "Edit note")
+                    }
                 }
             }
 
@@ -139,5 +180,47 @@ fun ProjectExecutionScreen(
             }
         }
     }
+
+    if (showNoteDialog) {
+        StepNoteDialog(
+            initialNote = uiState.currentNote.orEmpty(),
+            onDismiss = { showNoteDialog = false },
+            onSave = { note ->
+                viewModel.saveCurrentStepNote(note)
+                showNoteDialog = false
+            }
+        )
+    }
 }
 
+@Composable
+private fun StepNoteDialog(
+    initialNote: String,
+    onDismiss: () -> Unit,
+    onSave: (String) -> Unit
+) {
+    var note by remember(initialNote) { mutableStateOf(initialNote) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Step note") },
+        text = {
+            OutlinedTextField(
+                value = note,
+                onValueChange = { note = it },
+                label = { Text("Personal note") },
+                minLines = 4
+            )
+        },
+        confirmButton = {
+            Button(onClick = { onSave(note) }) {
+                Text("Save")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
+}

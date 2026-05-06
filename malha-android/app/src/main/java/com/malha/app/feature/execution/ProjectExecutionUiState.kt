@@ -3,11 +3,13 @@ package com.malha.app.feature.execution
 import com.malha.app.domain.model.Pattern
 import com.malha.app.domain.model.PatternStep
 import com.malha.app.domain.model.Project
+import com.malha.app.domain.model.ProjectStepProgress
 
 data class ProjectExecutionUiState(
     val isLoading: Boolean = true,
     val project: Project? = null,
     val pattern: Pattern? = null,
+    val currentStepProgress: ProjectStepProgress? = null,
     val errorMessage: String? = null
 ) {
     val currentStep: PatternStep?
@@ -28,5 +30,10 @@ data class ProjectExecutionUiState(
 
     val canGoNext: Boolean
         get() = totalSteps > 0 && (project?.currentStepIndex ?: 0) < totalSteps - 1
-}
 
+    val isCurrentStepDone: Boolean
+        get() = currentStepProgress?.isDone == true
+
+    val currentNote: String?
+        get() = currentStepProgress?.note
+}

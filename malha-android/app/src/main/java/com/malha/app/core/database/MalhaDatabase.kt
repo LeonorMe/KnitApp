@@ -5,6 +5,7 @@ import androidx.room.RoomDatabase
 import com.malha.app.core.database.dao.MaterialDao
 import com.malha.app.core.database.dao.PatternDao
 import com.malha.app.core.database.dao.ProjectDao
+import com.malha.app.core.database.dao.ProjectStepProgressDao
 import com.malha.app.core.database.entity.MaterialEntity
 import com.malha.app.core.database.entity.PatternEntity
 import com.malha.app.core.database.entity.PatternStepEntity
@@ -30,4 +31,5 @@ abstract class MalhaDatabase : RoomDatabase() {
     abstract fun projectDao(): ProjectDao
     abstract fun patternDao(): PatternDao
     abstract fun materialDao(): MaterialDao
+    abstract fun projectStepProgressDao(): ProjectStepProgressDao
 }
