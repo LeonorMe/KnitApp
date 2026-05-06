@@ -33,11 +33,12 @@ class RoomProjectRepository(
             .map { progress -> progress?.toDomain() }
     }
 
-    override suspend fun createProject(name: String, patternId: String?) {
+    override suspend fun createProject(name: String, patternId: String?): String {
         val now = System.currentTimeMillis()
+        val projectId = UUID.randomUUID().toString()
         projectDao.insertProject(
             ProjectEntity(
-                id = UUID.randomUUID().toString(),
+                id = projectId,
                 name = name,
                 craftType = "knitting",
                 patternId = patternId,
@@ -50,6 +51,7 @@ class RoomProjectRepository(
                 updatedAt = now
             )
         )
+        return projectId
     }
 
     override suspend fun archiveProject(projectId: String) {

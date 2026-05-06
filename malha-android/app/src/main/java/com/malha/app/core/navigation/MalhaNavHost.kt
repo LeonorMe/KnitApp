@@ -10,6 +10,7 @@ import androidx.navigation.navArgument
 import com.malha.app.feature.execution.ProjectExecutionScreen
 import com.malha.app.feature.home.HomeScreen
 import com.malha.app.feature.materials.MaterialsScreen
+import com.malha.app.feature.patterns.detail.PatternDetailScreen
 import com.malha.app.feature.patterns.PatternsScreen
 import com.malha.app.feature.projects.ProjectsScreen
 import com.malha.app.feature.settings.SettingsScreen
@@ -35,7 +36,11 @@ fun MalhaNavHost(
             )
         }
         composable(MalhaDestination.Patterns.route) {
-            PatternsScreen()
+            PatternsScreen(
+                onOpenPattern = { patternId ->
+                    navController.navigate(MalhaDestination.patternDetailRoute(patternId))
+                }
+            )
         }
         composable(MalhaDestination.Materials.route) {
             MaterialsScreen()
@@ -53,6 +58,22 @@ fun MalhaNavHost(
         ) { entry ->
             val projectId = entry.arguments?.getString("projectId").orEmpty()
             ProjectExecutionScreen(projectId = projectId)
+        }
+        composable(
+            route = MalhaDestination.PatternDetail.route,
+            arguments = listOf(
+                navArgument("patternId") {
+                    type = NavType.StringType
+                }
+            )
+        ) { entry ->
+            val patternId = entry.arguments?.getString("patternId").orEmpty()
+            PatternDetailScreen(
+                patternId = patternId,
+                onProjectStarted = { projectId ->
+                    navController.navigate(MalhaDestination.projectExecutionRoute(projectId))
+                }
+            )
         }
     }
 }

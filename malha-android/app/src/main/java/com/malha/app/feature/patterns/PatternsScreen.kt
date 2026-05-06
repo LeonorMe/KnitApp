@@ -17,7 +17,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.malha.app.core.design.component.ListScreen
 
 @Composable
-fun PatternsScreen(viewModel: PatternsViewModel = viewModel()) {
+fun PatternsScreen(
+    onOpenPattern: (String) -> Unit,
+    viewModel: PatternsViewModel = viewModel()
+) {
     val uiState by viewModel.uiState.collectAsState()
     var showCreateDialog by remember { mutableStateOf(false) }
 
@@ -33,6 +36,11 @@ fun PatternsScreen(viewModel: PatternsViewModel = viewModel()) {
         onActionClick = {
             viewModel.clearError()
             showCreateDialog = true
+        },
+        onItemClick = { index ->
+            uiState.patterns.getOrNull(index)?.let { pattern ->
+                onOpenPattern(pattern.id)
+            }
         }
     )
 
