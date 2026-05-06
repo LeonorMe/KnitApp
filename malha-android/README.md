@@ -22,4 +22,6 @@ This is the initial offline-first foundation:
 
 ## Next Implementation Step
 
-Add create/edit UI flows for projects, patterns, and materials.
+Add the real Firebase `google-services.json`, then implement Google Sign-In UI and Firestore sync behind the existing repository interfaces.
+
+See [Firebase Setup](docs/11-firebase-setup.md).

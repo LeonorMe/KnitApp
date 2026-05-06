@@ -3,6 +3,10 @@ package com.malha.app.core.app
 import android.content.Context
 import com.malha.app.core.database.DatabaseProvider
 import com.malha.app.core.database.seed.DatabaseSeeder
+import com.malha.app.core.firebase.AuthService
+import com.malha.app.core.firebase.CloudDataService
+import com.malha.app.core.firebase.FirebaseAuthService
+import com.malha.app.core.firebase.FirestoreCloudDataService
 import com.malha.app.data.material.MaterialRepository
 import com.malha.app.data.material.RoomMaterialRepository
 import com.malha.app.data.pattern.PatternRepository
@@ -19,6 +23,8 @@ class AppContainer(context: Context) {
     )
     val patternRepository: PatternRepository = RoomPatternRepository(database.patternDao())
     val materialRepository: MaterialRepository = RoomMaterialRepository(database.materialDao())
+    val authService: AuthService = FirebaseAuthService()
+    val cloudDataService: CloudDataService = FirestoreCloudDataService()
 
     val databaseSeeder = DatabaseSeeder(
         patternDao = database.patternDao(),

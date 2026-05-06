@@ -26,6 +26,7 @@ Implementation should still keep app display strings centralized, but Malha/Aidi
 8. [Gamification Economy](08-gamification-economy.md)
 9. [Brand Identity](09-brand-identity.md)
 10. [Implementation Plan](10-implementation-plan.md)
+11. [Firebase Setup](11-firebase-setup.md)
 
 ## Product Principle
 
