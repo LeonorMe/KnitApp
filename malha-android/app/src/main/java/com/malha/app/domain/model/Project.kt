@@ -5,5 +5,6 @@ data class Project(
     val name: String,
     val patternId: String?,
     val progressPercent: Int,
-    val currentStepIndex: Int
+    val currentStepIndex: Int,
+    val updatedAt: Long
 )

@@ -6,17 +6,21 @@ import androidx.lifecycle.viewModelScope
 import com.malha.app.core.app.appContainer
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class HomeViewModel(application: Application) : AndroidViewModel(application) {
     val uiState: StateFlow<HomeUiState> = appContainer.projectRepository
         .observeActiveProjects()
-        .map { projects ->
+        .combine(appContainer.materialRepository.observeMaterials()) { projects, materials ->
             HomeUiState(
                 isLoading = false,
-                projects = projects
+                projects = projects,
+                insights = HomeInsightEngine.buildInsights(
+                    projects = projects,
+                    materials = materials
+                )
             )
         }
         .stateIn(
@@ -31,4 +35,3 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 }
-

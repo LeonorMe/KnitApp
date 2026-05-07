@@ -18,7 +18,8 @@ fun ProjectEntity.toDomain(): Project {
         name = name,
         patternId = patternId,
         progressPercent = progressPercent,
-        currentStepIndex = currentStepIndex
+        currentStepIndex = currentStepIndex,
+        updatedAt = updatedAt
     )
 }
 

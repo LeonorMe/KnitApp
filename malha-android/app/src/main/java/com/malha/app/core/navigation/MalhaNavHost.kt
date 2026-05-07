@@ -26,7 +26,11 @@ fun MalhaNavHost(
         modifier = modifier
     ) {
         composable(MalhaDestination.Home.route) {
-            HomeScreen()
+            HomeScreen(
+                onOpenProject = { projectId ->
+                    navController.navigate(MalhaDestination.projectExecutionRoute(projectId))
+                }
+            )
         }
         composable(MalhaDestination.Projects.route) {
             ProjectsScreen(
