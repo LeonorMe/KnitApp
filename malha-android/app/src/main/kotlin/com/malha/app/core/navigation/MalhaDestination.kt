@@ -14,7 +14,8 @@ sealed class MalhaDestination(val route: String, val label: String) {
     }
 }
 
-// NavHost composable
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -22,7 +23,23 @@ import androidx.navigation.compose.composable
 
 @Composable
 fun MalhaNavHost(navController: NavHostController, modifier: androidx.compose.ui.Modifier = androidx.compose.ui.Modifier) {
-    NavHost(navController = navController, startDestination = MalhaDestination.Home.route, modifier = modifier) {
+    NavHost(
+        navController = navController,
+        startDestination = MalhaDestination.Home.route,
+        modifier = modifier,
+        enterTransition = {
+            slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left, animationSpec = tween(300))
+        },
+        exitTransition = {
+            slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Left, animationSpec = tween(300))
+        },
+        popEnterTransition = {
+            slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Right, animationSpec = tween(300))
+        },
+        popExitTransition = {
+            slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Right, animationSpec = tween(300))
+        }
+    ) {
         composable(MalhaDestination.Home.route) { com.malha.app.feature.home.HomeScreen() }
         composable(MalhaDestination.Projects.route) { com.malha.app.feature.projects.ProjectsScreen() }
         composable(MalhaDestination.Patterns.route) { com.malha.app.feature.patterns.PatternsScreen() }
