@@ -49,6 +49,8 @@ fun MalhaApp() {
                                     MalhaDestination.Patterns -> Icons.Outlined.List
                                     MalhaDestination.Materials -> Icons.Outlined.Build
                                     MalhaDestination.Settings -> Icons.Outlined.Settings
+                                    MalhaDestination.PatternDetail -> TODO()
+                                    MalhaDestination.ProjectExecution -> TODO()
                                 },
                                 contentDescription = destination.label
                             )
