@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Malha</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">Inicio</string>
+    <string name="nav_projects">Proyectos</string>
+    <string name="nav_patterns">Patrones</string>
+    <string name="nav_materials">Materiales</string>
+    <string name="nav_settings">Ajustes</string>
+
+    <!-- Home Screen -->
+    <string name="title_home">¡Buenos días, Tejedora!</string>
+    <string name="subtitle_home">¿Lista para hacer algunos puntos?</string>
+    <string name="section_recent_projects">Proyectos Recientes</string>
+    <string name="section_aidi_insights">Sugerencias Aidi</string>
+    <string name="aidi_tip_example">¡Tu proyecto Bufanda está al 80%! ¡Sigue así!</string>
+    <string name="action_quick_add">Añadir Rápido</string>
+
+    <!-- Projects Screen -->
+    <string name="title_projects">Mis Proyectos</string>
+    <string name="empty_projects_title">Sin proyectos aún</string>
+    <string name="empty_projects_desc">¡Empieza tu primer proyecto de punto o ganchillo hoy!</string>
+    <string name="action_add_project">Añadir Proyecto</string>
+
+    <!-- Patterns Screen -->
+    <string name="title_patterns">Biblioteca de Patrones</string>
+    <string name="empty_patterns_title">No se encontraron patrones</string>
+    <string name="empty_patterns_desc">Guarda tus patrones favoritos aquí.</string>
+    <string name="action_create_pattern">Crear Patrón</string>
+
+    <!-- Materials Screen -->
+    <string name="title_materials">Mi Inventario</string>
+    <string name="empty_materials_title">El inventario está vacío</string>
+    <string name="empty_materials_desc">Añade lana, agujas y ganchillos a tu inventario.</string>
+    <string name="action_add_material">Añadir Material</string>
+
+    <!-- Settings Screen -->
+    <string name="title_settings">Ajustes</string>
+    <string name="section_appearance">Apariencia</string>
+    <string name="theme_system">Predeterminado del Sistema</string>
+    <string name="theme_light">Claro</string>
+    <string name="theme_dark">Oscuro</string>
+    <string name="theme_warm">Cálido (Reducir Luz Azul)</string>
+</resources>

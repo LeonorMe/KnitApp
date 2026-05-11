@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Malha</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">Início</string>
+    <string name="nav_projects">Projetos</string>
+    <string name="nav_patterns">Receitas</string>
+    <string name="nav_materials">Materiais</string>
+    <string name="nav_settings">Definições</string>
+
+    <!-- Home Screen -->
+    <string name="title_home">Bom dia, Tricoteira!</string>
+    <string name="subtitle_home">Pronta para fazer umas malhas?</string>
+    <string name="section_recent_projects">Projetos Recentes</string>
+    <string name="section_aidi_insights">Sugestões Aidi</string>
+    <string name="aidi_tip_example">O teu projeto Cachecol está 80% concluído! Continua assim!</string>
+    <string name="action_quick_add">Adição Rápida</string>
+
+    <!-- Projects Screen -->
+    <string name="title_projects">Os Meus Projetos</string>
+    <string name="empty_projects_title">Ainda sem projetos</string>
+    <string name="empty_projects_desc">Começa o teu primeiro projeto de tricô ou croché hoje!</string>
+    <string name="action_add_project">Adicionar Projeto</string>
+
+    <!-- Patterns Screen -->
+    <string name="title_patterns">Biblioteca de Receitas</string>
+    <string name="empty_patterns_title">Nenhuma receita encontrada</string>
+    <string name="empty_patterns_desc">Guarda aqui as tuas receitas favoritas.</string>
+    <string name="action_create_pattern">Criar Receita</string>
+
+    <!-- Materials Screen -->
+    <string name="title_materials">O Meu Inventário</string>
+    <string name="empty_materials_title">O inventário está vazio</string>
+    <string name="empty_materials_desc">Adiciona fios e agulhas ao teu inventário.</string>
+    <string name="action_add_material">Adicionar Material</string>
+
+    <!-- Settings Screen -->
+    <string name="title_settings">Definições</string>
+    <string name="section_appearance">Aparência</string>
+    <string name="theme_system">Padrão do Sistema</string>
+    <string name="theme_light">Claro</string>
+    <string name="theme_dark">Escuro</string>
+    <string name="theme_warm">Quente (Reduzir Luz Azul)</string>
+</resources>

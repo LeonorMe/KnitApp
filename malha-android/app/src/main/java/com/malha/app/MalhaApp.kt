@@ -52,10 +52,10 @@ fun MalhaApp() {
                                     MalhaDestination.PatternDetail -> TODO()
                                     MalhaDestination.ProjectExecution -> TODO()
                                 },
-                                contentDescription = destination.label
+                                contentDescription = androidx.compose.ui.res.stringResource(destination.titleResId)
                             )
                         },
-                        label = { Text(destination.label) }
+                        label = { Text(androidx.compose.ui.res.stringResource(destination.titleResId)) }
                     )
                 }
             }

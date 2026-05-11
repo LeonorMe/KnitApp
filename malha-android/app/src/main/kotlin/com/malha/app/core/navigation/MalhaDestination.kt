@@ -1,18 +1,7 @@
 package com.malha.app.core.navigation
 
-sealed class MalhaDestination(val route: String, val label: String) {
-    object Home : MalhaDestination("home", "Home")
-    object Projects : MalhaDestination("projects", "Projects")
-    object Patterns : MalhaDestination("patterns", "Patterns")
-    object Materials : MalhaDestination("materials", "Materials")
-    object Settings : MalhaDestination("settings", "Settings")
-    object PatternDetail : MalhaDestination("pattern_detail", "Pattern Detail")
-    object ProjectExecution : MalhaDestination("project_execution", "Project Execution")
-
-    companion object {
-        val topLevel = listOf(Home, Projects, Patterns, Materials, Settings)
-    }
-}
+import androidx.annotation.StringRes
+import com.malha.app.R
 
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
@@ -20,6 +9,20 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+
+sealed class MalhaDestination(val route: String, @StringRes val titleResId: Int) {
+    object Home : MalhaDestination("home", R.string.nav_home)
+    object Projects : MalhaDestination("projects", R.string.nav_projects)
+    object Patterns : MalhaDestination("patterns", R.string.nav_patterns)
+    object Materials : MalhaDestination("materials", R.string.nav_materials)
+    object Settings : MalhaDestination("settings", R.string.nav_settings)
+    object PatternDetail : MalhaDestination("pattern_detail", R.string.title_patterns)
+    object ProjectExecution : MalhaDestination("project_execution", R.string.title_projects)
+
+    companion object {
+        val topLevel = listOf(Home, Projects, Patterns, Materials, Settings)
+    }
+}
 
 @Composable
 fun MalhaNavHost(navController: NavHostController, modifier: androidx.compose.ui.Modifier = androidx.compose.ui.Modifier) {
