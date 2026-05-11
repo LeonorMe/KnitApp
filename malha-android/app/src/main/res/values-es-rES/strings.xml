@@ -42,4 +42,27 @@
     <string name="theme_light">Claro</string>
     <string name="theme_dark">Oscuro</string>
     <string name="theme_warm">Cálido (Reducir Luz Azul)</string>
+    <string name="action_sign_out">Cerrar sesión</string>
+    <string name="action_sign_in_google">Iniciar sesión con Google</string>
+    <string name="action_signing_in">Iniciando sesión...</string>
+    <string name="dialog_new_project_title">Nuevo proyecto</string>
+    <string name="input_project_name">Nombre del proyecto</string>
+    <string name="action_create">Crear</string>
+    <string name="action_cancel">Cancelar</string>
+    <string name="dialog_new_pattern_title">Nuevo patrón</string>
+    <string name="input_pattern_title">Título del patrón</string>
+    <string name="input_instructions">Instrucciones</string>
+    <string name="action_start_project_pattern">Iniciar proyecto de este patrón</string>
+    <string name="dialog_start_project_title">Iniciar proyecto</string>
+    <string name="action_start">Iniciar</string>
+    <string name="dialog_new_yarn_title">Nuevo hilo</string>
+    <string name="input_yarn_name">Nombre del hilo</string>
+    <string name="input_quantity">Cantidad</string>
+    <string name="input_unit">Unidad</string>
+    <string name="action_previous">Anterior</string>
+    <string name="action_next">Siguiente</string>
+    <string name="action_mark_step_done">Marcar paso como hecho</string>
+    <string name="dialog_step_note_title">Nota del paso</string>
+    <string name="input_personal_note">Nota personal</string>
+    <string name="action_save">Guardar</string>
 </resources>

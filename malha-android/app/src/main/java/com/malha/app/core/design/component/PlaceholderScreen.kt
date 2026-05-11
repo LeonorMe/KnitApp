@@ -65,9 +65,10 @@ fun ListScreen(
         floatingActionButton = {
             if (actionLabel != null && onActionClick != null) {
                 ExtendedFloatingActionButton(
-                    onClick = onActionClick,
-                    text = { Text(actionLabel) }
-                )
+                    onClick = onActionClick
+                ) {
+                    Text(actionLabel)
+                }
             }
         }
     ) { innerPadding ->

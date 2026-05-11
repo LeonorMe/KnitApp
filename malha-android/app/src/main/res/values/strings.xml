@@ -42,4 +42,28 @@
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
     <string name="theme_warm">Warm (Reduce Blue Light)</string>
+    <string name="default_web_client_id" translatable="false">dummy_client_id</string>
+    <string name="action_sign_out">Sign out</string>
+    <string name="action_sign_in_google">Sign in with Google</string>
+    <string name="action_signing_in">Signing in...</string>
+    <string name="dialog_new_project_title">New project</string>
+    <string name="input_project_name">Project name</string>
+    <string name="action_create">Create</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="dialog_new_pattern_title">New pattern</string>
+    <string name="input_pattern_title">Pattern title</string>
+    <string name="input_instructions">Instructions</string>
+    <string name="action_start_project_pattern">Start project from this pattern</string>
+    <string name="dialog_start_project_title">Start project</string>
+    <string name="action_start">Start</string>
+    <string name="dialog_new_yarn_title">New yarn</string>
+    <string name="input_yarn_name">Yarn name</string>
+    <string name="input_quantity">Quantity</string>
+    <string name="input_unit">Unit</string>
+    <string name="action_previous">Previous</string>
+    <string name="action_next">Next</string>
+    <string name="action_mark_step_done">Mark step done</string>
+    <string name="dialog_step_note_title">Step note</string>
+    <string name="input_personal_note">Personal note</string>
+    <string name="action_save">Save</string>
 </resources>

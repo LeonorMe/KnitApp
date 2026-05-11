@@ -42,4 +42,27 @@
     <string name="theme_light">Claro</string>
     <string name="theme_dark">Escuro</string>
     <string name="theme_warm">Quente (Reduzir Luz Azul)</string>
+    <string name="action_sign_out">Terminar sessão</string>
+    <string name="action_sign_in_google">Iniciar sessão com o Google</string>
+    <string name="action_signing_in">A iniciar sessão...</string>
+    <string name="dialog_new_project_title">Novo projeto</string>
+    <string name="input_project_name">Nome do projeto</string>
+    <string name="action_create">Criar</string>
+    <string name="action_cancel">Cancelar</string>
+    <string name="dialog_new_pattern_title">Nova receita</string>
+    <string name="input_pattern_title">Título da receita</string>
+    <string name="input_instructions">Instruções</string>
+    <string name="action_start_project_pattern">Iniciar projeto a partir desta receita</string>
+    <string name="dialog_start_project_title">Iniciar projeto</string>
+    <string name="action_start">Iniciar</string>
+    <string name="dialog_new_yarn_title">Novo fio</string>
+    <string name="input_yarn_name">Nome do fio</string>
+    <string name="input_quantity">Quantidade</string>
+    <string name="input_unit">Unidade</string>
+    <string name="action_previous">Anterior</string>
+    <string name="action_next">Próximo</string>
+    <string name="action_mark_step_done">Marcar passo como concluído</string>
+    <string name="dialog_step_note_title">Nota do passo</string>
+    <string name="input_personal_note">Nota pessoal</string>
+    <string name="action_save">Guardar</string>
 </resources>

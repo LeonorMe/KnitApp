@@ -64,7 +64,7 @@ private fun CreateProjectDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("New project") },
+        title = { Text(stringResource(R.string.dialog_new_project_title)) },
         text = {
             OutlinedTextField(
                 value = name,
@@ -72,7 +72,7 @@ private fun CreateProjectDialog(
                     name = it
                     localError = null
                 },
-                label = { Text("Project name") },
+                label = { Text(stringResource(R.string.input_project_name)) },
                 supportingText = {
                     if (localError != null) {
                         Text(localError.orEmpty())
@@ -93,7 +93,7 @@ private fun CreateProjectDialog(
                     }
                 }
             ) {
-                Text("Create")
+                Text(stringResource(R.string.action_create))
             }
         },
         dismissButton = {
@@ -101,7 +101,7 @@ private fun CreateProjectDialog(
                 enabled = !isCreating,
                 onClick = onDismiss
             ) {
-                Text("Cancel")
+                Text(stringResource(R.string.action_cancel))
             }
         }
     )

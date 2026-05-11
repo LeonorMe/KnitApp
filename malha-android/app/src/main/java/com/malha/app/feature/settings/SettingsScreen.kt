@@ -22,6 +22,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -134,7 +135,7 @@ private fun ProfileCard(
                     enabled = !uiState.isSigningIn,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(if (uiState.isSigningIn) "Signing in..." else "Sign in with Google")
+                    Text(if (uiState.isSigningIn) stringResource(R.string.action_signing_in) else stringResource(R.string.action_sign_in_google))
                 }
             } else {
                 Text(
@@ -151,7 +152,7 @@ private fun ProfileCard(
                     onClick = onSignOut,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Sign out")
+                    Text(stringResource(R.string.action_sign_out))
                 }
             }
         }
