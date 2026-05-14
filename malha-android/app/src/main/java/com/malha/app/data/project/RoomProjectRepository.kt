@@ -40,6 +40,7 @@ class RoomProjectRepository(
             ProjectEntity(
                 id = projectId,
                 name = name,
+                imageUri = null,
                 craftType = "knitting",
                 patternId = patternId,
                 status = "active",

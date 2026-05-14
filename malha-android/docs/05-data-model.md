@@ -23,6 +23,7 @@ Fields:
 
 - id
 - name
+- imageUri nullable
 - craftType: knitting, crochet, other
 - patternId nullable
 - status: planned, active, paused, completed, archived
@@ -88,6 +89,7 @@ Fields:
 - id
 - type: yarn, needle, hook, accessory
 - name
+- imageUri nullable
 - color nullable
 - fiber nullable
 - weight nullable

@@ -4,11 +4,11 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.malha.app.core.app.appContainer
+import com.malha.app.domain.model.MaterialType
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -38,9 +38,14 @@ class MaterialsViewModel(application: Application) : AndroidViewModel(applicatio
         }
     }
 
-    fun createYarn(name: String, quantityText: String, unit: String) {
+    fun createMaterial(
+        name: String,
+        type: MaterialType,
+        quantityText: String,
+        unit: String
+    ) {
         val trimmedName = name.trim()
-        val trimmedUnit = unit.trim().ifBlank { "skeins" }
+        val trimmedUnit = unit.trim().ifBlank { defaultUnitFor(type) }
         val quantity = quantityText.trim().replace(',', '.').toDoubleOrNull()
 
         when {
@@ -57,8 +62,9 @@ class MaterialsViewModel(application: Application) : AndroidViewModel(applicatio
         viewModelScope.launch {
             creationState.update { it.copy(isCreating = true, errorMessage = null) }
             runCatching {
-                appContainer.materialRepository.createYarn(
+                appContainer.materialRepository.createMaterial(
                     name = trimmedName,
+                    type = type,
                     quantity = quantity,
                     unit = trimmedUnit
                 )
@@ -73,6 +79,15 @@ class MaterialsViewModel(application: Application) : AndroidViewModel(applicatio
 
     fun clearError() {
         creationState.update { it.copy(errorMessage = null) }
+    }
+
+    private fun defaultUnitFor(type: MaterialType): String {
+        return when (type) {
+            MaterialType.Yarn -> "skeins"
+            MaterialType.Needle -> "pairs"
+            MaterialType.Hook -> "hooks"
+            MaterialType.Accessory -> "items"
+        }
     }
 }
 

@@ -25,7 +25,7 @@ interface ProjectDao {
     suspend fun insertProject(project: ProjectEntity)
 
     @Query("UPDATE projects SET status = 'archived', updatedAt = :updatedAt WHERE id = :projectId")
-    suspend fun archiveProject(projectId: String, updatedAt: Long)
+    suspend fun archiveProject(projectId: String, updatedAt: Long): Int
 
     @Query(
         """
@@ -41,5 +41,5 @@ interface ProjectDao {
         stepIndex: Int,
         progressPercent: Int,
         updatedAt: Long
-    )
+    ): Int
 }

@@ -153,6 +153,7 @@ object SeedData {
         ProjectEntity(
             id = "project-first-scarf",
             name = "First Calm Scarf",
+            imageUri = "drawable:malha_asset_project",
             craftType = "knitting",
             patternId = "pattern-scarf-basic",
             status = "active",
@@ -170,6 +171,7 @@ object SeedData {
             id = "material-sage-yarn",
             type = "yarn",
             name = "Sage wool",
+            imageUri = "drawable:malha_asset_yarn",
             color = "Sage",
             fiber = "Wool",
             weight = "DK",
@@ -180,7 +182,54 @@ object SeedData {
             purchasedAt = createdAt,
             createdAt = createdAt,
             updatedAt = createdAt
+        ),
+        MaterialEntity(
+            id = "material-bamboo-needles",
+            type = "needle",
+            name = "Bamboo needles 4 mm",
+            imageUri = null,
+            color = null,
+            fiber = null,
+            weight = "4 mm",
+            quantity = 1.0,
+            unit = "pairs",
+            lengthMeters = null,
+            costCents = 650,
+            purchasedAt = createdAt,
+            createdAt = createdAt,
+            updatedAt = createdAt
+        ),
+        MaterialEntity(
+            id = "material-crochet-hook",
+            type = "hook",
+            name = "Crochet hook 3.5 mm",
+            imageUri = null,
+            color = null,
+            fiber = null,
+            weight = "3.5 mm",
+            quantity = 1.0,
+            unit = "hooks",
+            lengthMeters = null,
+            costCents = 450,
+            purchasedAt = createdAt,
+            createdAt = createdAt,
+            updatedAt = createdAt
+        ),
+        MaterialEntity(
+            id = "material-stitch-markers",
+            type = "accessory",
+            name = "Stitch markers",
+            imageUri = null,
+            color = "Mixed",
+            fiber = null,
+            weight = null,
+            quantity = 12.0,
+            unit = "items",
+            lengthMeters = null,
+            costCents = 300,
+            purchasedAt = createdAt,
+            createdAt = createdAt,
+            updatedAt = createdAt
         )
     )
 }
-

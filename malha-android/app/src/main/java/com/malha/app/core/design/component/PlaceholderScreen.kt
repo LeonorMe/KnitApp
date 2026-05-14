@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -58,6 +59,7 @@ fun ListScreen(
     actionLabel: String? = null,
     onActionClick: (() -> Unit)? = null,
     onItemClick: ((Int) -> Unit)? = null,
+    showItemImagePlaceholders: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -125,12 +127,19 @@ fun ListScreen(
                                     onItemClick?.invoke(index)
                                 }
                         ) {
-                            Text(
-                                text = label,
+                            Row(
                                 modifier = Modifier.padding(16.dp),
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
+                                horizontalArrangement = Arrangement.spacedBy(14.dp)
+                            ) {
+                                if (showItemImagePlaceholders) {
+                                    ImagePlaceholder(label = "Image")
+                                }
+                                Text(
+                                    text = label,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
                         }
                     }
                 }

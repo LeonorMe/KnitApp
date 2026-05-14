@@ -4,6 +4,7 @@ import com.malha.app.core.database.dao.MaterialDao
 import com.malha.app.core.database.entity.MaterialEntity
 import com.malha.app.data.mapper.toDomain
 import com.malha.app.domain.model.Material
+import com.malha.app.domain.model.MaterialType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.util.UUID
@@ -16,13 +17,20 @@ class RoomMaterialRepository(
             .map { materials -> materials.map { it.toDomain() } }
     }
 
-    override suspend fun createYarn(name: String, quantity: Double, unit: String) {
+    override suspend fun createMaterial(
+        name: String,
+        type: MaterialType,
+        quantity: Double,
+        unit: String,
+        imageUri: String?
+    ) {
         val now = System.currentTimeMillis()
         materialDao.insertMaterial(
             MaterialEntity(
                 id = UUID.randomUUID().toString(),
-                type = "yarn",
+                type = type.storageValue,
                 name = name,
+                imageUri = imageUri,
                 color = null,
                 fiber = null,
                 weight = null,
