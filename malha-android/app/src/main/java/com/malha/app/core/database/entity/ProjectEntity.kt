@@ -20,6 +20,7 @@ import androidx.room.PrimaryKey
 data class ProjectEntity(
     @PrimaryKey val id: String,
     val name: String,
+    val imageUri: String?,
     val craftType: String,
     val patternId: String?,
     val status: String,
@@ -30,4 +31,3 @@ data class ProjectEntity(
     val createdAt: Long,
     val updatedAt: Long
 )
-

@@ -10,7 +10,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.malha.app.R
 import com.malha.app.core.design.component.ListScreen
 
 @Composable
@@ -38,7 +40,8 @@ fun ProjectsScreen(
             uiState.projects.getOrNull(index)?.let { project ->
                 onOpenProject(project.id)
             }
-        }
+        },
+        showItemImagePlaceholders = true
     )
 
     if (showCreateDialog) {

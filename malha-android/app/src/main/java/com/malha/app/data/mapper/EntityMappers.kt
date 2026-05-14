@@ -16,6 +16,7 @@ fun ProjectEntity.toDomain(): Project {
     return Project(
         id = id,
         name = name,
+        imageUri = imageUri,
         patternId = patternId,
         progressPercent = progressPercent,
         currentStepIndex = currentStepIndex,
@@ -46,12 +47,8 @@ fun MaterialEntity.toDomain(): Material {
     return Material(
         id = id,
         name = name,
-        type = when (type) {
-            "needle" -> MaterialType.Needle
-            "hook" -> MaterialType.Hook
-            "accessory" -> MaterialType.Accessory
-            else -> MaterialType.Yarn
-        },
+        imageUri = imageUri,
+        type = MaterialType.fromStorageValue(type),
         quantity = quantity,
         unit = unit
     )

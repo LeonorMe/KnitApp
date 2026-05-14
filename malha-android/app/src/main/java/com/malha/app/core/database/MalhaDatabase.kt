@@ -24,7 +24,7 @@ import com.malha.app.core.database.entity.UserPreferencesEntity
         ProjectStepProgressEntity::class,
         UserPreferencesEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class MalhaDatabase : RoomDatabase() {

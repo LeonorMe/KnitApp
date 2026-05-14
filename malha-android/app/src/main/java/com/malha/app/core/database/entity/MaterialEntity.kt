@@ -8,6 +8,7 @@ data class MaterialEntity(
     @PrimaryKey val id: String,
     val type: String,
     val name: String,
+    val imageUri: String?,
     val color: String?,
     val fiber: String?,
     val weight: String?,
@@ -19,4 +20,3 @@ data class MaterialEntity(
     val createdAt: Long,
     val updatedAt: Long
 )
-

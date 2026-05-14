@@ -13,8 +13,10 @@ object DatabaseProvider {
                 context.applicationContext,
                 MalhaDatabase::class.java,
                 "malha.db"
-            ).build().also { database = it }
+            )
+                .fallbackToDestructiveMigration()
+                .build()
+                .also { database = it }
         }
     }
 }
-

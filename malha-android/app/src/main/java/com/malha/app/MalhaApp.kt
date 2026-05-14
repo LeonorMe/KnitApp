@@ -2,10 +2,10 @@ package com.malha.app
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.List
 import androidx.compose.material.icons.outlined.Build
 import androidx.compose.material.icons.outlined.Folder
 import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.List
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -46,11 +46,11 @@ fun MalhaApp() {
                                 imageVector = when (destination) {
                                     MalhaDestination.Home -> Icons.Outlined.Home
                                     MalhaDestination.Projects -> Icons.Outlined.Folder
-                                    MalhaDestination.Patterns -> Icons.Outlined.List
+                                    MalhaDestination.Patterns -> Icons.AutoMirrored.Outlined.List
                                     MalhaDestination.Materials -> Icons.Outlined.Build
                                     MalhaDestination.Settings -> Icons.Outlined.Settings
-                                    MalhaDestination.PatternDetail -> TODO()
-                                    MalhaDestination.ProjectExecution -> TODO()
+                                    MalhaDestination.PatternDetail -> Icons.AutoMirrored.Outlined.List
+                                    MalhaDestination.ProjectExecution -> Icons.Outlined.Folder
                                 },
                                 contentDescription = androidx.compose.ui.res.stringResource(destination.titleResId)
                             )
