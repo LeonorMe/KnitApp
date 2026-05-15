@@ -28,5 +28,6 @@ data class PatternEntity(
     
     // Multi-size (stored as CSV or JSON in real app, simplified for now)
     val availableSizes: String?,
-    val selectedSize: String?
+    val selectedSize: String?,
+    val updatedAt: Long
 )

@@ -8,6 +8,8 @@ import com.malha.app.core.database.entity.ProjectEntity
 import com.malha.app.domain.model.*
 
 object SeedData {
+    private val now = System.currentTimeMillis()
+
     val patterns = listOf(
         PatternEntity(
             id = "pattern-scarf-basic",
@@ -25,7 +27,8 @@ object SeedData {
             aiConfidence = 1.0,
             isPremium = false,
             availableSizes = "Small,Medium,Large",
-            selectedSize = "Medium"
+            selectedSize = "Medium",
+            updatedAt = now
         ),
         PatternEntity(
             id = "demo_beanie_001",
@@ -43,7 +46,8 @@ object SeedData {
             aiConfidence = 1.0,
             isPremium = false,
             availableSizes = "S,M,L",
-            selectedSize = "M"
+            selectedSize = "M",
+            updatedAt = now
         )
     )
 
@@ -90,7 +94,8 @@ object SeedData {
             startRow = null,
             endRow = null,
             condition = "S",
-            stitchPatternId = null
+            stitchPatternId = null,
+            updatedAt = now
         ),
         PatternStepEntity(
             id = "step-beanie-1m",
@@ -107,7 +112,8 @@ object SeedData {
             startRow = null,
             endRow = null,
             condition = "M",
-            stitchPatternId = null
+            stitchPatternId = null,
+            updatedAt = now
         ),
         PatternStepEntity(
             id = "step-beanie-1l",
@@ -124,7 +130,8 @@ object SeedData {
             startRow = null,
             endRow = null,
             condition = "L",
-            stitchPatternId = null
+            stitchPatternId = null,
+            updatedAt = now
         ),
         PatternStepEntity(
             id = "step-beanie-2",
@@ -141,7 +148,8 @@ object SeedData {
             startRow = null,
             endRow = null,
             condition = null,
-            stitchPatternId = null
+            stitchPatternId = null,
+            updatedAt = now
         ),
         PatternStepEntity(
             id = "step-beanie-3",
@@ -158,13 +166,14 @@ object SeedData {
             startRow = null,
             endRow = null,
             condition = null,
-            stitchPatternId = "rib_1x1"
+            stitchPatternId = "rib_1x1",
+            updatedAt = now
         ),
         PatternStepEntity(
             id = "step-beanie-body-1",
             patternId = "demo_beanie_001",
             sectionId = "section-beanie-body",
-            orderIndex = 0,
+            orderIndex = 5,
             stepType = StepType.REPEAT_BLOCK,
             instruction = "Knit every round until piece measures 18 cm from cast on edge.",
             rowNumber = null,
@@ -175,13 +184,14 @@ object SeedData {
             startRow = null,
             endRow = null,
             condition = null,
-            stitchPatternId = "stockinette_round"
+            stitchPatternId = "stockinette_round",
+            updatedAt = now
         ),
         PatternStepEntity(
             id = "step-beanie-crown-1",
             patternId = "demo_beanie_001",
             sectionId = "section-beanie-crown",
-            orderIndex = 0,
+            orderIndex = 6,
             stepType = StepType.DECREASE,
             instruction = "K8, k2tog around.",
             rowNumber = null,
@@ -192,13 +202,14 @@ object SeedData {
             startRow = null,
             endRow = null,
             condition = null,
-            stitchPatternId = null
+            stitchPatternId = null,
+            updatedAt = now
         ),
         PatternStepEntity(
             id = "step-beanie-crown-final",
             patternId = "demo_beanie_001",
             sectionId = "section-beanie-crown",
-            orderIndex = 1,
+            orderIndex = 7,
             stepType = StepType.FINISHING,
             instruction = "Cut yarn, thread through remaining stitches, pull tight and weave in ends.",
             rowNumber = null,
@@ -209,7 +220,8 @@ object SeedData {
             startRow = null,
             endRow = null,
             condition = null,
-            stitchPatternId = null
+            stitchPatternId = null,
+            updatedAt = now
         ),
         PatternStepEntity(
             id = "step-scarf-1",
@@ -226,7 +238,8 @@ object SeedData {
             startRow = null,
             endRow = null,
             condition = "Medium",
-            stitchPatternId = null
+            stitchPatternId = null,
+            updatedAt = now
         ),
         PatternStepEntity(
             id = "step-scarf-2",
@@ -243,16 +256,39 @@ object SeedData {
             startRow = 1,
             endRow = 1,
             condition = null,
-            stitchPatternId = null
+            stitchPatternId = null,
+            updatedAt = now
+        )
+    )
+
+    val projects = listOf(
+        ProjectEntity(
+            id = "project-first-scarf",
+            name = "My First Scarf",
+            imageUri = null,
+            craftType = "knitting",
+            patternId = "pattern-scarf-basic",
+            status = "active",
+            progressPercent = 10,
+            currentStepIndex = 1,
+            startedAt = now,
+            completedAt = null,
+            createdAt = now,
+            updatedAt = now
         ),
         ProjectEntity(
             id = "project-demo-beanie",
             name = "Demo Beanie Project",
             imageUri = null,
+            craftType = "knitting",
             patternId = "demo_beanie_001",
+            status = "active",
             progressPercent = 0,
             currentStepIndex = 0,
-            updatedAt = System.currentTimeMillis()
+            startedAt = now,
+            completedAt = null,
+            createdAt = now,
+            updatedAt = now
         )
     )
 
@@ -268,7 +304,8 @@ object SeedData {
             gramsPerBall = 110,
             needleType = null,
             sizeMm = 6.0,
-            lengthCm = null
+            lengthCm = null,
+            updatedAt = now
         ),
         MaterialEntity(
             id = "material-sage-yarn",
@@ -281,7 +318,8 @@ object SeedData {
             gramsPerBall = 100,
             needleType = null,
             sizeMm = null,
-            lengthCm = null
+            lengthCm = null,
+            updatedAt = now
         ),
         MaterialEntity(
             id = "material-bamboo-needles",
@@ -294,7 +332,8 @@ object SeedData {
             gramsPerBall = null,
             needleType = "straight",
             sizeMm = 4.0,
-            lengthCm = 35
+            lengthCm = 35,
+            updatedAt = now
         )
     )
 }

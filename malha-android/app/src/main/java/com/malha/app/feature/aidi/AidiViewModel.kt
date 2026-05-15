@@ -47,7 +47,7 @@ class AidiViewModel(application: Application) : AndroidViewModel(application) {
                 if (prompt.contains("Row", ignoreCase = true) || prompt.contains("Rnd", ignoreCase = true)) {
                     // It looks like a pattern!
                     val parsed = com.malha.app.core.ai.PatternParser.parse(prompt)
-                    "I've analyzed your pattern! It has ${parsed.steps.size} steps. Would you like me to save this to your Pattern Library?"
+                    "I've analyzed your pattern! It has ${parsed.allSteps.size} steps. Would you like me to save this to your Pattern Library?"
                 } else {
                     appContainer.aidiAssistantService.generateReply(prompt)
                 }

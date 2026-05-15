@@ -107,13 +107,13 @@ fun PatternDetailScreen(
 
             item {
                 Text(
-                    text = "${pattern.steps.size} steps",
+                    text = "${pattern.allSteps.size} steps",
                     style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.onBackground
                 )
             }
 
-            items(pattern.steps.sortedBy { it.orderIndex }) { step ->
+            items(pattern.allSteps) { step ->
                 Card(
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.surfaceVariant

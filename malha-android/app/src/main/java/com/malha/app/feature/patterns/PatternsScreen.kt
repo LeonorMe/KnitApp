@@ -28,7 +28,7 @@ fun PatternsScreen(
         title = "Patterns",
         subtitle = "Manual pattern input and the first starter patterns will live here.",
         items = uiState.patterns.map { pattern ->
-            "${pattern.title} - ${pattern.steps.size} steps"
+            "${pattern.title} - ${pattern.allSteps.size} steps"
         },
         emptyText = if (uiState.isLoading) "Loading patterns..." else "No patterns yet.",
         errorMessage = uiState.errorMessage,

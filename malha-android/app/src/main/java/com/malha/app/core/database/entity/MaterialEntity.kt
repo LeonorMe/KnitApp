@@ -17,5 +17,6 @@ data class MaterialEntity(
     val gramsPerBall: Int?,
     val needleType: String?,
     val sizeMm: Double?,
-    val lengthCm: Int?
+    val lengthCm: Int?,
+    val updatedAt: Long
 )

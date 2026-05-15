@@ -22,5 +22,6 @@ data class PatternStepEntity(
     val startRow: Int?,
     val endRow: Int?,
     val condition: String?,
-    val stitchPatternId: String?
+    val stitchPatternId: String?,
+    val updatedAt: Long
 )

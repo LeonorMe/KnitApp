@@ -6,6 +6,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import com.malha.app.core.database.entity.PatternEntity
+import com.malha.app.core.database.entity.PatternSectionEntity
 import com.malha.app.core.database.entity.PatternStepEntity
 import com.malha.app.core.database.relation.PatternWithSteps
 import kotlinx.coroutines.flow.Flow
@@ -37,4 +38,10 @@ interface PatternDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertStep(step: PatternStepEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertSections(sections: List<PatternSectionEntity>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertSection(section: PatternSectionEntity)
 }

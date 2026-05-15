@@ -397,3 +397,44 @@ private fun UnitsSelector(
         }
     }
 }
+
+@Composable
+private fun TextSizeSelector(
+    currentMultiplier: Float,
+    onMultiplierSelected: (Float) -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
+    ) {
+        Column(modifier = Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Text(
+                text = "Text Size",
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = "Adjust the app's text size for better readability.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Slider(
+                value = currentMultiplier,
+                onValueChange = onMultiplierSelected,
+                valueRange = 0.8f..1.6f,
+                steps = 4,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text("Small", style = MaterialTheme.typography.labelSmall)
+                Text("Normal", style = MaterialTheme.typography.labelSmall)
+                Text("Large", style = MaterialTheme.typography.labelSmall)
+            }
+        }
+    }
+}

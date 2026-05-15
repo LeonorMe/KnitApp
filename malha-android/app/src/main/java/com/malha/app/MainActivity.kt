@@ -47,6 +47,7 @@ class MainActivity : ComponentActivity() {
             Locale.setDefault(locale)
             val config = resources.configuration
             config.setLocale(locale)
+            @Suppress("DEPRECATION")
             resources.updateConfiguration(config, resources.displayMetrics)
             // Note: This is a bit legacy, but works for simple cases. 
             // In a real app, you'd use AppCompatDelegate.setApplicationLocales()

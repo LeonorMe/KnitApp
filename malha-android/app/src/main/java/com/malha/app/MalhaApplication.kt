@@ -9,7 +9,13 @@ class MalhaApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        instance = this
         appContainer = AppContainer(this)
+    }
+
+    companion object {
+        lateinit var instance: MalhaApplication
+            private set
     }
 }
 

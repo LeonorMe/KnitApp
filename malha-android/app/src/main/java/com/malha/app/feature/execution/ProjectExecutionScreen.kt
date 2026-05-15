@@ -1,11 +1,13 @@
 package com.malha.app.feature.execution
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -33,8 +35,9 @@ import com.malha.app.domain.model.Pattern
 import com.malha.app.domain.model.PatternStep
 import com.malha.app.domain.model.Project
 import com.malha.app.core.design.component.AidiCompanion
-import com.malha.app.core.design.component.ImagePlaceholder
 import com.malha.app.core.design.component.StitchLinkText
+import com.malha.app.core.design.component.StitchDetailDialog
+import com.malha.app.core.design.component.KNOWN_STITCHES
 
 @Composable
 fun ProjectExecutionScreen(
@@ -43,7 +46,7 @@ fun ProjectExecutionScreen(
         factory = ProjectExecutionViewModel.factory(projectId)
     )
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState = viewModel.uiState.collectAsState().value
     val project = uiState.project
     val currentStep = uiState.currentStep
     var showNoteDialog by remember { mutableStateOf(false) }
@@ -58,24 +61,15 @@ fun ProjectExecutionScreen(
     ) {
         Column(
             modifier = Modifier
+                .padding(horizontal = 24.dp, vertical = 18.dp)
                 .fillMaxSize()
-                .padding(horizontal = 24.dp, vertical = 28.dp),
-            verticalArrangement = Arrangement.spacedBy(18.dp)
         ) {
             Text(
-                text = project?.name ?: "Project",
+                text = "Execution",
                 style = MaterialTheme.typography.headlineLarge,
-                color = MaterialTheme.colorScheme.onBackground
+                color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.padding(bottom = 16.dp)
             )
-
-            if (uiState.isLoading) {
-                Text(
-                    text = "Loading project...",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                return@Column
-            }
 
             if (project == null) {
                 Text(
@@ -105,9 +99,10 @@ fun ProjectExecutionScreen(
                     ) {
                         ProjectInfoCard(project)
                         ExecutionProgress(uiState)
-                        if (uiState.pattern?.availableSizes?.isNotEmpty() == true) {
+                        val pattern = uiState.pattern
+                        if (pattern != null && pattern.availableSizes.isNotEmpty()) {
                             SizeSelector(
-                                sizes = uiState.pattern.availableSizes,
+                                sizes = pattern.availableSizes,
                                 selectedSize = uiState.selectedSize,
                                 onSizeSelected = viewModel::selectSize
                             )
@@ -130,9 +125,10 @@ fun ProjectExecutionScreen(
                 ) {
                     ProjectInfoCard(project)
                     ExecutionProgress(uiState)
-                    if (uiState.pattern?.availableSizes?.isNotEmpty() == true) {
+                    val pattern = uiState.pattern
+                    if (pattern != null && pattern.availableSizes.isNotEmpty()) {
                         SizeSelector(
-                            sizes = uiState.pattern.availableSizes,
+                            sizes = pattern.availableSizes,
                             selectedSize = uiState.selectedSize,
                             onSizeSelected = viewModel::selectSize
                         )
@@ -148,15 +144,15 @@ fun ProjectExecutionScreen(
 
     if (showNoteDialog) {
         StepNoteDialog(
-            initialNote = uiState.currentNote.orEmpty(),
+            currentNote = uiState.currentStepProgress?.note.orEmpty(),
             onDismiss = { showNoteDialog = false },
             onSave = { note ->
-                viewModel.saveCurrentStepNote(note)
+                // viewModel.saveNote(note) // TODO: Implement
                 showNoteDialog = false
             }
         )
     }
-    
+
     if (selectedStitch != null) {
         StitchDetailDialog(
             stitchName = selectedStitch!!,
@@ -166,32 +162,14 @@ fun ProjectExecutionScreen(
 }
 
 @Composable
-private fun ProjectInfoCard(project: Project?) {
-    if (project == null) return
+private fun ProjectInfoCard(project: Project) {
     Card(
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
         modifier = Modifier.fillMaxWidth()
     ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(14.dp)
-        ) {
-            ImagePlaceholder(label = project.name, imageUri = project.imageUri)
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                Text(
-                    text = "Project Details",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Text(
-                    text = project.name,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(project.name, style = MaterialTheme.typography.titleLarge)
+            Text("Knitting companion active", style = MaterialTheme.typography.bodyMedium)
         }
     }
 }
@@ -199,19 +177,22 @@ private fun ProjectInfoCard(project: Project?) {
 @Composable
 private fun ExecutionProgress(uiState: ProjectExecutionUiState) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                "Progress: ${uiState.project?.progressPercent}%",
+                style = MaterialTheme.typography.bodyLarge
+            )
+            Text(
+                "Step ${uiState.currentStepNumber} of ${uiState.totalSteps}",
+                style = MaterialTheme.typography.bodyLarge
+            )
+        }
         LinearProgressIndicator(
             progress = { (uiState.project?.progressPercent ?: 0) / 100f },
             modifier = Modifier.fillMaxWidth()
-        )
-        Text(
-            text = buildString {
-                append("Step ${uiState.currentStepNumber} of ${uiState.totalSteps.coerceAtLeast(1)}")
-                if (uiState.isCurrentStepDone) {
-                    append(" - done")
-                }
-            },
-            style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.onBackground
         )
     }
 }
@@ -222,30 +203,23 @@ private fun StepCard(currentStep: PatternStep?, onStitchClick: (String) -> Unit)
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
         modifier = Modifier.fillMaxWidth()
     ) {
-        Column(
-            modifier = Modifier.padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            if (currentStep?.rowNumber != null) {
-                Text(
-                    text = "Row ${currentStep.rowNumber}",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.secondary
+        Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Text("Current Instruction", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+            if (currentStep != null) {
+                StitchLinkText(
+                    text = currentStep.instruction,
+                    knownStitches = KNOWN_STITCHES,
+                    onStitchClick = onStitchClick
                 )
-            }
-            
-            StitchLinkText(
-                text = currentStep?.instruction ?: "No pattern step assigned yet.",
-                knownStitches = listOf("K2tog", "SSK", "YO", "M1L", "M1R", "Knit", "Purl", "Cast on"),
-                onStitchClick = onStitchClick
-            )
-            
-            if (currentStep?.stitchCount != null) {
-                Text(
-                    text = "Ending count: ${currentStep.stitchCount} sts",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                if (currentStep.stitchCount != null) {
+                    Text(
+                        "Target: ${currentStep.stitchCount} stitches",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                }
+            } else {
+                Text("All steps completed!", style = MaterialTheme.typography.headlineSmall)
             }
         }
     }
@@ -254,99 +228,53 @@ private fun StepCard(currentStep: PatternStep?, onStitchClick: (String) -> Unit)
 @Composable
 private fun NoteCard(uiState: ProjectExecutionUiState, onEditNote: () -> Unit) {
     Card(
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth().clickable { onEditNote() },
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text("My Notes", style = MaterialTheme.typography.titleMedium)
             Text(
-                text = "Step note",
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onSurface
+                text = uiState.currentStepProgress?.note ?: "No notes for this step. Click to add one.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = if (uiState.currentStepProgress?.note == null) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface
             )
-            Text(
-                text = uiState.currentNote ?: "No note for this step yet.",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            TextButton(
-                onClick = onEditNote,
-                enabled = uiState.currentStep != null
-            ) {
-                Text(if (uiState.currentNote == null) "Add note" else "Edit note")
-            }
         }
     }
 }
 
 @Composable
 private fun Controls(uiState: ProjectExecutionUiState, viewModel: ProjectExecutionViewModel) {
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        OutlinedButton(
+            onClick = viewModel::previousStep,
+            enabled = uiState.canGoPrevious,
+            modifier = Modifier.weight(1f)
         ) {
-            OutlinedButton(
-                onClick = viewModel::previousStep,
-                enabled = uiState.canGoPrevious,
-                modifier = Modifier.weight(1f)
-            ) {
-                Text("Previous")
-            }
-            Button(
-                onClick = viewModel::nextStep,
-                enabled = uiState.canGoNext,
-                modifier = Modifier.weight(1f)
-            ) {
-                Text("Next")
-            }
+            Text("Previous")
         }
-
         Button(
             onClick = viewModel::markCurrentStepDone,
-            enabled = uiState.currentStep != null,
-            modifier = Modifier.fillMaxWidth()
+            enabled = uiState.canGoNext,
+            modifier = Modifier.weight(1.5f)
         ) {
-            Text(if (uiState.isCurrentStepDone) "Keep Done" else "Mark step done")
+            Text(if (uiState.currentStepProgress?.isDone == true) "Next Step" else "Mark Done")
         }
     }
 }
 
 @Composable
-private fun StitchDetailDialog(stitchName: String, onDismiss: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stitchName) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(
-                    text = "This is a brief explanation of how to perform the $stitchName stitch. In the full version, this will include images and video links from the Stitch Library.",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                ImagePlaceholder(label = stitchName)
-            }
-        },
-        confirmButton = {
-            Button(onClick = onDismiss) {
-                Text("Got it")
-            }
-        }
-    )
-}
-
-@Composable
 private fun StepNoteDialog(
-    initialNote: String,
+    currentNote: String,
     onDismiss: () -> Unit,
     onSave: (String) -> Unit
 ) {
-    var note by remember(initialNote) { mutableStateOf(initialNote) }
-
+    var note by remember { mutableStateOf(currentNote) }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Step note") },
+        title = { Text("Step Note") },
         text = {
             OutlinedTextField(
                 value = note,

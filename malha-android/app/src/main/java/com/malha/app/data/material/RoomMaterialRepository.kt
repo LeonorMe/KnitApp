@@ -28,18 +28,16 @@ class RoomMaterialRepository(
         materialDao.insertMaterial(
             MaterialEntity(
                 id = UUID.randomUUID().toString(),
-                type = type.storageValue,
                 name = name,
                 imageUri = imageUri,
-                color = null,
-                fiber = null,
-                weight = null,
+                type = type.storageValue,
                 quantity = quantity,
                 unit = unit,
-                lengthMeters = null,
-                costCents = null,
-                purchasedAt = now,
-                createdAt = now,
+                fiber = null,
+                gramsPerBall = null,
+                needleType = null,
+                sizeMm = null,
+                lengthCm = null,
                 updatedAt = now
             )
         )

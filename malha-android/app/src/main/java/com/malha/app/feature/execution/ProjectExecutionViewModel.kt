@@ -2,12 +2,13 @@ package com.malha.app.feature.execution
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.CreationExtras
 import com.malha.app.core.app.appContainer
+import com.malha.app.domain.model.Pattern
+import com.malha.app.domain.model.PatternStep
+import com.malha.app.domain.model.Project
+import com.malha.app.domain.model.ProjectStepProgress
+import com.malha.app.MalhaApplication
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -35,9 +36,10 @@ class ProjectExecutionViewModel(
             appContainer.patternRepository.observePattern(patternId)
         }
     }
+    
     private val currentStepProgressFlow = combine(projectFlow, patternFlow) { project, pattern ->
-        val currentStep = pattern?.steps?.getOrNull(project?.currentStepIndex ?: 0)
-        Pair(project, currentStep)
+        val currentStep = pattern?.allSteps?.getOrNull(project?.currentStepIndex ?: 0)
+        project to currentStep
     }.flatMapLatest { (project, currentStep) ->
         if (project == null || currentStep == null) {
             flowOf(null)
@@ -55,7 +57,7 @@ class ProjectExecutionViewModel(
         currentStepProgressFlow,
         selectedSizeState,
         errorMessage
-    ) { project, pattern, stepProgress, selectedSize, error ->
+    ) { project: Project?, pattern: Pattern?, stepProgress: ProjectStepProgress?, selectedSize: String?, error: String? ->
         ProjectExecutionUiState(
             isLoading = false,
             project = project,
@@ -101,61 +103,18 @@ class ProjectExecutionViewModel(
             project.currentStepIndex
         }
         viewModelScope.launch {
-            runCatching {
-                appContainer.projectRepository.saveStepProgress(
-                    projectId = project.id,
-                    patternStepId = currentStep.id,
-                    isDone = true,
-                    note = state.currentNote
-                )
-                updateStep(nextIndex, state.totalSteps)
-            }.onFailure { error ->
-                errorMessage.update {
-                    error.message ?: "Could not mark step done."
-                }
-            }
-        }
-    }
-
-    fun saveCurrentStepNote(note: String) {
-        val state = uiState.value
-        val project = state.project ?: return
-        val currentStep = state.currentStep ?: return
-
-        viewModelScope.launch {
-            runCatching {
-                appContainer.projectRepository.saveStepProgress(
-                    projectId = project.id,
-                    patternStepId = currentStep.id,
-                    isDone = state.isCurrentStepDone,
-                    note = note
-                )
-            }.onFailure { error ->
-                errorMessage.update {
-                    error.message ?: "Could not save note."
-                }
-            }
-        }
-    }
-
-    private suspend fun updateStep(stepIndex: Int, totalSteps: Int) {
-        val progressPercent = if (totalSteps <= 0) {
-            0
-        } else {
-            (((stepIndex + 1).toFloat() / totalSteps.toFloat()) * 100).toInt()
-        }
-
-        runCatching {
-            appContainer.projectRepository.updateProgress(
-                projectId = projectId,
-                stepIndex = stepIndex,
-                progressPercent = progressPercent
+            appContainer.projectRepository.saveStepProgress(
+                projectId = project.id,
+                patternStepId = currentStep.id,
+                isDone = true,
+                note = state.currentStepProgress?.note
             )
-        }.onFailure { error ->
-            errorMessage.update {
-                error.message ?: "Could not update project progress."
-            }
+            updateStep(nextIndex, state.totalSteps)
         }
+    }
+
+    private suspend fun updateStep(index: Int, total: Int) {
+        appContainer.projectRepository.updateProgress(projectId, index, (index.toFloat() / total.toFloat() * 100).toInt())
     }
 
     fun selectSize(size: String) {
@@ -167,16 +126,11 @@ class ProjectExecutionViewModel(
     }
 
     companion object {
-        fun factory(projectId: String): ViewModelProvider.Factory {
-            return object : ViewModelProvider.Factory {
-                @Suppress("UNCHECKED_CAST")
-                override fun <T : ViewModel> create(
-                    modelClass: Class<T>,
-                    extras: CreationExtras
-                ): T {
-                    val application = checkNotNull(extras[APPLICATION_KEY])
-                    return ProjectExecutionViewModel(application, projectId) as T
-                }
+        fun factory(projectId: String) = object : androidx.lifecycle.ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+                val app = MalhaApplication.instance
+                return ProjectExecutionViewModel(app, projectId) as T
             }
         }
     }
