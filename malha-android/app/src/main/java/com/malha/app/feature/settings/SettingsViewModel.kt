@@ -9,11 +9,43 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+import kotlinx.coroutines.flow.collectLatest
+
 class SettingsViewModel(application: Application) : AndroidViewModel(application) {
     private val _uiState = MutableStateFlow(
         SettingsUiState(user = appContainer.authService.currentUser)
     )
     val uiState: StateFlow<SettingsUiState> = _uiState
+
+    init {
+        viewModelScope.launch {
+            appContainer.preferencesRepository.userPreferences.collectLatest { prefs ->
+                _uiState.update { it.copy(preferences = prefs) }
+            }
+        }
+    }
+
+    fun updateTheme(theme: com.malha.app.core.preferences.AppTheme) {
+        viewModelScope.launch { appContainer.preferencesRepository.updateTheme(theme) }
+    }
+
+    fun updateLanguage(language: com.malha.app.core.preferences.AppLanguage) {
+        viewModelScope.launch { appContainer.preferencesRepository.updateLanguage(language) }
+    }
+
+    fun updateUnits(units: com.malha.app.core.preferences.AppUnits) {
+        viewModelScope.launch { appContainer.preferencesRepository.updateUnits(units) }
+    }
+
+    fun updateProfile(username: String, bio: String) {
+        viewModelScope.launch { 
+            appContainer.preferencesRepository.updateProfile(username, bio)
+            // Also sync to cloud if signed in
+            uiState.value.user?.let { user ->
+                // This would need more complex logic to update CloudDataService
+            }
+        }
+    }
 
     fun signInWithGoogleToken(idToken: String?) {
         if (idToken.isNullOrBlank()) {

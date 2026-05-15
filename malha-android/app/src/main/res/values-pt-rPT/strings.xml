@@ -42,6 +42,10 @@
     <string name="theme_light">Claro</string>
     <string name="theme_dark">Escuro</string>
     <string name="theme_warm">Quente (Reduzir Luz Azul)</string>
+    <string name="section_language">Idioma</string>
+    <string name="section_units">Unidades</string>
+    <string name="unit_metric">Métrico (cm/m)</string>
+    <string name="unit_imperial">Imperial (pol/jard)</string>
     <string name="action_sign_out">Terminar sessão</string>
     <string name="action_sign_in_google">Iniciar sessão com o Google</string>
     <string name="action_signing_in">A iniciar sessão...</string>

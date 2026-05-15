@@ -10,4 +10,7 @@ val Indigo = Color(0xFF6E5A8D)
 val Lavender = Color(0xFFB9A7D1)
 val Ink = Color(0xFF25231F)
 val WarmGray = Color(0xFF6D675F)
+val SageLight = Color(0xFF76A58F)
+val InkDark = Color(0xFF1A1916)
+val ClayDark = Color(0xFF8C6D4F)
 

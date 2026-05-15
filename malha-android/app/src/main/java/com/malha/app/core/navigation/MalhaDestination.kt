@@ -15,6 +15,7 @@ sealed class MalhaDestination(
     data object Settings : MalhaDestination("settings", R.string.nav_settings)
     data object ProjectExecution : MalhaDestination("project/{projectId}", R.string.title_projects)
     data object PatternDetail : MalhaDestination("pattern/{patternId}", R.string.title_patterns)
+    data object ProfileEdit : MalhaDestination("profile_edit", R.string.title_settings)
 
     companion object {
         val topLevel = listOf(Home, Projects, Patterns, Materials, Aidi, Settings)

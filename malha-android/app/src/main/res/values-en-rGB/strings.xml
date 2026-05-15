@@ -27,7 +27,7 @@
     <!-- Patterns Screen -->
     <string name="title_patterns">Patterns Library</string>
     <string name="empty_patterns_title">No patterns found</string>
-    <string name="empty_patterns_desc">Save your favorite patterns here.</string>
+    <string name="empty_patterns_desc">Save your favourite patterns here.</string>
     <string name="action_create_pattern">Create Pattern</string>
 
     <!-- Materials Screen -->
@@ -47,7 +47,6 @@
     <string name="section_units">Units</string>
     <string name="unit_metric">Metric (cm/m)</string>
     <string name="unit_imperial">Imperial (in/yd)</string>
-    <string name="default_web_client_id" translatable="false">dummy_client_id</string>
     <string name="action_sign_out">Sign out</string>
     <string name="action_sign_in_google">Sign in with Google</string>
     <string name="action_signing_in">Signing in...</string>

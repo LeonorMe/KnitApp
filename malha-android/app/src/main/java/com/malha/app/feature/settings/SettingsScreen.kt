@@ -6,20 +6,32 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -29,9 +41,15 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.malha.app.R
+import com.malha.app.core.preferences.AppLanguage
+import com.malha.app.core.preferences.AppTheme
+import com.malha.app.core.preferences.AppUnits
 
 @Composable
-fun SettingsScreen(viewModel: SettingsViewModel = viewModel()) {
+fun SettingsScreen(
+    onNavigateToProfileEdit: () -> Unit,
+    viewModel: SettingsViewModel = viewModel()
+) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
     val googleSignInClient = remember(context) {
@@ -65,7 +83,9 @@ fun SettingsScreen(viewModel: SettingsViewModel = viewModel()) {
         color = MaterialTheme.colorScheme.background
     ) {
         Column(
-            modifier = Modifier.padding(PaddingValues(horizontal = 24.dp, vertical = 28.dp)),
+            modifier = Modifier
+                .padding(PaddingValues(horizontal = 24.dp, vertical = 28.dp))
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
@@ -74,7 +94,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = viewModel()) {
                 color = MaterialTheme.colorScheme.onBackground
             )
             Text(
-                text = "Profile, sync, language, units, notation, theme, and assistant preferences.",
+                text = "Profile, sync, language, units, and theme preferences.",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -96,9 +116,46 @@ fun SettingsScreen(viewModel: SettingsViewModel = viewModel()) {
                 onSignOut = {
                     googleSignInClient.signOut()
                     viewModel.signOut()
-                }
+                },
+                onEditProfile = onNavigateToProfileEdit
             )
+
+            SettingsSection(title = stringResource(R.string.section_appearance)) {
+                ThemeSelector(
+                    currentTheme = uiState.preferences.theme,
+                    onThemeSelected = viewModel::updateTheme
+                )
+            }
+
+            SettingsSection(title = stringResource(R.string.section_language)) {
+                LanguageSelector(
+                    currentLanguage = uiState.preferences.language,
+                    onLanguageSelected = viewModel::updateLanguage
+                )
+            }
+
+            SettingsSection(title = stringResource(R.string.section_units)) {
+                UnitsSelector(
+                    currentUnits = uiState.preferences.units,
+                    onUnitsSelected = viewModel::updateUnits
+                )
+            }
         }
+    }
+}
+
+@Composable
+private fun SettingsSection(
+    title: String,
+    content: @Composable () -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.primary
+        )
+        content()
     }
 }
 
@@ -106,7 +163,8 @@ fun SettingsScreen(viewModel: SettingsViewModel = viewModel()) {
 private fun ProfileCard(
     uiState: SettingsUiState,
     onSignIn: () -> Unit,
-    onSignOut: () -> Unit
+    onSignOut: () -> Unit,
+    onEditProfile: () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -118,11 +176,21 @@ private fun ProfileCard(
             modifier = Modifier.padding(18.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text(
-                text = "Profile",
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onSurface
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Profile",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                if (uiState.user != null) {
+                    TextButton(onClick = onEditProfile) {
+                        Text("Edit")
+                    }
+                }
+            }
 
             if (uiState.user == null) {
                 Text(
@@ -139,10 +207,17 @@ private fun ProfileCard(
                 }
             } else {
                 Text(
-                    text = uiState.user.displayName ?: "Signed in",
+                    text = uiState.preferences.username ?: uiState.user.displayName ?: "Signed in",
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurface
                 )
+                if (uiState.preferences.bio != null) {
+                    Text(
+                        text = uiState.preferences.bio!!,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
                 Text(
                     text = uiState.user.email ?: uiState.user.id,
                     style = MaterialTheme.typography.bodyLarge,
@@ -154,6 +229,157 @@ private fun ProfileCard(
                 ) {
                     Text(stringResource(R.string.action_sign_out))
                 }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ThemeSelector(
+    currentTheme: AppTheme,
+    onThemeSelected: (AppTheme) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+    
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded }
+    ) {
+        OutlinedTextField(
+            value = when (currentTheme) {
+                AppTheme.SYSTEM -> stringResource(R.string.theme_system)
+                AppTheme.LIGHT -> stringResource(R.string.theme_light)
+                AppTheme.DARK -> stringResource(R.string.theme_dark)
+                AppTheme.WARM -> stringResource(R.string.theme_warm)
+            },
+            onValueChange = {},
+            readOnly = true,
+            label = { Text("Theme") },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            modifier = Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryNotEditable)
+        )
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            AppTheme.entries.forEach { theme ->
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            when (theme) {
+                                AppTheme.SYSTEM -> stringResource(R.string.theme_system)
+                                AppTheme.LIGHT -> stringResource(R.string.theme_light)
+                                AppTheme.DARK -> stringResource(R.string.theme_dark)
+                                AppTheme.WARM -> stringResource(R.string.theme_warm)
+                            }
+                        )
+                    },
+                    onClick = {
+                        onThemeSelected(theme)
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun LanguageSelector(
+    currentLanguage: AppLanguage,
+    onLanguageSelected: (AppLanguage) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded }
+    ) {
+        OutlinedTextField(
+            value = when (currentLanguage) {
+                AppLanguage.SYSTEM -> "System Default"
+                AppLanguage.ENGLISH_UK -> "English (UK)"
+                AppLanguage.ENGLISH_US -> "English (US)"
+                AppLanguage.PORTUGUESE_PT -> "Português (PT)"
+                AppLanguage.SPANISH_ES -> "Español (ES)"
+            },
+            onValueChange = {},
+            readOnly = true,
+            label = { Text("App Language") },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            modifier = Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryNotEditable)
+        )
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            AppLanguage.entries.forEach { lang ->
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            when (lang) {
+                                AppLanguage.SYSTEM -> "System Default"
+                                AppLanguage.ENGLISH_UK -> "English (UK)"
+                                AppLanguage.ENGLISH_US -> "English (US)"
+                                AppLanguage.PORTUGUESE_PT -> "Português (PT)"
+                                AppLanguage.SPANISH_ES -> "Español (ES)"
+                            }
+                        )
+                    },
+                    onClick = {
+                        onLanguageSelected(lang)
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun UnitsSelector(
+    currentUnits: AppUnits,
+    onUnitsSelected: (AppUnits) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded }
+    ) {
+        OutlinedTextField(
+            value = when (currentUnits) {
+                AppUnits.METRIC -> stringResource(R.string.unit_metric)
+                AppUnits.IMPERIAL -> stringResource(R.string.unit_imperial)
+            },
+            onValueChange = {},
+            readOnly = true,
+            label = { Text("Measurement Units") },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            modifier = Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryNotEditable)
+        )
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            AppUnits.entries.forEach { unit ->
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            when (unit) {
+                                AppUnits.METRIC -> stringResource(R.string.unit_metric)
+                                AppUnits.IMPERIAL -> stringResource(R.string.unit_imperial)
+                            }
+                        )
+                    },
+                    onClick = {
+                        onUnitsSelected(unit)
+                        expanded = false
+                    }
+                )
             }
         }
     }

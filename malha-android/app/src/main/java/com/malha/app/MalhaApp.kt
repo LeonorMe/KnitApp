@@ -53,6 +53,7 @@ fun MalhaApp() {
                                     MalhaDestination.Settings -> Icons.Outlined.Settings
                                     MalhaDestination.PatternDetail -> Icons.AutoMirrored.Outlined.List
                                     MalhaDestination.ProjectExecution -> Icons.Outlined.Folder
+                                    MalhaDestination.ProfileEdit -> Icons.Outlined.Face
                                 },
                                 contentDescription = androidx.compose.ui.res.stringResource(destination.titleResId)
                             )

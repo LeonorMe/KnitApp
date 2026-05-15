@@ -17,11 +17,11 @@ class AidiViewModel(application: Application) : AndroidViewModel(application) {
     val uiState: StateFlow<AidiUiState> = _uiState
 
     val suggestedPrompts = listOf(
+        "Import pattern from text",
         "Help me plan a sweater",
         "How do I check gauge?",
         "What yarn should I use?",
-        "Explain this pattern step",
-        "How do I avoid losing progress?"
+        "Explain this pattern step"
     )
 
     fun sendMessage(text: String) {
@@ -44,7 +44,13 @@ class AidiViewModel(application: Application) : AndroidViewModel(application) {
 
         viewModelScope.launch {
             runCatching {
-                appContainer.aidiAssistantService.generateReply(prompt)
+                if (prompt.contains("Row", ignoreCase = true) || prompt.contains("Rnd", ignoreCase = true)) {
+                    // It looks like a pattern!
+                    val parsed = com.malha.app.core.ai.PatternParser.parse(prompt)
+                    "I've analyzed your pattern! It has ${parsed.steps.size} steps. Would you like me to save this to your Pattern Library?"
+                } else {
+                    appContainer.aidiAssistantService.generateReply(prompt)
+                }
             }.onSuccess { reply ->
                 val aidiMessage = AidiMessage(
                     id = UUID.randomUUID().toString(),

@@ -15,6 +15,7 @@ import com.malha.app.feature.patterns.detail.PatternDetailScreen
 import com.malha.app.feature.patterns.PatternsScreen
 import com.malha.app.feature.projects.ProjectsScreen
 import com.malha.app.feature.settings.SettingsScreen
+import com.malha.app.feature.profile.ProfileEditScreen
 
 @Composable
 fun MalhaNavHost(
@@ -54,7 +55,18 @@ fun MalhaNavHost(
             AidiScreen()
         }
         composable(MalhaDestination.Settings.route) {
-            SettingsScreen()
+            SettingsScreen(
+                onNavigateToProfileEdit = {
+                    navController.navigate(MalhaDestination.ProfileEdit.route)
+                }
+            )
+        }
+        composable(MalhaDestination.ProfileEdit.route) {
+            ProfileEditScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
         }
         composable(
             route = MalhaDestination.ProjectExecution.route,
