@@ -1,30 +1,19 @@
 package com.malha.app.feature.materials
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddAPhoto
+import androidx.compose.material.icons.filled.PhotoLibrary
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -54,7 +43,7 @@ fun MaterialsScreen(viewModel: MaterialsViewModel = viewModel()) {
             }
             item {
                 Text(
-                    text = "Track yarn, needles, hooks, purchases, and project assignments.",
+                    text = "Track yarn, needles, hooks, and accessories for your projects.",
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -98,8 +87,8 @@ fun MaterialsScreen(viewModel: MaterialsViewModel = viewModel()) {
         CreateMaterialDialog(
             isCreating = uiState.isCreating,
             onDismiss = { showCreateDialog = false },
-            onCreate = { name, type, quantity, unit ->
-                viewModel.createMaterial(name, type, quantity, unit)
+            onCreate = { name, type, quantity, unit, imageUri ->
+                viewModel.createMaterial(name, type, quantity, unit, imageUri)
                 showCreateDialog = false
             }
         )
@@ -170,11 +159,6 @@ private fun MaterialRow(material: Material) {
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            Text(
-                text = if (material.imageUri == null) "No image added" else "Image attached",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
         }
     }
 }
@@ -183,20 +167,29 @@ private fun MaterialRow(material: Material) {
 private fun CreateMaterialDialog(
     isCreating: Boolean,
     onDismiss: () -> Unit,
-    onCreate: (String, MaterialType, String, String) -> Unit
+    onCreate: (String, MaterialType, String, String, String?) -> Unit
 ) {
     var name by remember { mutableStateOf("") }
     var quantity by remember { mutableStateOf("") }
     var selectedType by remember { mutableStateOf(MaterialType.Yarn) }
     var unit by remember(selectedType) { mutableStateOf(defaultUnitFor(selectedType)) }
+    var imageUri by remember { mutableStateOf<Uri?>(null) }
     var localError by remember { mutableStateOf<String?>(null) }
+
+    val photoPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+        onResult = { uri -> imageUri = uri }
+    )
 
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("New material") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().horizontalScroll(androidx.compose.foundation.rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
                     MaterialType.entries.forEach { type ->
                         FilterChip(
                             selected = selectedType == type,
@@ -208,7 +201,40 @@ private fun CreateMaterialDialog(
                         )
                     }
                 }
-                ImagePlaceholder(label = "Photo")
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Box(modifier = Modifier.size(80.dp)) {
+                        ImagePlaceholder(label = "Photo", imageUri = imageUri?.toString())
+                    }
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        OutlinedButton(
+                            onClick = {
+                                photoPickerLauncher.launch(
+                                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                                )
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Icon(Icons.Default.PhotoLibrary, contentDescription = null)
+                            Spacer(Modifier.width(8.dp))
+                            Text("Gallery")
+                        }
+                        // Note: Camera launcher would need a File URI provider, skipping for now to keep it simple
+                        // but adding a stub button for UI completeness
+                        OutlinedButton(
+                            onClick = { /* Camera stub */ },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Icon(Icons.Default.AddAPhoto, contentDescription = null)
+                            Spacer(Modifier.width(8.dp))
+                            Text("Camera")
+                        }
+                    }
+                }
+
                 OutlinedTextField(
                     value = name,
                     onValueChange = {
@@ -235,8 +261,6 @@ private fun CreateMaterialDialog(
                     supportingText = {
                         if (localError != null) {
                             Text(localError.orEmpty())
-                        } else {
-                            Text("Image upload will be connected in the next media step.")
                         }
                     },
                     isError = localError != null,
@@ -254,7 +278,7 @@ private fun CreateMaterialDialog(
                         else -> null
                     }
                     if (localError == null) {
-                        onCreate(name, selectedType, quantity, unit)
+                        onCreate(name, selectedType, quantity, unit, imageUri?.toString())
                     }
                 }
             ) {
@@ -262,7 +286,7 @@ private fun CreateMaterialDialog(
             }
         },
         dismissButton = {
-            Button(
+            TextButton(
                 enabled = !isCreating,
                 onClick = onDismiss
             ) {
@@ -278,5 +302,6 @@ private fun defaultUnitFor(type: MaterialType): String {
         MaterialType.Needle -> "pairs"
         MaterialType.Hook -> "hooks"
         MaterialType.Accessory -> "items"
+        else -> "units"
     }
 }

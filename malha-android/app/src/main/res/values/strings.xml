@@ -8,6 +8,8 @@
     <string name="nav_patterns">Patterns</string>
     <string name="nav_materials">Materials</string>
     <string name="nav_aidi">Aidi</string>
+    <string name="nav_community">Community</string>
+    <string name="nav_profile">Profile</string>
     <string name="nav_settings">Settings</string>
 
     <!-- Home Screen -->

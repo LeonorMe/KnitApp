@@ -20,7 +20,8 @@ enum class MaterialType {
     Yarn,
     Needle,
     Hook,
-    Accessory;
+    Accessory,
+    OtherAccessory;
 
     val storageValue: String
         get() = when (this) {

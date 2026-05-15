@@ -42,7 +42,8 @@ class MaterialsViewModel(application: Application) : AndroidViewModel(applicatio
         name: String,
         type: MaterialType,
         quantityText: String,
-        unit: String
+        unit: String,
+        imageUri: String? = null
     ) {
         val trimmedName = name.trim()
         val trimmedUnit = unit.trim().ifBlank { defaultUnitFor(type) }
@@ -66,7 +67,8 @@ class MaterialsViewModel(application: Application) : AndroidViewModel(applicatio
                     name = trimmedName,
                     type = type,
                     quantity = quantity,
-                    unit = trimmedUnit
+                    unit = trimmedUnit,
+                    imageUri = imageUri
                 )
             }.onFailure { error ->
                 creationState.update {

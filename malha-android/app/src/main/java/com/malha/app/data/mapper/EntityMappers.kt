@@ -110,3 +110,28 @@ fun ProjectStepProgressEntity.toDomain(): ProjectStepProgress {
         note = note
     )
 }
+
+fun UserEntity.toDomain(): User {
+    return User(
+        id = id,
+        name = name,
+        bio = bio,
+        profilePicUri = profilePicUri,
+        coins = coins
+    )
+}
+
+fun PostWithDetails.toDomain(): Post {
+    return Post(
+        id = post.id,
+        userId = post.userId,
+        userName = user.name,
+        userProfilePic = user.profilePicUri,
+        patternId = post.patternId,
+        patternName = pattern?.title,
+        imageUri = post.imageUri,
+        description = post.description,
+        status = post.status,
+        createdAt = post.createdAt
+    )
+}

@@ -1,0 +1,105 @@
+package com.malha.app.data.social
+
+import com.malha.app.core.database.dao.SocialDao
+import com.malha.app.core.database.entity.CommentEntity
+import com.malha.app.core.database.entity.PostEntity
+import com.malha.app.core.database.entity.UserEntity
+import com.malha.app.data.mapper.toDomain
+import com.malha.app.domain.model.Comment
+import com.malha.app.domain.model.Post
+import com.malha.app.domain.model.User
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import java.util.UUID
+
+class RoomSocialRepository(
+    private val socialDao: SocialDao,
+    private val currentUserId: String = "default-user" // Mocked for now
+) : SocialRepository {
+
+    override fun observeCurrentUser(): Flow<User?> {
+        return socialDao.observeUser(currentUserId).map { it?.toDomain() }
+    }
+
+    override suspend fun getCurrentUser(): User? {
+        var user = socialDao.getUser(currentUserId)?.toDomain()
+        if (user == null) {
+            // Seed initial user
+            val newUser = UserEntity(
+                id = currentUserId,
+                name = "New Crafter",
+                bio = "Exploring the world of knitting.",
+                profilePicUri = null,
+                coins = 100,
+                updatedAt = System.currentTimeMillis()
+            )
+            socialDao.insertUser(newUser)
+            user = newUser.toDomain()
+        }
+        return user
+    }
+
+    override suspend fun updateProfile(name: String, bio: String?, profilePicUri: String?) {
+        val current = getCurrentUser() ?: return
+        socialDao.insertUser(
+            UserEntity(
+                id = current.id,
+                name = name,
+                bio = bio,
+                profilePicUri = profilePicUri ?: current.profilePicUri,
+                coins = current.coins,
+                updatedAt = System.currentTimeMillis()
+            )
+        )
+    }
+
+    override fun observeFeed(): Flow<List<Post>> {
+        return socialDao.observeFeed().map { posts -> posts.map { it.toDomain() } }
+    }
+
+    override fun observeUserPosts(userId: String): Flow<List<Post>> {
+        return socialDao.observeUserPosts(userId).map { posts -> posts.map { it.toDomain() } }
+    }
+
+    override suspend fun createPost(patternId: String?, imageUri: String, description: String, status: String) {
+        val post = PostEntity(
+            id = UUID.randomUUID().toString(),
+            userId = currentUserId,
+            patternId = patternId,
+            imageUri = imageUri,
+            description = description,
+            status = status,
+            createdAt = System.currentTimeMillis(),
+            updatedAt = System.currentTimeMillis()
+        )
+        socialDao.insertPost(post)
+    }
+
+    override fun observeComments(postId: String): Flow<List<Comment>> {
+        return socialDao.observeComments(postId).map { comments -> 
+            // In a real app we'd join with User table or fetch users separately
+            comments.map { 
+                Comment(
+                    id = it.id,
+                    postId = it.postId,
+                    userId = it.userId,
+                    userName = "User ${it.userId.take(4)}",
+                    content = it.content,
+                    createdAt = it.createdAt
+                )
+            }
+        }
+    }
+
+    override suspend fun addComment(postId: String, content: String) {
+        socialDao.insertComment(
+            CommentEntity(
+                id = UUID.randomUUID().toString(),
+                postId = postId,
+                userId = currentUserId,
+                content = content,
+                createdAt = System.currentTimeMillis()
+            )
+        )
+    }
+}

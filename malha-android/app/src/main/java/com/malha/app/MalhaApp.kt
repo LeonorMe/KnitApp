@@ -49,11 +49,10 @@ fun MalhaApp() {
                                     MalhaDestination.Projects -> Icons.Outlined.Folder
                                     MalhaDestination.Patterns -> Icons.AutoMirrored.Outlined.List
                                     MalhaDestination.Materials -> Icons.Outlined.Build
-                                    MalhaDestination.Aidi -> Icons.Outlined.Face
+                                    MalhaDestination.Community -> Icons.Outlined.Face
+                                    MalhaDestination.Profile -> Icons.Outlined.Face
                                     MalhaDestination.Settings -> Icons.Outlined.Settings
-                                    MalhaDestination.PatternDetail -> Icons.AutoMirrored.Outlined.List
-                                    MalhaDestination.ProjectExecution -> Icons.Outlined.Folder
-                                    MalhaDestination.ProfileEdit -> Icons.Outlined.Face
+                                    else -> Icons.Outlined.Home
                                 },
                                 contentDescription = androidx.compose.ui.res.stringResource(destination.titleResId)
                             )

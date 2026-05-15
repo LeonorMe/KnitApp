@@ -16,6 +16,8 @@ import com.malha.app.data.pattern.RoomPatternRepository
 import com.malha.app.data.project.ProjectRepository
 import com.malha.app.data.project.RoomProjectRepository
 import com.malha.app.core.preferences.PreferencesRepository
+import com.malha.app.data.social.RoomSocialRepository
+import com.malha.app.data.social.SocialRepository
 
 class AppContainer(context: Context) {
     private val database = DatabaseProvider.getDatabase(context)
@@ -30,6 +32,7 @@ class AppContainer(context: Context) {
     val cloudDataService: CloudDataService = FirestoreCloudDataService()
     val aidiAssistantService: AidiAssistantService = LocalAidiAssistantService()
     val preferencesRepository = PreferencesRepository(context)
+    val socialRepository: SocialRepository = RoomSocialRepository(database.socialDao())
 
     val databaseSeeder = DatabaseSeeder(
         patternDao = database.patternDao(),
