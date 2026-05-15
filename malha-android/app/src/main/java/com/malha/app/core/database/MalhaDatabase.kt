@@ -2,6 +2,7 @@ package com.malha.app.core.database
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 import com.malha.app.core.database.dao.MaterialDao
 import com.malha.app.core.database.dao.PatternDao
 import com.malha.app.core.database.dao.ProjectDao
@@ -28,9 +29,10 @@ import com.malha.app.core.database.entity.UserPreferencesEntity
         UserPreferencesEntity::class,
         StitchPatternEntity::class
     ],
-    version = 3,
+    version = 4,
     exportSchema = false
 )
+@TypeConverters(RoomConverters::class)
 abstract class MalhaDatabase : RoomDatabase() {
     abstract fun projectDao(): ProjectDao
     abstract fun patternDao(): PatternDao

@@ -6,17 +6,16 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "materials")
 data class MaterialEntity(
     @PrimaryKey val id: String,
-    val type: String,
     val name: String,
     val imageUri: String?,
-    val color: String?,
-    val fiber: String?,
-    val weight: String?,
+    val type: String,
     val quantity: Double,
     val unit: String,
-    val lengthMeters: Double?,
-    val costCents: Int?,
-    val purchasedAt: Long?,
-    val createdAt: Long,
-    val updatedAt: Long
+    
+    // Structured Data
+    val fiber: String?,
+    val gramsPerBall: Int?,
+    val needleType: String?,
+    val sizeMm: Double?,
+    val lengthCm: Int?
 )

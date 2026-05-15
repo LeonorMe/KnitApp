@@ -6,7 +6,14 @@ data class Material(
     val imageUri: String?,
     val type: MaterialType,
     val quantity: Double,
-    val unit: String
+    val unit: String,
+    
+    // Structured Data for Yarn & Needles
+    val fiber: String? = null,
+    val gramsPerBall: Int? = null,
+    val needleType: String? = null, // circular, straight, DPN
+    val sizeMm: Double? = null,
+    val lengthCm: Int? = null
 )
 
 enum class MaterialType {

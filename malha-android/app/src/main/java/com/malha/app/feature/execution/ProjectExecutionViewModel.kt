@@ -25,6 +25,7 @@ class ProjectExecutionViewModel(
     private val projectId: String
 ) : AndroidViewModel(application) {
     private val errorMessage = MutableStateFlow<String?>(null)
+    private val selectedSizeState = MutableStateFlow<String?>(null)
     private val projectFlow = appContainer.projectRepository.observeProject(projectId)
     private val patternFlow = projectFlow.flatMapLatest { project ->
         val patternId = project?.patternId
@@ -52,13 +53,15 @@ class ProjectExecutionViewModel(
         projectFlow,
         patternFlow,
         currentStepProgressFlow,
+        selectedSizeState,
         errorMessage
-    ) { project, pattern, stepProgress, error ->
+    ) { project, pattern, stepProgress, selectedSize, error ->
         ProjectExecutionUiState(
             isLoading = false,
             project = project,
             pattern = pattern,
             currentStepProgress = stepProgress,
+            selectedSize = selectedSize ?: pattern?.selectedSize,
             errorMessage = error
         )
     }.stateIn(
@@ -153,6 +156,10 @@ class ProjectExecutionViewModel(
                 error.message ?: "Could not update project progress."
             }
         }
+    }
+
+    fun selectSize(size: String) {
+        selectedSizeState.update { size }
     }
 
     fun clearError() {

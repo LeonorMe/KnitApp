@@ -6,17 +6,7 @@ import com.malha.app.core.database.entity.ProjectEntity
 import com.malha.app.core.database.entity.ProjectStepProgressEntity
 import com.malha.app.core.database.entity.StitchPatternEntity
 import com.malha.app.core.database.relation.PatternWithSteps
-import com.malha.app.domain.model.CraftType
-import com.malha.app.domain.model.Gauge
-import com.malha.app.domain.model.Material
-import com.malha.app.domain.model.MaterialType
-import com.malha.app.domain.model.Pattern
-import com.malha.app.domain.model.PatternSection
-import com.malha.app.domain.model.PatternStep
-import com.malha.app.domain.model.Project
-import com.malha.app.domain.model.ProjectStepProgress
-import com.malha.app.domain.model.StepType
-import com.malha.app.domain.model.StitchPattern
+import com.malha.app.domain.model.*
 
 fun ProjectEntity.toDomain(): Project {
     return Project(
@@ -47,12 +37,21 @@ fun PatternWithSteps.toDomain(): Pattern {
     return Pattern(
         id = pattern.id,
         title = pattern.title,
-        craft = try { CraftType.valueOf(pattern.craftType) } catch (e: Exception) { CraftType.KNITTING },
+        designer = pattern.designer,
+        year = pattern.year,
+        craft = pattern.craft,
         difficulty = pattern.difficulty,
-        gauge = if (pattern.widthStitches != null && pattern.heightRows != null) {
-            Gauge(pattern.widthStitches, pattern.heightRows, pattern.measurementCm ?: 10)
+        gauge = if (pattern.gaugeWidth != null && pattern.gaugeHeight != null) {
+            Gauge(pattern.gaugeWidth, pattern.gaugeHeight, pattern.gaugeUnit?.toIntOrNull() ?: 10)
         } else null,
-        sections = domainSections
+        sections = domainSections,
+        sourceType = pattern.sourceType,
+        originalText = pattern.originalText,
+        verificationStatus = pattern.verificationStatus,
+        aiConfidence = pattern.aiConfidence,
+        isPremium = pattern.isPremium,
+        availableSizes = pattern.availableSizes?.split(",") ?: emptyList(),
+        selectedSize = pattern.selectedSize
     )
 }
 
@@ -60,11 +59,17 @@ fun PatternStepEntity.toDomain(): PatternStep {
     return PatternStep(
         id = id,
         orderIndex = orderIndex,
-        type = try { StepType.valueOf(stepType) } catch (e: Exception) { StepType.NORMAL },
+        type = stepType,
         instruction = instruction,
         rowNumber = rowNumber,
         stitchCount = stitchCount,
-        confidence = confidence
+        confidence = confidence,
+        repeatCount = repeatCount,
+        everyNRows = everyNRows,
+        startRow = startRow,
+        endRow = endRow,
+        condition = condition,
+        stitchPatternId = stitchPatternId
     )
 }
 
@@ -87,7 +92,12 @@ fun MaterialEntity.toDomain(): Material {
         imageUri = imageUri,
         type = MaterialType.fromStorageValue(type),
         quantity = quantity,
-        unit = unit
+        unit = unit,
+        fiber = fiber,
+        gramsPerBall = gramsPerBall,
+        needleType = needleType,
+        sizeMm = sizeMm,
+        lengthCm = lengthCm
     )
 }
 

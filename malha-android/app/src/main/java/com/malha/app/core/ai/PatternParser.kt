@@ -1,9 +1,6 @@
 package com.malha.app.core.ai
 
-import com.malha.app.domain.model.Pattern
-import com.malha.app.domain.model.PatternSection
-import com.malha.app.domain.model.PatternStep
-import com.malha.app.domain.model.StepType
+import com.malha.app.domain.model.*
 import java.util.UUID
 
 object PatternParser {
@@ -35,6 +32,7 @@ object PatternParser {
                 val stepType = inferStepType(line)
                 val rowNumber = extractRowNumber(line)
                 val stitchCount = extractStitchCount(line)
+                val repeatCount = extractRepeatCount(line)
                 
                 currentSectionSteps.add(
                     PatternStep(
@@ -44,7 +42,8 @@ object PatternParser {
                         instruction = line,
                         rowNumber = rowNumber,
                         stitchCount = stitchCount,
-                        confidence = 0.85
+                        confidence = 0.85,
+                        repeatCount = repeatCount
                     )
                 )
             }
@@ -57,7 +56,11 @@ object PatternParser {
         return Pattern(
             id = UUID.randomUUID().toString(),
             title = title,
-            sections = sections
+            sections = sections,
+            sourceType = SourceType.RAW_TEXT,
+            originalText = text,
+            verificationStatus = VerificationStatus.AI_STRUCTURED,
+            aiConfidence = 0.82
         )
     }
 
@@ -69,7 +72,9 @@ object PatternParser {
             l.contains("inc") || l.contains("aumentar") || l.contains("aum.") -> StepType.INCREASE
             l.contains("dec") || l.contains("diminuir") || l.contains("dim.") -> StepType.DECREASE
             l.contains("bind off") || l.contains("rematar") -> StepType.BIND_OFF
+            l.contains("repeat rows") || l.contains("repetir as carreiras") -> StepType.REPEAT_BLOCK
             l.contains("repeat") || l.contains("repetir") -> StepType.REPEAT
+            l.contains("join") || l.contains("unir") -> StepType.JOIN
             l.contains("sew") || l.contains("finish") || l.contains("coser") -> StepType.FINISHING
             else -> StepType.NORMAL
         }
@@ -81,8 +86,12 @@ object PatternParser {
     }
 
     private fun extractStitchCount(line: String): Int? {
-        // Look for numbers near "sts", "stitches", "malhas", "m." at the end of the line
         val stsMatch = Regex("""(\d+)\s*(?:sts|stitches|malhas|m\.)""", RegexOption.IGNORE_CASE).find(line)
         return stsMatch?.groupValues?.getOrNull(1)?.toIntOrNull()
+    }
+
+    private fun extractRepeatCount(line: String): Int? {
+        val repMatch = Regex("""(\d+)\s*(?:times|vezes)""", RegexOption.IGNORE_CASE).find(line)
+        return repMatch?.groupValues?.getOrNull(1)?.toIntOrNull()
     }
 }

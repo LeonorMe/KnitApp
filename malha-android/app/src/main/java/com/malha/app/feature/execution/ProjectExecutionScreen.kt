@@ -105,6 +105,13 @@ fun ProjectExecutionScreen(
                     ) {
                         ProjectInfoCard(project)
                         ExecutionProgress(uiState)
+                        if (uiState.pattern?.availableSizes?.isNotEmpty() == true) {
+                            SizeSelector(
+                                sizes = uiState.pattern.availableSizes,
+                                selectedSize = uiState.selectedSize,
+                                onSizeSelected = viewModel::selectSize
+                            )
+                        }
                         StepCard(currentStep) { selectedStitch = it }
                     }
                     Column(
@@ -123,6 +130,13 @@ fun ProjectExecutionScreen(
                 ) {
                     ProjectInfoCard(project)
                     ExecutionProgress(uiState)
+                    if (uiState.pattern?.availableSizes?.isNotEmpty() == true) {
+                        SizeSelector(
+                            sizes = uiState.pattern.availableSizes,
+                            selectedSize = uiState.selectedSize,
+                            onSizeSelected = viewModel::selectSize
+                        )
+                    }
                     StepCard(currentStep) { selectedStitch = it }
                     NoteCard(uiState) { showNoteDialog = true }
                     AidiCompanion(modifier = Modifier.size(100.dp))
@@ -352,4 +366,41 @@ private fun StepNoteDialog(
             }
         }
     )
+}
+
+@Composable
+private fun SizeSelector(
+    sizes: List<String>,
+    selectedSize: String?,
+    onSizeSelected: (String) -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(
+            text = "Select Size",
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            sizes.forEach { size ->
+                val isSelected = size == selectedSize
+                OutlinedButton(
+                    onClick = { onSizeSelected(size) },
+                    modifier = Modifier.weight(1f),
+                    colors = if (isSelected) {
+                        androidx.compose.material3.ButtonDefaults.outlinedButtonColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    } else {
+                        androidx.compose.material3.ButtonDefaults.outlinedButtonColors()
+                    }
+                ) {
+                    Text(size)
+                }
+            }
+        }
+    }
 }

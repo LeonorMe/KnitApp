@@ -10,11 +10,17 @@ data class ProjectExecutionUiState(
     val project: Project? = null,
     val pattern: Pattern? = null,
     val currentStepProgress: ProjectStepProgress? = null,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val selectedSize: String? = null
 ) {
+    val allSteps: List<PatternStep>
+        get() = pattern?.allSteps?.filter { step ->
+            step.condition == null || selectedSize == null || step.condition.contains(selectedSize)
+        } ?: emptyList()
+
     val currentStep: PatternStep?
         get() {
-            val steps = pattern?.allSteps.orEmpty()
+            val steps = allSteps
             val index = project?.currentStepIndex ?: 0
             return steps.getOrNull(index.coerceIn(0, (steps.size - 1).coerceAtLeast(0)))
         }
@@ -23,7 +29,7 @@ data class ProjectExecutionUiState(
         get() = (project?.currentStepIndex ?: 0) + 1
 
     val totalSteps: Int
-        get() = pattern?.allSteps?.size ?: 0
+        get() = allSteps.size
 
     val canGoPrevious: Boolean
         get() = (project?.currentStepIndex ?: 0) > 0
