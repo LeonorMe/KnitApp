@@ -22,6 +22,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.malha.app.core.design.component.AidiMessageBubble
 import com.malha.app.core.design.component.ImagePlaceholder
 
 @Composable
@@ -48,11 +49,7 @@ fun HomeScreen(
             }
 
             item {
-                Text(
-                    text = uiState.aidiSummary,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                AidiMessageBubble(message = uiState.aidiSummary)
             }
 
             items(uiState.insights) { insight ->
