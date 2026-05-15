@@ -23,6 +23,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -138,6 +139,18 @@ fun SettingsScreen(
                 UnitsSelector(
                     currentUnits = uiState.preferences.units,
                     onUnitsSelected = viewModel::updateUnits
+                )
+            }
+
+            SettingsSection(title = "Accessibility") {
+                Text(
+                    text = "Adjust text size for better readability.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                TextSizeSelector(
+                    currentMultiplier = uiState.preferences.textSizeMultiplier,
+                    onMultiplierSelected = viewModel::updateTextSize
                 )
             }
         }

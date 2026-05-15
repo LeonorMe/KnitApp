@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
@@ -16,6 +17,7 @@ class PreferencesRepository(private val context: Context) {
         val THEME = stringPreferencesKey("theme")
         val LANGUAGE = stringPreferencesKey("language")
         val UNITS = stringPreferencesKey("units")
+        val TEXT_SIZE = floatPreferencesKey("text_size")
         val USERNAME = stringPreferencesKey("username")
         val BIO = stringPreferencesKey("bio")
     }
@@ -25,6 +27,7 @@ class PreferencesRepository(private val context: Context) {
             theme = AppTheme.valueOf(preferences[Keys.THEME] ?: AppTheme.SYSTEM.name),
             language = AppLanguage.valueOf(preferences[Keys.LANGUAGE] ?: AppLanguage.SYSTEM.name),
             units = AppUnits.valueOf(preferences[Keys.UNITS] ?: AppUnits.METRIC.name),
+            textSizeMultiplier = preferences[Keys.TEXT_SIZE] ?: 1.0f,
             username = preferences[Keys.USERNAME],
             bio = preferences[Keys.BIO]
         )
@@ -40,6 +43,10 @@ class PreferencesRepository(private val context: Context) {
 
     suspend fun updateUnits(units: AppUnits) {
         context.dataStore.edit { it[Keys.UNITS] = units.name }
+    }
+
+    suspend fun updateTextSize(multiplier: Float) {
+        context.dataStore.edit { it[Keys.TEXT_SIZE] = multiplier }
     }
 
     suspend fun updateProfile(username: String?, bio: String?) {

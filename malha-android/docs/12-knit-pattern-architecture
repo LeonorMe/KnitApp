@@ -1,0 +1,1042 @@
+# Malha — Full Pattern System Architecture
+
+## Comprehensive Technical Design Document
+
+---
+
+# 1. Introduction
+
+The Pattern System is the core engine of Malha.
+
+Everything in the application depends on it:
+
+- project execution
+    
+- row tracking
+    
+- AI assistance
+    
+- yarn estimation
+    
+- pattern adaptation
+    
+- progress analytics
+    
+- voice commands
+    
+- community validation
+    
+- future AI learning
+    
+
+The pattern engine is not a simple document viewer.
+
+It is a:
+
+> structured executable crafting workflow system.
+
+---
+
+# 2. Core Philosophy
+
+Traditional knitting/crochet patterns are:
+
+- inconsistent
+    
+- human-oriented
+    
+- ambiguous
+    
+- difficult to parse
+    
+- difficult to adapt mathematically
+    
+
+Malha transforms patterns into:
+
+- structured workflows
+    
+- machine-readable execution graphs
+    
+- validated procedural systems
+    
+
+while preserving:
+
+- human readability
+    
+- original notation
+    
+- craft authenticity
+    
+
+---
+
+# 3. Primary Goals
+
+The system must:
+
+## Human Goals
+
+- feel natural to knitters
+    
+- preserve traditional notation
+    
+- remain editable
+    
+- support multiple languages
+    
+
+## Technical Goals
+
+- support progress tracking
+    
+- support AI interpretation
+    
+- support mathematical adaptation
+    
+- support validation
+    
+- support reusable components
+    
+
+---
+
+# 4. Supported Craft Types
+
+Initially:
+
+- knitting
+    
+- crochet
+    
+
+Future:
+
+- tunisian crochet
+    
+- weaving
+    
+- embroidery
+    
+- lacework
+    
+
+---
+
+# 5. Pattern Lifecycle
+
+Every pattern passes through stages.
+
+```text
+Import
+→ Extraction
+→ Structuring
+→ Validation
+→ Storage
+→ Execution
+→ Community Enhancement
+→ AI Learning
+```
+
+---
+
+# 6. Input Sources
+
+Patterns may originate from:
+
+## Digital PDFs
+
+- text PDFs
+    
+- scanned PDFs
+    
+
+## Images
+
+- photographs
+    
+- screenshots
+    
+- scanned books/magazines
+    
+
+## Raw Text
+
+- copied instructions
+    
+
+## Manual Creation
+
+- typed directly into app
+    
+
+## Community Imports
+
+- shared/forked patterns
+    
+
+---
+
+# 7. Core Pattern Architecture
+
+Patterns use hybrid storage architecture.
+
+---
+
+# Layer 1 — Original Source
+
+Immutable archive layer.
+
+Purpose:
+
+- preserve authenticity
+    
+- allow reparsing
+    
+- preserve formatting
+    
+- legal traceability
+    
+
+Example:
+
+```json
+{
+  "source_id": "pdf_001",
+  "source_type": "pdf",
+  "language": "pt-PT",
+  "original_text": "...",
+  "ocr_confidence": 0.92
+}
+```
+
+---
+
+# Layer 2 — Structured Metadata
+
+Contains global pattern information.
+
+Example categories:
+
+- title
+    
+- language
+    
+- craft type
+    
+- difficulty
+    
+- size range
+    
+- gauge
+    
+- materials
+    
+- designer
+    
+- publication year
+    
+
+---
+
+# Layer 3 — Execution Graph
+
+The actual procedural knitting logic.
+
+This is the heart of the system.
+
+---
+
+# 8. Why Execution Graphs?
+
+Traditional text:
+
+```text
+Decrease 1 stitch every 2 rows 52 times.
+```
+
+Machine-readable representation:
+
+```json
+{
+  "type": "decrease_repeat",
+  "repeat_count": 52,
+  "every_n_rows": 2,
+  "decrease_amount": 1
+}
+```
+
+Benefits:
+
+- trackable
+    
+- adaptable
+    
+- voice-navigable
+    
+- mathematically verifiable
+    
+
+---
+
+# 9. Core Pattern Object
+
+```text
+Pattern
+├── Metadata
+├── Materials
+├── Gauge
+├── Stitch Library
+├── Sections
+├── Measurements
+├── Notes
+├── AI Confidence
+├── Validation Status
+├── Community Data
+└── Original Source
+```
+
+---
+
+# 10. Metadata System
+
+## Basic Metadata
+
+```json
+{
+  "id": "pattern_001",
+  "name": "Cardigan Lilás",
+  "craft": "knitting",
+  "difficulty": 3,
+  "language": "pt-PT",
+  "year": 1980
+}
+```
+
+---
+
+## Skill Classification
+
+Difficulty scale:
+
+1. Beginner
+    
+2. Easy
+    
+3. Intermediate
+    
+4. Advanced
+    
+5. Expert
+    
+
+---
+
+# 11. Materials System
+
+Tracks all project materials.
+
+---
+
+## Yarn Objects
+
+```json
+{
+  "fiber": "Mohair",
+  "grams": 520,
+  "colors": [
+    {
+      "name": "Lilás",
+      "grams": 240
+    }
+  ]
+}
+```
+
+---
+
+## Needle Objects
+
+```json
+{
+  "type": "circular",
+  "size_mm": 4.5,
+  "length_cm": 80
+}
+```
+
+---
+
+# 12. Gauge System
+
+Critical for adaptation.
+
+```json
+{
+  "width_stitches": 30,
+  "height_rows": 40,
+  "measurement_cm": 10
+}
+```
+
+Used for:
+
+- size conversion
+    
+- yarn substitution
+    
+- AI adaptation
+    
+- project estimation
+    
+
+---
+
+# 13. Stitch Library System
+
+Reusable stitch definitions.
+
+Avoids duplication.
+
+---
+
+## Example
+
+```json
+{
+  "stitch_id": "shell_pattern_2color",
+  "repeat_multiple": 8,
+  "instructions": []
+}
+```
+
+---
+
+# 14. Why Stitch Libraries Matter
+
+Without libraries:
+
+- repeated parsing
+    
+- inconsistency
+    
+- poor adaptation
+    
+
+With libraries:
+
+- reusable logic
+    
+- cleaner execution
+    
+- AI understanding
+    
+- easier validation
+    
+
+---
+
+# 15. Section System
+
+Patterns divided into logical construction sections.
+
+Examples:
+
+- back panel
+    
+- sleeves
+    
+- collar
+    
+- yoke
+    
+
+---
+
+## Example
+
+```json
+{
+  "section_id": "back_panel",
+  "name": "Costas"
+}
+```
+
+---
+
+# 16. Step System
+
+Every section contains ordered procedural steps.
+
+---
+
+# 17. Step Types
+
+Examples:
+
+|Type|Purpose|
+|---|---|
+|cast_on|initial stitches|
+|knit|knit rows|
+|purl|purl rows|
+|increase|shaping|
+|decrease|shaping|
+|repeat|loops|
+|bind_off|finishing|
+|join|combine sections|
+
+---
+
+# 18. Step Object Example
+
+```json
+{
+  "step_id": 12,
+  "type": "increase",
+  "instruction": "Increase 2 stitches evenly",
+  "increase_count": 2
+}
+```
+
+---
+
+# 19. Repeat Logic
+
+Many patterns use repeated instructions.
+
+Example:
+
+```text
+Repeat rows 4–8 six times.
+```
+
+Structured:
+
+```json
+{
+  "type": "repeat_block",
+  "start_row": 4,
+  "end_row": 8,
+  "repeat_count": 6
+}
+```
+
+---
+
+# 20. Conditional Logic
+
+Some instructions vary by:
+
+- size
+    
+- yarn
+    
+- style variation
+    
+
+System must support branching.
+
+---
+
+## Example
+
+```json
+{
+  "condition": "size == XL",
+  "instruction": "Add 12 stitches"
+}
+```
+
+---
+
+# 21. Multi-Size Support
+
+Patterns may include:
+
+- S
+    
+- M
+    
+- L
+    
+- XL
+    
+
+The system should:
+
+- isolate instructions per size
+    
+- simplify visible instructions
+    
+
+User only sees selected size instructions.
+
+---
+
+# 22. Measurement System
+
+Supports:
+
+- cm
+    
+- inches
+    
+
+All internal calculations normalized.
+
+---
+
+# 23. Row Tracking System
+
+Critical UX component.
+
+Tracks:
+
+- current row
+    
+- completed rows
+    
+- repeated cycles
+    
+- milestones
+    
+
+---
+
+# 24. Smart Progress Tracking
+
+The app understands:
+
+- repeated blocks
+    
+- section completion
+    
+- total progress
+    
+
+Not just static row numbers.
+
+---
+
+# 25. Voice Navigation Integration
+
+Because steps are structured:
+
+- “next row”
+    
+- “repeat instruction”
+    
+- “mark done”
+    
+
+becomes possible.
+
+---
+
+# 26. Pattern DSL (Domain Language)
+
+Long-term internal language.
+
+Example:
+
+```text
+CAST_ON 82
+RIB_1x1 4cm
+INCREASE evenly +70
+REPEAT shell_pattern UNTIL 38cm
+```
+
+---
+
+# 27. Why DSL Is Important
+
+Benefits:
+
+- easier AI generation
+    
+- easier parsing
+    
+- easier validation
+    
+- easier adaptation
+    
+- lower ambiguity
+    
+
+---
+
+# 28. AI Parsing Pipeline
+
+---
+
+## Step 1 — OCR
+
+Extract raw text.
+
+---
+
+## Step 2 — Cleaning
+
+Normalize:
+
+- symbols
+    
+- abbreviations
+    
+- formatting
+    
+
+---
+
+## Step 3 — AI Structuring
+
+Convert:
+
+- prose  
+    → structured graph
+    
+
+---
+
+## Step 4 — Confidence Scoring
+
+Every extracted field gets confidence.
+
+---
+
+## Step 5 — Human Review
+
+Low-confidence areas highlighted.
+
+---
+
+# 29. Confidence System
+
+Example:
+
+```json
+{
+  "instruction": "decrease 1 stitch",
+  "confidence": 0.94
+}
+```
+
+Low confidence:
+
+- warning badge
+    
+- manual review required
+    
+
+---
+
+# 30. Validation System
+
+Patterns must pass:
+
+- syntax validation
+    
+- logical validation
+    
+- stitch consistency validation
+    
+
+---
+
+# 31. Logical Validation Examples
+
+Detect:
+
+- impossible stitch counts
+    
+- missing bind-offs
+    
+- invalid repeats
+    
+- incompatible gauge changes
+    
+
+---
+
+# 32. Community Validation
+
+Patterns gain trust through:
+
+- successful completions
+    
+- user corrections
+    
+- ratings
+    
+- forks
+    
+
+---
+
+# 33. Pattern Forking
+
+Users may:
+
+- duplicate pattern
+    
+- modify it
+    
+- create variants
+    
+
+Variants preserve:
+
+- ancestry
+    
+- modification history
+    
+
+---
+
+# 34. AI Adaptation System
+
+Experimental but powerful.
+
+Can adapt:
+
+- yarn weight
+    
+- gauge
+    
+- needle size
+    
+- dimensions
+    
+
+Uses:
+
+- gauge mathematics
+    
+- stitch density
+    
+- shaping rules
+    
+
+---
+
+# 35. Yarn Estimation System
+
+Uses:
+
+- stitch count
+    
+- gauge
+    
+- garment dimensions
+    
+- historical datasets
+    
+
+Returns:
+
+- estimated grams
+    
+- confidence score
+    
+
+---
+
+# 36. Image Analysis System (Experimental)
+
+Analyzes garment photos.
+
+Attempts to infer:
+
+- construction type
+    
+- stitch pattern
+    
+- shaping style
+    
+
+Must always be labeled experimental.
+
+---
+
+# 37. Offline Pattern Execution
+
+All structured patterns stored locally.
+
+Users can:
+
+- continue projects
+    
+- track rows
+    
+- access notes
+    
+
+without internet.
+
+---
+
+# 38. Database Architecture
+
+Recommended:
+
+## PostgreSQL + JSONB
+
+Why:
+
+- flexible schema
+    
+- nested execution graphs
+    
+- efficient querying
+    
+
+---
+
+# 39. Local Device Storage
+
+Android:
+
+- Room database
+    
+- cached pattern objects
+    
+
+---
+
+# 40. Pattern Rendering Layer
+
+Users never see raw JSON.
+
+The app transforms structure into:
+
+- readable instructions
+    
+- row cards
+    
+- progress UI
+    
+
+---
+
+# 41. Pattern UI Features
+
+## Execution View
+
+- current step
+    
+- repeat counters
+    
+- progress bar
+    
+
+## Section Navigation
+
+- sleeves
+    
+- collar
+    
+- body
+    
+
+## Notes
+
+- attach personal comments
+    
+
+---
+
+# 42. Error Recovery
+
+Users may:
+
+- undo rows
+    
+- rollback progress
+    
+- manually adjust counters
+    
+
+---
+
+# 43. Accessibility Requirements
+
+- large text mode
+    
+- voice playback
+    
+- high contrast
+    
+- simplified instruction mode
+    
+
+---
+
+# 44. Localization
+
+Initially:
+
+- English UK
+    
+- Portuguese PT
+    
+- Spanish ES
+    
+
+Must support notation translation.
+
+---
+
+# 45. Future AI Learning System
+
+Over time the system accumulates:
+
+- validated patterns
+    
+- corrections
+    
+- adaptations
+    
+- successful outcomes
+    
+
+This becomes:
+
+- proprietary training data
+    
+- recommendation engine
+    
+- adaptation intelligence
+    
+
+---
+
+# 46. Strategic Importance
+
+The structured pattern engine is:
+
+- the product moat
+    
+- the intelligence layer
+    
+- the future AI foundation
+    
+
+This system differentiates Malha from:
+
+- PDF readers
+    
+- static pattern apps
+    
+- generic AI chatbots
+    
+
+---
+
+# 47. Final Vision
+
+The Malha pattern engine should evolve into:
+
+> the universal structured language and execution system for knitting and crochet workflows.
+
+This is the foundation of the entire ecosystem.

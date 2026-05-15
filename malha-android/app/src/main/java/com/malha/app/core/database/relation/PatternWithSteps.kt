@@ -3,6 +3,7 @@ package com.malha.app.core.database.relation
 import androidx.room.Embedded
 import androidx.room.Relation
 import com.malha.app.core.database.entity.PatternEntity
+import com.malha.app.core.database.entity.PatternSectionEntity
 import com.malha.app.core.database.entity.PatternStepEntity
 
 data class PatternWithSteps(
@@ -11,6 +12,10 @@ data class PatternWithSteps(
         parentColumn = "id",
         entityColumn = "patternId"
     )
+    val sections: List<PatternSectionEntity>,
+    @Relation(
+        parentColumn = "id",
+        entityColumn = "patternId"
+    )
     val steps: List<PatternStepEntity>
 )
-

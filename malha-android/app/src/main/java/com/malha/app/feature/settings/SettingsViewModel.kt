@@ -37,6 +37,10 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         viewModelScope.launch { appContainer.preferencesRepository.updateUnits(units) }
     }
 
+    fun updateTextSize(multiplier: Float) {
+        viewModelScope.launch { appContainer.preferencesRepository.updateTextSize(multiplier) }
+    }
+
     fun updateProfile(username: String, bio: String) {
         viewModelScope.launch { 
             appContainer.preferencesRepository.updateProfile(username, bio)

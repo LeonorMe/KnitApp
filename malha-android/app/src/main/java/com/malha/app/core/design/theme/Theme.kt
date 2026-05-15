@@ -8,37 +8,46 @@ import androidx.compose.material3.darkColorScheme
 import com.malha.app.core.preferences.AppTheme
 
 private val LightColors = lightColorScheme(
-    primary = Sage,
-    onPrimary = Cream,
-    secondary = Indigo,
-    onSecondary = Cream,
-    tertiary = Clay,
-    background = Cream,
-    onBackground = Ink,
-    surface = Cream,
-    onSurface = Ink,
-    surfaceVariant = ColorTokens.SurfaceVariant,
-    onSurfaceVariant = WarmGray
+    primary = MalhaGreenDark,
+    onPrimary = MalhaSurface,
+    primaryContainer = MalhaGreen,
+    onPrimaryContainer = MalhaGreenDark,
+    secondary = MalhaBlueDark,
+    onSecondary = MalhaSurface,
+    secondaryContainer = MalhaBlue,
+    onSecondaryContainer = MalhaBlueDark,
+    tertiary = MalhaAidiBlue,
+    background = MalhaBackground,
+    onBackground = MalhaTextPrimary,
+    surface = MalhaSurface,
+    onSurface = MalhaTextPrimary,
+    surfaceVariant = MalhaBlue,
+    onSurfaceVariant = MalhaTextSecondary
 )
 
 private val DarkColors = darkColorScheme(
-    primary = SageLight,
-    onPrimary = InkDark,
-    secondary = Lavender,
-    onSecondary = InkDark,
-    tertiary = ClayDark,
-    background = InkDark,
-    onBackground = Cream,
-    surface = InkDark,
-    onSurface = Cream,
-    surfaceVariant = Ink,
-    onSurfaceVariant = WarmGray
+    primary = MalhaGreenMedium,
+    onPrimary = MalhaTextPrimary,
+    primaryContainer = MalhaGreenDark,
+    onPrimaryContainer = MalhaGreen,
+    secondary = MalhaBlueMedium,
+    onSecondary = MalhaTextPrimary,
+    secondaryContainer = MalhaBlueDark,
+    onSecondaryContainer = MalhaBlue,
+    tertiary = MalhaAidiBlue,
+    background = ColorTokens.DarkBackground,
+    onBackground = MalhaBackground,
+    surface = ColorTokens.DarkSurface,
+    onSurface = MalhaBackground,
+    surfaceVariant = ColorTokens.DarkSurfaceVariant,
+    onSurfaceVariant = MalhaTextSecondary
 )
 
 @Composable
 fun MalhaTheme(
     appTheme: AppTheme = AppTheme.SYSTEM,
     darkTheme: Boolean = isSystemInDarkTheme(),
+    textSizeMultiplier: Float = 1.0f,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when (appTheme) {
@@ -50,13 +59,14 @@ fun MalhaTheme(
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = MalhaTypography,
+        typography = getMalhaTypography(textSizeMultiplier),
         content = content
     )
 }
 
 private object ColorTokens {
-    val SurfaceVariant = androidx.compose.ui.graphics.Color(0xFFEDE1D2)
+    val DarkBackground = androidx.compose.ui.graphics.Color(0xFF121212)
+    val DarkSurface = androidx.compose.ui.graphics.Color(0xFF1E1E1E)
+    val DarkSurfaceVariant = androidx.compose.ui.graphics.Color(0xFF2C2C2C)
     val WarmBackground = androidx.compose.ui.graphics.Color(0xFFFFF9F0)
 }
-

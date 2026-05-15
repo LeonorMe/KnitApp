@@ -1,5 +1,7 @@
 package com.malha.app.core.ai
 
+import com.malha.app.domain.model.Pattern
+
 class LocalAidiAssistantService : AidiAssistantService {
     override suspend fun generateReply(prompt: String): String {
         val normalized = prompt.lowercase()
@@ -24,6 +26,10 @@ class LocalAidiAssistantService : AidiAssistantService {
                 "I can help plan projects, explain techniques, think through materials, and keep your progress organized. AI suggestions are drafts, so always verify stitch counts, gauge, and sizing."
             }
         }
+    }
+
+    override suspend fun parsePattern(text: String): Pattern {
+        return PatternParser.parse(text)
     }
 }
 

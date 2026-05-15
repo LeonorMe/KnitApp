@@ -20,6 +20,7 @@ data class UserPreferences(
     val theme: AppTheme = AppTheme.SYSTEM,
     val language: AppLanguage = AppLanguage.SYSTEM,
     val units: AppUnits = AppUnits.METRIC,
+    val textSizeMultiplier: Float = 1.0f,
     val username: String? = null,
     val bio: String? = null
 )

@@ -13,19 +13,26 @@ import androidx.room.PrimaryKey
             parentColumns = ["id"],
             childColumns = ["patternId"],
             onDelete = ForeignKey.CASCADE
+        ),
+        ForeignKey(
+            entity = PatternSectionEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["sectionId"],
+            onDelete = ForeignKey.SET_NULL
         )
     ],
-    indices = [Index("patternId")]
+    indices = [Index("patternId"), Index("sectionId")]
 )
 data class PatternStepEntity(
     @PrimaryKey val id: String,
     val patternId: String,
+    val sectionId: String?,
     val orderIndex: Int,
     val rowNumber: Int?,
     val instruction: String,
-    val stepType: String?,
-    val repeatInfo: String?,
+    val stepType: String,
+    val stitchCount: Int?,
+    val confidence: Double,
     val createdAt: Long,
     val updatedAt: Long
 )
-

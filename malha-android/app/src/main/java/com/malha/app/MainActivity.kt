@@ -28,7 +28,10 @@ class MainActivity : ComponentActivity() {
                 applyLocale(preferences.language)
             }
 
-            MalhaTheme(appTheme = preferences.theme) {
+            MalhaTheme(
+                appTheme = preferences.theme,
+                textSizeMultiplier = preferences.textSizeMultiplier
+            ) {
                 MalhaApp()
             }
         }

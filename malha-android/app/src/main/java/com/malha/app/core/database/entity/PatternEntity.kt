@@ -9,11 +9,15 @@ data class PatternEntity(
     val title: String,
     val description: String,
     val craftType: String,
-    val difficulty: String,
+    val difficulty: Int,
     val sourceType: String,
     val verificationStatus: String,
     val isPremium: Boolean,
+    // Gauge
+    val widthStitches: Int?,
+    val heightRows: Int?,
+    val measurementCm: Int?,
+    
     val createdAt: Long,
     val updatedAt: Long
 )
-

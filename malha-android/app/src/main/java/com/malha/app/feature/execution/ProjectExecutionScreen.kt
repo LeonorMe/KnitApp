@@ -24,9 +24,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.malha.app.domain.model.Pattern
+import com.malha.app.domain.model.PatternStep
+import com.malha.app.domain.model.Project
+import com.malha.app.core.design.component.AidiCompanion
 import com.malha.app.core.design.component.ImagePlaceholder
+import com.malha.app.core.design.component.StitchLinkText
 
 @Composable
 fun ProjectExecutionScreen(
@@ -39,6 +47,10 @@ fun ProjectExecutionScreen(
     val project = uiState.project
     val currentStep = uiState.currentStep
     var showNoteDialog by remember { mutableStateOf(false) }
+    var selectedStitch by remember { mutableStateOf<String?>(null) }
+    
+    val configuration = LocalConfiguration.current
+    val isTablet = configuration.screenWidthDp > 600
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -82,135 +94,40 @@ fun ProjectExecutionScreen(
                 )
             }
 
-            Card(
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                ),
-                modifier = Modifier.fillMaxWidth()
-            ) {
+            if (isTablet) {
                 Row(
-                    modifier = Modifier.padding(16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(14.dp)
+                    modifier = Modifier.weight(1f),
+                    horizontalArrangement = Arrangement.spacedBy(24.dp)
                 ) {
-                    ImagePlaceholder(label = project.name, imageUri = project.imageUri)
                     Column(
-                        modifier = Modifier.weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                        modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()),
+                        verticalArrangement = Arrangement.spacedBy(18.dp)
                     ) {
-                        Text(
-                            text = "Project image",
-                            style = MaterialTheme.typography.titleLarge,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Text(
-                            text = if (project.imageUri == null) {
-                                "No image added yet."
-                            } else {
-                                "Image attached."
-                            },
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        ProjectInfoCard(project)
+                        ExecutionProgress(uiState)
+                        StepCard(currentStep) { selectedStitch = it }
                     }
-                }
-            }
-
-            LinearProgressIndicator(
-                progress = { project.progressPercent / 100f },
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Text(
-                text = buildString {
-                    append("Step ${uiState.currentStepNumber} of ${uiState.totalSteps.coerceAtLeast(1)}")
-                    if (uiState.isCurrentStepDone) {
-                        append(" - done")
-                    }
-                },
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-
-            Card(
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant
-                ),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(
-                    modifier = Modifier.padding(20.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    if (currentStep?.rowNumber != null) {
-                        Text(
-                            text = "Row ${currentStep.rowNumber}",
-                            style = MaterialTheme.typography.titleLarge,
-                            color = MaterialTheme.colorScheme.secondary
-                        )
-                    }
-                    Text(
-                        text = currentStep?.instruction ?: "No pattern step assigned yet.",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                }
-            }
-
-            Card(
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                ),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text(
-                        text = "Step note",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Text(
-                        text = uiState.currentNote ?: "No note for this step yet.",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    TextButton(
-                        onClick = { showNoteDialog = true },
-                        enabled = currentStep != null
+                    Column(
+                        modifier = Modifier.weight(0.8f).verticalScroll(rememberScrollState()),
+                        verticalArrangement = Arrangement.spacedBy(18.dp)
                     ) {
-                        Text(if (uiState.currentNote == null) "Add note" else "Edit note")
+                        AidiCompanion(modifier = Modifier.fillMaxWidth())
+                        NoteCard(uiState) { showNoteDialog = true }
+                        Controls(uiState, viewModel)
                     }
                 }
-            }
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                OutlinedButton(
-                    onClick = viewModel::previousStep,
-                    enabled = uiState.canGoPrevious,
-                    modifier = Modifier.weight(1f)
+            } else {
+                Column(
+                    modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(18.dp)
                 ) {
-                    Text("Previous")
+                    ProjectInfoCard(project)
+                    ExecutionProgress(uiState)
+                    StepCard(currentStep) { selectedStitch = it }
+                    NoteCard(uiState) { showNoteDialog = true }
+                    AidiCompanion(modifier = Modifier.size(100.dp))
+                    Controls(uiState, viewModel)
                 }
-                Button(
-                    onClick = viewModel::nextStep,
-                    enabled = uiState.canGoNext,
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text("Next")
-                }
-            }
-
-            Button(
-                onClick = viewModel::markCurrentStepDone,
-                enabled = currentStep != null,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Mark step done")
             }
         }
     }
@@ -225,6 +142,184 @@ fun ProjectExecutionScreen(
             }
         )
     }
+    
+    if (selectedStitch != null) {
+        StitchDetailDialog(
+            stitchName = selectedStitch!!,
+            onDismiss = { selectedStitch = null }
+        )
+    }
+}
+
+@Composable
+private fun ProjectInfoCard(project: Project?) {
+    if (project == null) return
+    Card(
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            ImagePlaceholder(label = project.name, imageUri = project.imageUri)
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Text(
+                    text = "Project Details",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = project.name,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ExecutionProgress(uiState: ProjectExecutionUiState) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        LinearProgressIndicator(
+            progress = { (uiState.project?.progressPercent ?: 0) / 100f },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Text(
+            text = buildString {
+                append("Step ${uiState.currentStepNumber} of ${uiState.totalSteps.coerceAtLeast(1)}")
+                if (uiState.isCurrentStepDone) {
+                    append(" - done")
+                }
+            },
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+    }
+}
+
+@Composable
+private fun StepCard(currentStep: PatternStep?, onStitchClick: (String) -> Unit) {
+    Card(
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier.padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            if (currentStep?.rowNumber != null) {
+                Text(
+                    text = "Row ${currentStep.rowNumber}",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.secondary
+                )
+            }
+            
+            StitchLinkText(
+                text = currentStep?.instruction ?: "No pattern step assigned yet.",
+                knownStitches = listOf("K2tog", "SSK", "YO", "M1L", "M1R", "Knit", "Purl", "Cast on"),
+                onStitchClick = onStitchClick
+            )
+            
+            if (currentStep?.stitchCount != null) {
+                Text(
+                    text = "Ending count: ${currentStep.stitchCount} sts",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun NoteCard(uiState: ProjectExecutionUiState, onEditNote: () -> Unit) {
+    Card(
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                text = "Step note",
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = uiState.currentNote ?: "No note for this step yet.",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            TextButton(
+                onClick = onEditNote,
+                enabled = uiState.currentStep != null
+            ) {
+                Text(if (uiState.currentNote == null) "Add note" else "Edit note")
+            }
+        }
+    }
+}
+
+@Composable
+private fun Controls(uiState: ProjectExecutionUiState, viewModel: ProjectExecutionViewModel) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            OutlinedButton(
+                onClick = viewModel::previousStep,
+                enabled = uiState.canGoPrevious,
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Previous")
+            }
+            Button(
+                onClick = viewModel::nextStep,
+                enabled = uiState.canGoNext,
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Next")
+            }
+        }
+
+        Button(
+            onClick = viewModel::markCurrentStepDone,
+            enabled = uiState.currentStep != null,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(if (uiState.isCurrentStepDone) "Keep Done" else "Mark step done")
+        }
+    }
+}
+
+@Composable
+private fun StitchDetailDialog(stitchName: String, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stitchName) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    text = "This is a brief explanation of how to perform the $stitchName stitch. In the full version, this will include images and video links from the Stitch Library.",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                ImagePlaceholder(label = stitchName)
+            }
+        },
+        confirmButton = {
+            Button(onClick = onDismiss) {
+                Text("Got it")
+            }
+        }
+    )
 }
 
 @Composable
