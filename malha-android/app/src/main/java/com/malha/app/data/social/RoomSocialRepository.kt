@@ -4,7 +4,8 @@ import com.malha.app.core.database.dao.SocialDao
 import com.malha.app.core.database.entity.CommentEntity
 import com.malha.app.core.database.entity.PostEntity
 import com.malha.app.core.database.entity.UserEntity
-import com.malha.app.data.mapper.toDomain
+import com.malha.app.data.mapper.toPostDomain
+import com.malha.app.data.mapper.toUserDomain
 import com.malha.app.domain.model.Comment
 import com.malha.app.domain.model.Post
 import com.malha.app.domain.model.User
@@ -18,11 +19,11 @@ class RoomSocialRepository(
 ) : SocialRepository {
 
     override fun observeCurrentUser(): Flow<User?> {
-        return socialDao.observeUser(currentUserId).map { it?.toDomain() }
+        return socialDao.observeUser(currentUserId).map { it?.toUserDomain() }
     }
 
     override suspend fun getCurrentUser(): User? {
-        var user = socialDao.getUser(currentUserId)?.toDomain()
+        var user = socialDao.getUser(currentUserId)?.toUserDomain()
         if (user == null) {
             // Seed initial user
             val newUser = UserEntity(
@@ -34,7 +35,7 @@ class RoomSocialRepository(
                 updatedAt = System.currentTimeMillis()
             )
             socialDao.insertUser(newUser)
-            user = newUser.toDomain()
+            user = newUser.toUserDomain()
         }
         return user
     }
@@ -54,11 +55,11 @@ class RoomSocialRepository(
     }
 
     override fun observeFeed(): Flow<List<Post>> {
-        return socialDao.observeFeed().map { posts -> posts.map { it.toDomain() } }
+        return socialDao.observeFeed().map { posts -> posts.map { it.toPostDomain() } }
     }
 
     override fun observeUserPosts(userId: String): Flow<List<Post>> {
-        return socialDao.observeUserPosts(userId).map { posts -> posts.map { it.toDomain() } }
+        return socialDao.observeUserPosts(userId).map { posts -> posts.map { it.toPostDomain() } }
     }
 
     override suspend fun createPost(patternId: String?, imageUri: String, description: String, status: String) {

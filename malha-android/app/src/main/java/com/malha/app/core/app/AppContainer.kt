@@ -40,3 +40,9 @@ class AppContainer(context: Context) {
         materialDao = database.materialDao()
     )
 }
+
+val android.content.Context.appContainer: AppContainer
+    get() = (applicationContext as com.malha.app.MalhaApplication).appContainer
+
+val androidx.lifecycle.AndroidViewModel.appContainer: AppContainer
+    get() = (getApplication<com.malha.app.MalhaApplication>()).appContainer

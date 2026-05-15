@@ -89,6 +89,7 @@ class MaterialsViewModel(application: Application) : AndroidViewModel(applicatio
             MaterialType.Needle -> "pairs"
             MaterialType.Hook -> "hooks"
             MaterialType.Accessory -> "items"
+            MaterialType.OtherAccessory -> "units"
         }
     }
 }

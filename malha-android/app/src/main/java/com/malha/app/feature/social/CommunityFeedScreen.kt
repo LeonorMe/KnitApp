@@ -12,23 +12,28 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.malha.app.core.app.appContainer
 import com.malha.app.core.design.component.ImagePlaceholder
+import com.malha.app.data.social.SocialRepository
+import com.malha.app.domain.model.Comment
 import com.malha.app.domain.model.Post
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-class CommunityViewModel : ViewModel() {
-    val feed: StateFlow<List<Post>> = appContainer.socialRepository
+class CommunityViewModel(application: android.app.Application) : AndroidViewModel(application) {
+    val repository: SocialRepository = appContainer.socialRepository
+    
+    val feed: StateFlow<List<Post>> = repository
         .observeFeed()
         .stateIn(
             scope = viewModelScope,
@@ -38,6 +43,17 @@ class CommunityViewModel : ViewModel() {
 
     fun likePost(postId: String) {
         // TODO: Implement likes
+    }
+
+    fun observeComments(postId: String): StateFlow<List<Comment>> {
+        return repository.observeComments(postId)
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+    }
+
+    fun addComment(postId: String, content: String) {
+        viewModelScope.launch {
+            repository.addComment(postId, content)
+        }
     }
 }
 
@@ -73,14 +89,24 @@ fun CommunityFeedScreen(
                 }
             }
             items(feed) { post ->
-                PostCard(post = post, onLike = { viewModel.likePost(post.id) })
+                PostCard(
+                    post = post, 
+                    onLike = { viewModel.likePost(post.id) },
+                    onAddComment = { viewModel.addComment(post.id, it) },
+                    observeComments = { viewModel.observeComments(post.id) }
+                )
             }
         }
     }
 }
 
 @Composable
-private fun PostCard(post: Post, onLike: () -> Unit) {
+private fun PostCard(
+    post: Post, 
+    onLike: () -> Unit,
+    onAddComment: (String) -> Unit,
+    observeComments: () -> StateFlow<List<Comment>>
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
@@ -135,7 +161,11 @@ private fun PostCard(post: Post, onLike: () -> Unit) {
                 }
                 
                 if (showComments) {
-                    CommentsDialog(postId = post.id, onDismiss = { showComments = false })
+                    CommentsDialog(
+                        onDismiss = { showComments = false },
+                        onPostComment = onAddComment,
+                        commentsFlow = observeComments()
+                    )
                 }
             }
 
@@ -162,10 +192,13 @@ private fun PostCard(post: Post, onLike: () -> Unit) {
 }
 
 @Composable
-private fun CommentsDialog(postId: String, onDismiss: () -> Unit) {
-    val comments by appContainer.socialRepository.observeComments(postId).collectAsState(emptyList())
+private fun CommentsDialog(
+    onDismiss: () -> Unit,
+    onPostComment: (String) -> Unit,
+    commentsFlow: StateFlow<List<Comment>>
+) {
+    val comments by commentsFlow.collectAsState()
     var newComment by remember { mutableStateOf("") }
-    val scope = rememberCoroutineScope()
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -192,10 +225,8 @@ private fun CommentsDialog(postId: String, onDismiss: () -> Unit) {
             Button(
                 enabled = newComment.isNotBlank(),
                 onClick = {
-                    scope.launch {
-                        appContainer.socialRepository.addComment(postId, newComment)
-                        newComment = ""
-                    }
+                    onPostComment(newComment)
+                    newComment = ""
                 }
             ) {
                 Text("Post")
@@ -206,9 +237,3 @@ private fun CommentsDialog(postId: String, onDismiss: () -> Unit) {
         }
     )
 }
-
-private fun buildAnnotatedString(block: androidx.compose.ui.text.AnnotatedString.Builder.() -> Unit) = 
-    androidx.compose.ui.text.buildAnnotatedString(block)
-
-private fun withStyle(style: androidx.compose.ui.text.SpanStyle, block: androidx.compose.ui.text.AnnotatedString.Builder.() -> Unit) = 
-    androidx.compose.ui.text.withStyle(style, block)

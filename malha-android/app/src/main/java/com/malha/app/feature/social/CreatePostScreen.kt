@@ -3,6 +3,7 @@ package com.malha.app.feature.social
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -15,7 +16,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.malha.app.core.app.appContainer
@@ -26,7 +27,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-class CreatePostViewModel : ViewModel() {
+class CreatePostViewModel(application: android.app.Application) : AndroidViewModel(application) {
     val patterns: StateFlow<List<Pattern>> = appContainer.patternRepository
         .observePatterns()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
@@ -147,7 +148,7 @@ fun CreatePostScreen(
 @Composable
 private fun ScrollableRow(content: @Composable () -> Unit) {
     Row(
-        modifier = Modifier.fillMaxWidth().androidx.compose.foundation.horizontalScroll(androidx.compose.foundation.rememberScrollState()),
+        modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         content()

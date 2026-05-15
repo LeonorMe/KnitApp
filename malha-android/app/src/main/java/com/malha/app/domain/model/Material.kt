@@ -29,6 +29,7 @@ enum class MaterialType {
             Needle -> "needle"
             Hook -> "hook"
             Accessory -> "accessory"
+            OtherAccessory -> "other_accessory"
         }
 
     val label: String
@@ -37,6 +38,7 @@ enum class MaterialType {
             Needle -> "Needles"
             Hook -> "Hooks"
             Accessory -> "Accessories"
+            OtherAccessory -> "Other"
         }
 
     companion object {
@@ -45,6 +47,7 @@ enum class MaterialType {
                 "needle" -> Needle
                 "hook" -> Hook
                 "accessory" -> Accessory
+                "other_accessory" -> OtherAccessory
                 else -> Yarn
             }
         }

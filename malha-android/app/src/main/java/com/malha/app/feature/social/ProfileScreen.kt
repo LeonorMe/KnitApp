@@ -3,6 +3,7 @@ package com.malha.app.feature.social
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -15,7 +16,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.malha.app.core.app.appContainer
@@ -27,7 +28,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-class ProfileViewModel : ViewModel() {
+class ProfileViewModel(application: android.app.Application) : AndroidViewModel(application) {
     val user: StateFlow<User?> = appContainer.socialRepository
         .observeCurrentUser()
         .stateIn(
@@ -198,7 +199,7 @@ private fun EditProfileDialog(
         title = { Text("Edit Profile") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Box(modifier = Modifier.size(80.dp).align(Alignment.CenterHorizontally).androidx.compose.foundation.clickable { photoPickerLauncher.launch("image/*") }) {
+                Box(modifier = Modifier.size(80.dp).align(Alignment.CenterHorizontally).clickable { photoPickerLauncher.launch("image/*") }) {
                     ImagePlaceholder(label = name, imageUri = picUri)
                 }
                 OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text("Name") })
