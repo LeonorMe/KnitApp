@@ -8,7 +8,7 @@ plugins {
 
 android {
     namespace = "com.malha.app"
-    compileSdk = 36
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.malha.app"

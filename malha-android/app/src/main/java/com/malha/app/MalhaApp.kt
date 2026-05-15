@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.List
 import androidx.compose.material.icons.outlined.Build
+import androidx.compose.material.icons.outlined.Face
 import androidx.compose.material.icons.outlined.Folder
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Settings
@@ -48,6 +49,7 @@ fun MalhaApp() {
                                     MalhaDestination.Projects -> Icons.Outlined.Folder
                                     MalhaDestination.Patterns -> Icons.AutoMirrored.Outlined.List
                                     MalhaDestination.Materials -> Icons.Outlined.Build
+                                    MalhaDestination.Aidi -> Icons.Outlined.Face
                                     MalhaDestination.Settings -> Icons.Outlined.Settings
                                     MalhaDestination.PatternDetail -> Icons.AutoMirrored.Outlined.List
                                     MalhaDestination.ProjectExecution -> Icons.Outlined.Folder

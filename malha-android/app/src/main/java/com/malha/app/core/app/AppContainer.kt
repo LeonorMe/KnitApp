@@ -1,6 +1,8 @@
 package com.malha.app.core.app
 
 import android.content.Context
+import com.malha.app.core.ai.AidiAssistantService
+import com.malha.app.core.ai.LocalAidiAssistantService
 import com.malha.app.core.database.DatabaseProvider
 import com.malha.app.core.database.seed.DatabaseSeeder
 import com.malha.app.core.firebase.AuthService
@@ -25,6 +27,7 @@ class AppContainer(context: Context) {
     val materialRepository: MaterialRepository = RoomMaterialRepository(database.materialDao())
     val authService: AuthService = FirebaseAuthService()
     val cloudDataService: CloudDataService = FirestoreCloudDataService()
+    val aidiAssistantService: AidiAssistantService = LocalAidiAssistantService()
 
     val databaseSeeder = DatabaseSeeder(
         patternDao = database.patternDao(),

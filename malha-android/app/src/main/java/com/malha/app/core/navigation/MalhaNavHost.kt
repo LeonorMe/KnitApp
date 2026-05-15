@@ -7,6 +7,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.malha.app.feature.aidi.AidiScreen
 import com.malha.app.feature.execution.ProjectExecutionScreen
 import com.malha.app.feature.home.HomeScreen
 import com.malha.app.feature.materials.MaterialsScreen
@@ -48,6 +49,9 @@ fun MalhaNavHost(
         }
         composable(MalhaDestination.Materials.route) {
             MaterialsScreen()
+        }
+        composable(MalhaDestination.Aidi.route) {
+            AidiScreen()
         }
         composable(MalhaDestination.Settings.route) {
             SettingsScreen()
