@@ -22,5 +22,6 @@ data class UserPreferences(
     val units: AppUnits = AppUnits.METRIC,
     val textSizeMultiplier: Float = 1.0f,
     val username: String? = null,
-    val bio: String? = null
+    val bio: String? = null,
+    val lastDailyRewardTimestamp: Long = 0L
 )

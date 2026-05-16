@@ -1,0 +1,321 @@
+{
+  "pattern_id": "demo_beanie_full_001",
+  "pattern_version": "1.0",
+  "created_for": "Malha",
+  "language": "en-UK",
+  "metadata": {
+    "name": "Simple Everyday Beanie",
+    "craft": "knitting",
+    "category": "hat",
+    "difficulty": 1,
+    "difficulty_label": "Beginner",
+    "designer": "Malha Demo",
+    "description": "A simple beginner-friendly unisex beanie knitted in the round using bulky yarn."
+  },
+  "sizes": {
+    "available": [
+      "S",
+      "M",
+      "L"
+    ],
+    "default": "M",
+    "head_circumference_cm": {
+      "S": 52,
+      "M": 56,
+      "L": 60
+    }
+  },
+  "materials": {
+    "yarns": [
+      {
+        "id": "yarn_001",
+        "name": "Chunky Wool",
+        "fiber": "100% Wool",
+        "weight_category": "bulky",
+        "grams_required": {
+          "S": 90,
+          "M": 110,
+          "L": 130
+        }
+      }
+    ],
+    "needles": [
+      {
+        "type": "circular",
+        "size_mm": 6.0,
+        "length_cm": 40
+      },
+      {
+        "type": "double_pointed",
+        "size_mm": 6.0
+      }
+    ],
+    "extras": [
+      "1 stitch marker",
+      "1 tapestry needle",
+      "scissors"
+    ]
+  },
+  "gauge": {
+    "stitches": 14,
+    "rows": 20,
+    "measurement_cm": 10,
+    "stitch_pattern": "stockinette"
+  },
+  "abbreviations": [
+    {
+      "abbr": "k",
+      "meaning": "knit"
+    },
+    {
+      "abbr": "p",
+      "meaning": "purl"
+    },
+    {
+      "abbr": "k2tog",
+      "meaning": "knit two stitches together"
+    },
+    {
+      "abbr": "rnd",
+      "meaning": "round"
+    }
+  ],
+  "execution_graph": {
+    "sections": [
+      {
+        "section_id": "setup",
+        "name": "Setup",
+        "steps": [
+          {
+            "step_id": "setup_001",
+            "type": "prepare_materials",
+            "instruction": "Gather all materials: yarn, circular needles, double-pointed needles, stitch marker, scissors and tapestry needle.",
+            "voice_instruction": "Gather your knitting materials.",
+            "confidence": 1.0
+          }
+        ]
+      },
+      {
+        "section_id": "cast_on",
+        "name": "Cast On",
+        "steps": [
+          {
+            "step_id": "caston_001",
+            "type": "cast_on",
+            "instruction": {
+              "S": "Cast on 72 stitches using the long-tail cast on method.",
+              "M": "Cast on 80 stitches using the long-tail cast on method.",
+              "L": "Cast on 88 stitches using the long-tail cast on method."
+            },
+            "stitch_count": {
+              "S": 72,
+              "M": 80,
+              "L": 88
+            },
+            "voice_instruction": "Cast on the required number of stitches.",
+            "confidence": 1.0
+          },
+          {
+            "step_id": "caston_002",
+            "type": "join_round",
+            "instruction": "Carefully join the stitches in the round, making sure the stitches are not twisted. Place a stitch marker to mark the beginning of the round.",
+            "voice_instruction": "Join the stitches in the round and place marker.",
+            "confidence": 1.0
+          }
+        ]
+      },
+      {
+        "section_id": "brim",
+        "name": "Ribbed Brim",
+        "steps": [
+          {
+            "step_id": "brim_001",
+            "type": "repeat_round",
+            "instruction": "Round 1: *K1, P1* repeat from * to * until end of round.",
+            "repeat_logic": {
+              "repeat_until_end": true
+            },
+            "confidence": 1.0
+          },
+          {
+            "step_id": "brim_002",
+            "type": "repeat_block",
+            "instruction": "Repeat Round 1 until the ribbed brim measures approximately 5 cm.",
+            "estimated_rounds": 10,
+            "confidence": 0.98
+          }
+        ]
+      },
+      {
+        "section_id": "body",
+        "name": "Hat Body",
+        "steps": [
+          {
+            "step_id": "body_001",
+            "type": "knit_round",
+            "instruction": "Round 1: Knit all stitches.",
+            "confidence": 1.0
+          },
+          {
+            "step_id": "body_002",
+            "type": "repeat_block",
+            "instruction": "Repeat knitting every round until the hat measures approximately 18 cm from the cast on edge.",
+            "estimated_rounds": 26,
+            "confidence": 0.96
+          }
+        ]
+      },
+      {
+        "section_id": "crown",
+        "name": "Crown Shaping",
+        "steps": [
+          {
+            "step_id": "crown_001",
+            "type": "decrease_round",
+            "instruction": "Decrease Round 1: *K8, K2tog* repeat from * to * until end of round.",
+            "repeat_logic": {
+              "repeat_until_end": true
+            },
+            "resulting_stitch_count_estimate": {
+              "S": 64,
+              "M": 72,
+              "L": 80
+            },
+            "confidence": 0.98
+          },
+          {
+            "step_id": "crown_002",
+            "type": "knit_round",
+            "instruction": "Knit all stitches for one round.",
+            "confidence": 1.0
+          },
+          {
+            "step_id": "crown_003",
+            "type": "decrease_round",
+            "instruction": "Decrease Round 2: *K7, K2tog* repeat from * to * until end of round.",
+            "repeat_logic": {
+              "repeat_until_end": true
+            },
+            "confidence": 0.98
+          },
+          {
+            "step_id": "crown_004",
+            "type": "knit_round",
+            "instruction": "Knit all stitches for one round.",
+            "confidence": 1.0
+          },
+          {
+            "step_id": "crown_005",
+            "type": "decrease_round",
+            "instruction": "Decrease Round 3: *K6, K2tog* repeat from * to * until end of round.",
+            "repeat_logic": {
+              "repeat_until_end": true
+            },
+            "confidence": 0.98
+          },
+          {
+            "step_id": "crown_006",
+            "type": "knit_round",
+            "instruction": "Knit all stitches for one round.",
+            "confidence": 1.0
+          },
+          {
+            "step_id": "crown_007",
+            "type": "decrease_round",
+            "instruction": "Decrease Round 4: *K5, K2tog* repeat from * to * until end of round.",
+            "repeat_logic": {
+              "repeat_until_end": true
+            },
+            "confidence": 0.98
+          },
+          {
+            "step_id": "crown_008",
+            "type": "knit_round",
+            "instruction": "Knit all stitches for one round.",
+            "confidence": 1.0
+          },
+          {
+            "step_id": "crown_009",
+            "type": "decrease_round",
+            "instruction": "Continue decreasing in the same way. Each decrease round reduce the knit stitches before K2tog by 1. Continue until only 8 stitches remain.",
+            "confidence": 0.95
+          },
+          {
+            "step_id": "crown_010",
+            "type": "switch_needles",
+            "instruction": "When the stitches become too tight for circular needles, switch to double-pointed needles.",
+            "confidence": 0.97
+          }
+        ]
+      },
+      {
+        "section_id": "finishing",
+        "name": "Finishing",
+        "steps": [
+          {
+            "step_id": "finish_001",
+            "type": "cut_yarn",
+            "instruction": "Cut the yarn leaving a 20 cm tail.",
+            "confidence": 1.0
+          },
+          {
+            "step_id": "finish_002",
+            "type": "thread_yarn",
+            "instruction": "Thread the yarn tail through a tapestry needle.",
+            "confidence": 1.0
+          },
+          {
+            "step_id": "finish_003",
+            "type": "close_top",
+            "instruction": "Pass the yarn through the remaining stitches and pull tightly to close the top of the hat.",
+            "confidence": 1.0
+          },
+          {
+            "step_id": "finish_004",
+            "type": "weave_ends",
+            "instruction": "Weave in all loose yarn ends on the inside of the hat.",
+            "confidence": 1.0
+          },
+          {
+            "step_id": "finish_005",
+            "type": "final_check",
+            "instruction": "Check the beanie for loose stitches or ends. The hat is now complete.",
+            "confidence": 1.0
+          }
+        ]
+      }
+    ]
+  },
+  "voice_navigation": {
+    "enabled": true,
+    "supported_commands": [
+      "next step",
+      "previous step",
+      "repeat instruction",
+      "mark step done",
+      "how many stitches",
+      "what row am I on"
+    ]
+  },
+  "gamification": {
+    "estimated_hours": {
+      "S": 4,
+      "M": 5,
+      "L": 6
+    },
+    "estimated_coin_reward": {
+      "S": 18,
+      "M": 22,
+      "L": 28
+    }
+  },
+  "community": {
+    "verified": true,
+    "rating": 4.9,
+    "completed_projects": 24
+  },
+  "original_source": {
+    "source_type": "manual_demo_pattern",
+    "original_text": "Simple beginner beanie created as a fully structured demo pattern for the Malha app."
+  }
+}

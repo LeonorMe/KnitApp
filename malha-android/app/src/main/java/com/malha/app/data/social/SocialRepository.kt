@@ -16,4 +16,5 @@ interface SocialRepository {
     
     fun observeComments(postId: String): Flow<List<Comment>>
     suspend fun addComment(postId: String, content: String)
+    suspend fun addCoins(amount: Int)
 }

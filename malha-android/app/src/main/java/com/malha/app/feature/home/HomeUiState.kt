@@ -5,7 +5,8 @@ import com.malha.app.domain.model.Project
 data class HomeUiState(
     val isLoading: Boolean = true,
     val projects: List<Project> = emptyList(),
-    val insights: List<HomeInsight> = emptyList()
+    val insights: List<HomeInsight> = emptyList(),
+    val showDailyYarn: Boolean = false
 ) {
     val activeProjectCount: Int = projects.size
     val aidiSummary: String

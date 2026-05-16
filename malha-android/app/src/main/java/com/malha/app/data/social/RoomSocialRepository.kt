@@ -103,4 +103,18 @@ class RoomSocialRepository(
             )
         )
     }
+
+    override suspend fun addCoins(amount: Int) {
+        val current = getCurrentUser() ?: return
+        socialDao.insertUser(
+            UserEntity(
+                id = current.id,
+                name = current.name,
+                bio = current.bio,
+                profilePicUri = current.profilePicUri,
+                coins = current.coins + amount,
+                updatedAt = System.currentTimeMillis()
+            )
+        )
+    }
 }

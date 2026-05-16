@@ -20,6 +20,7 @@ class PreferencesRepository(private val context: Context) {
         val TEXT_SIZE = floatPreferencesKey("text_size")
         val USERNAME = stringPreferencesKey("username")
         val BIO = stringPreferencesKey("bio")
+        val LAST_REWARD_TS = androidx.datastore.preferences.core.longPreferencesKey("last_reward_ts")
     }
 
     val userPreferences: Flow<UserPreferences> = context.dataStore.data.map { preferences ->
@@ -29,7 +30,8 @@ class PreferencesRepository(private val context: Context) {
             units = AppUnits.valueOf(preferences[Keys.UNITS] ?: AppUnits.METRIC.name),
             textSizeMultiplier = preferences[Keys.TEXT_SIZE] ?: 1.0f,
             username = preferences[Keys.USERNAME],
-            bio = preferences[Keys.BIO]
+            bio = preferences[Keys.BIO],
+            lastDailyRewardTimestamp = preferences[Keys.LAST_REWARD_TS] ?: 0L
         )
     }
 
@@ -57,5 +59,9 @@ class PreferencesRepository(private val context: Context) {
             if (bio != null) preferences[Keys.BIO] = bio
             else preferences.remove(Keys.BIO)
         }
+    }
+
+    suspend fun updateLastDailyReward(timestamp: Long) {
+        context.dataStore.edit { it[Keys.LAST_REWARD_TS] = timestamp }
     }
 }

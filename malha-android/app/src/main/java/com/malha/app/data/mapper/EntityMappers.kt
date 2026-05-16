@@ -17,7 +17,7 @@ fun ProjectEntity.toDomain(): Project {
     )
 }
 
-fun PatternWithSteps.toPatternDomain(): Pattern {
+fun PatternWithSteps.toDomain(): Pattern {
     val domainSections = sections
         .sortedBy { it.orderIndex }
         .map { sectionEntity ->
@@ -38,18 +38,30 @@ fun PatternWithSteps.toPatternDomain(): Pattern {
         year = pattern.year,
         craft = pattern.craft,
         difficulty = pattern.difficulty,
-        gaugeWidth = pattern.gaugeWidth,
-        gaugeHeight = pattern.gaugeHeight,
-        gaugeUnit = pattern.gaugeUnit,
+        gauge = if (pattern.gaugeWidth != null && pattern.gaugeHeight != null) {
+            Gauge(
+                widthStitches = pattern.gaugeWidth,
+                heightRows = pattern.gaugeHeight,
+                measurementCm = pattern.gaugeUnit
+                    ?.filter { it.isDigit() }
+                    ?.toIntOrNull()
+                    ?: 10
+            )
+        } else {
+            null
+        },
         sourceType = pattern.sourceType,
         originalText = pattern.originalText,
         verificationStatus = pattern.verificationStatus,
         aiConfidence = pattern.aiConfidence,
         isPremium = pattern.isPremium,
-        availableSizes = pattern.availableSizes?.split(","),
+        availableSizes = pattern.availableSizes
+            ?.split(",")
+            ?.map { it.trim() }
+            ?.filter { it.isNotEmpty() }
+            ?: emptyList(),
         selectedSize = pattern.selectedSize,
-        sections = domainSections,
-        updatedAt = pattern.updatedAt
+        sections = domainSections
     )
 }
 
@@ -91,10 +103,14 @@ fun StitchPatternEntity.toDomain(): StitchPattern {
     return StitchPattern(
         id = id,
         name = name,
-        instruction = instruction,
-        abbreviation = abbreviation,
+        description = description,
+        instructions = instructions,
         imageUrl = imageUrl,
-        category = category
+        videoUrl = videoUrl,
+        terms = searchTerms
+            .split(",")
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
     )
 }
 
