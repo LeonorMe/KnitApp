@@ -17,7 +17,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         HomeUiState(
             isLoading = false,
             projects = projects,
-            insights = HomeInsightEngine.buildInsights(
+            aidiSuggestions = HomeInsightEngine.buildInsights(
                 projects = projects,
                 materials = materials
             ),
