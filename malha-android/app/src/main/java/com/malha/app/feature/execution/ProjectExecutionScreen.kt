@@ -207,13 +207,13 @@ private fun StepCard(currentStep: PatternStep?, onStitchClick: (String) -> Unit)
             Text("Current Instruction", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
             if (currentStep != null) {
                 StitchLinkText(
-                    text = currentStep.instruction,
+                    text = currentStep.instructionData,
                     knownStitches = KNOWN_STITCHES,
                     onStitchClick = onStitchClick
                 )
-                if (currentStep.stitchCount != null) {
+                if (currentStep.stitchCountData != null) {
                     Text(
-                        "Target: ${currentStep.stitchCount} stitches",
+                        "Target: ${currentStep.stitchCountData} stitches",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.secondary
                     )

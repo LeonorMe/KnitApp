@@ -70,14 +70,13 @@ fun PatternStepEntity.toStepDomain(): PatternStep {
         id = id,
         orderIndex = orderIndex,
         type = stepType,
-        instruction = instruction,
+        instructionData = instruction,
+        voiceInstruction = null, // To be implemented in JSON execution graph
         rowNumber = rowNumber,
-        stitchCount = stitchCount,
+        stitchCountData = stitchCount?.toString(),
         confidence = confidence,
-        repeatCount = repeatCount,
-        everyNRows = everyNRows,
-        startRow = startRow,
-        endRow = endRow,
+        repeatLogicJson = null, // To be implemented in JSON execution graph
+        estimatedRounds = null, // To be implemented in JSON execution graph
         condition = condition,
         stitchPatternId = stitchPatternId
     )

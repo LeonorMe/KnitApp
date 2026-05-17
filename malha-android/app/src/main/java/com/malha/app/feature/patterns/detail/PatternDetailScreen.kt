@@ -134,7 +134,7 @@ fun PatternDetailScreen(
                             color = MaterialTheme.colorScheme.secondary
                         )
                         Text(
-                            text = step.instruction,
+                            text = step.instructionData,
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurface
                         )

@@ -37,7 +37,7 @@ fun YarnEstimatorCard(
             }
             
             if (pattern != null) {
-                val totalStitches = pattern.allSteps.sumOf { it.stitchCount ?: 0 }
+                val totalStitches = pattern.allSteps.sumOf { it.stitchCountData?.toIntOrNull() ?: 0 }
                 val estimatedGrams = (totalStitches * 0.015).toInt() // Dummy math
                 
                 Text(

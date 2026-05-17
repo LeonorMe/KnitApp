@@ -39,11 +39,11 @@ object PatternParser {
                         id = UUID.randomUUID().toString(),
                         orderIndex = stepCount++,
                         type = stepType,
-                        instruction = line,
+                        instructionData = line,
                         rowNumber = rowNumber,
-                        stitchCount = stitchCount,
+                        stitchCountData = stitchCount?.toString(),
                         confidence = 0.85,
-                        repeatCount = repeatCount
+                        estimatedRounds = repeatCount
                     )
                 )
             }

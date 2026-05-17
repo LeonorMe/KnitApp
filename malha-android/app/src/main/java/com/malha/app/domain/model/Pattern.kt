@@ -54,23 +54,22 @@ data class PatternSection(
 )
 
 enum class StepType {
-    CAST_ON, RIBBING, INCREASE, DECREASE, BIND_OFF, NORMAL, REPEAT, REPEAT_BLOCK, JOIN, FINISHING
+    CAST_ON, KNIT, PURL, RIBBING, INCREASE, DECREASE, BIND_OFF, NORMAL, REPEAT, REPEAT_BLOCK, JOIN, FINISHING
 }
 
 data class PatternStep(
     val id: String,
     val orderIndex: Int,
     val type: StepType = StepType.NORMAL,
-    val instruction: String,
+    val instructionData: String, // JSON payload representing string or size-based map
+    val voiceInstruction: String? = null,
     val rowNumber: Int? = null,
-    val stitchCount: Int? = null,
+    val stitchCountData: String? = null, // JSON payload representing int or size-based map
     val confidence: Double = 1.0,
     
     // Execution Logic Parameters
-    val repeatCount: Int? = null,
-    val everyNRows: Int? = null,
-    val startRow: Int? = null,
-    val endRow: Int? = null,
+    val repeatLogicJson: String? = null, // JSON representation of repeat logic (e.g. repeat_until_end)
+    val estimatedRounds: Int? = null,
     val condition: String? = null, // e.g. "size == XL"
     val stitchPatternId: String? = null // Reference to Stitch Library
 )

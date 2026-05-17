@@ -10,6 +10,7 @@ data class Material(
     
     // Structured Data for Yarn & Needles
     val fiber: String? = null,
+    val weightCategory: String? = null,
     val gramsPerBall: Int? = null,
     val needleType: String? = null, // circular, straight, DPN
     val sizeMm: Double? = null,
