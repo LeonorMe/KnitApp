@@ -70,10 +70,11 @@ fun ProfileScreen(viewModel: ProfileViewModel = viewModel()) {
             // Profile Header
             ProfileHeader(
                 user = user,
+                postsCount = posts.size,
                 onEditClick = { showEditDialog = true }
             )
 
-            Divider()
+            HorizontalDivider()
 
             // Posts Grid
             LazyVerticalGrid(
@@ -105,7 +106,7 @@ fun ProfileScreen(viewModel: ProfileViewModel = viewModel()) {
 }
 
 @Composable
-private fun ProfileHeader(user: User?, onEditClick: () -> Unit) {
+private fun ProfileHeader(user: User?, postsCount: Int, onEditClick: () -> Unit) {
     Column(
         modifier = Modifier.padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -121,9 +122,8 @@ private fun ProfileHeader(user: User?, onEditClick: () -> Unit) {
             }
             
             Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
-                StatItem(label = "Projects", value = "12")
-                StatItem(label = "Followers", value = "240")
-                StatItem(label = "Following", value = "180")
+                StatItem(label = "Projetos", value = postsCount.toString())
+                StatItem(label = "Amigos", value = "42")
             }
         }
 

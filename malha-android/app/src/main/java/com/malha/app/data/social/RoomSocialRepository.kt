@@ -18,6 +18,8 @@ class RoomSocialRepository(
     private val currentUserId: String = "default-user" // Mocked for now
 ) : SocialRepository {
 
+    private val likedPostIds = mutableSetOf<String>()
+
     override fun observeCurrentUser(): Flow<User?> {
         return socialDao.observeUser(currentUserId).map { it?.toUserDomain() }
     }
@@ -55,11 +57,15 @@ class RoomSocialRepository(
     }
 
     override fun observeFeed(): Flow<List<Post>> {
-        return socialDao.observeFeed().map { posts -> posts.map { it.toPostDomain() } }
+        return socialDao.observeFeed().map { posts ->
+            posts.map { it.toPostDomain(isLiked = likedPostIds.contains(it.post.id)) }
+        }
     }
 
     override fun observeUserPosts(userId: String): Flow<List<Post>> {
-        return socialDao.observeUserPosts(userId).map { posts -> posts.map { it.toPostDomain() } }
+        return socialDao.observeUserPosts(userId).map { posts ->
+            posts.map { it.toPostDomain(isLiked = likedPostIds.contains(it.post.id)) }
+        }
     }
 
     override suspend fun createPost(patternId: String?, imageUri: String, description: String, status: String) {
@@ -74,6 +80,19 @@ class RoomSocialRepository(
             updatedAt = System.currentTimeMillis()
         )
         socialDao.insertPost(post)
+    }
+
+    override suspend fun toggleLikePost(postId: String) {
+        val post = socialDao.getPost(postId) ?: return
+        if (likedPostIds.contains(postId)) {
+            likedPostIds.remove(postId)
+            val newLikes = maxOf(0, post.likesCount - 1)
+            socialDao.updatePostLikes(postId, newLikes)
+        } else {
+            likedPostIds.add(postId)
+            val newLikes = post.likesCount + 1
+            socialDao.updatePostLikes(postId, newLikes)
+        }
     }
 
     override fun observeComments(postId: String): Flow<List<Comment>> {

@@ -29,6 +29,12 @@ interface SocialDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertPost(post: PostEntity)
 
+    @Query("SELECT * FROM posts WHERE id = :postId LIMIT 1")
+    suspend fun getPost(postId: String): PostEntity?
+
+    @Query("UPDATE posts SET likesCount = :likesCount WHERE id = :postId")
+    suspend fun updatePostLikes(postId: String, likesCount: Int)
+
     @Query("SELECT * FROM comments WHERE postId = :postId ORDER BY createdAt ASC")
     fun observeComments(postId: String): Flow<List<CommentEntity>>
 

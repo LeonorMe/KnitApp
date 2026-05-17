@@ -13,6 +13,7 @@ interface SocialRepository {
     fun observeFeed(): Flow<List<Post>>
     fun observeUserPosts(userId: String): Flow<List<Post>>
     suspend fun createPost(patternId: String?, imageUri: String, description: String, status: String)
+    suspend fun toggleLikePost(postId: String)
     
     fun observeComments(postId: String): Flow<List<Comment>>
     suspend fun addComment(postId: String, content: String)

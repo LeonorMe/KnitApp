@@ -37,7 +37,8 @@ class AppContainer(context: Context) {
     val databaseSeeder = DatabaseSeeder(
         patternDao = database.patternDao(),
         projectDao = database.projectDao(),
-        materialDao = database.materialDao()
+        materialDao = database.materialDao(),
+        socialDao = database.socialDao()
     )
 }
 

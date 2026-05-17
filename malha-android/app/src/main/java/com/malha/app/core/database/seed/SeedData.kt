@@ -5,6 +5,9 @@ import com.malha.app.core.database.entity.PatternEntity
 import com.malha.app.core.database.entity.PatternSectionEntity
 import com.malha.app.core.database.entity.PatternStepEntity
 import com.malha.app.core.database.entity.ProjectEntity
+import com.malha.app.core.database.entity.UserEntity
+import com.malha.app.core.database.entity.PostEntity
+import com.malha.app.core.database.entity.CommentEntity
 import com.malha.app.domain.model.*
 
 object SeedData {
@@ -334,6 +337,75 @@ object SeedData {
             sizeMm = 4.0,
             lengthCm = 35,
             updatedAt = now
+        )
+    )
+
+    val users = listOf(
+        UserEntity(
+            id = "default-user",
+            name = "Ana Silva",
+            bio = "Crafting dreams, stitch by stitch. 🌸",
+            profilePicUri = null,
+            coins = 120,
+            updatedAt = now
+        ),
+        UserEntity(
+            id = "user-marta",
+            name = "Marta Jones",
+            bio = "Cozy winter wear designer.",
+            profilePicUri = null,
+            coins = 250,
+            updatedAt = now
+        ),
+        UserEntity(
+            id = "user-joao",
+            name = "João Neto",
+            bio = "Scarf master & yarn hoarder.",
+            profilePicUri = null,
+            coins = 150,
+            updatedAt = now
+        )
+    )
+
+    val posts = listOf(
+        PostEntity(
+            id = "post-1",
+            userId = "user-marta",
+            patternId = "demo_beanie_001",
+            imageUri = "drawable:malha_asset_project",
+            description = "Just casted on the new Simple Everyday Beanie! The instructions are super clean and easy to follow. 🧶✨",
+            status = "ongoing",
+            likesCount = 12,
+            createdAt = now - 3600000 * 2, // 2 hours ago
+            updatedAt = now
+        ),
+        PostEntity(
+            id = "post-2",
+            userId = "user-joao",
+            patternId = "pattern-scarf-basic",
+            imageUri = "drawable:malha_asset_yarn",
+            description = "Finished the Starter Garter Scarf! The length is perfect and the wool feels warm.",
+            status = "finished",
+            likesCount = 28,
+            createdAt = now - 3600000 * 12, // 12 hours ago
+            updatedAt = now
+        )
+    )
+
+    val comments = listOf(
+        CommentEntity(
+            id = "comment-1",
+            postId = "post-2",
+            userId = "default-user",
+            content = "Wow João, that looks amazing! What yarn color did you use?",
+            createdAt = now - 3600000 * 10
+        ),
+        CommentEntity(
+            id = "comment-2",
+            postId = "post-2",
+            userId = "user-marta",
+            content = "Beautiful tension! Perfect for winter.",
+            createdAt = now - 3600000 * 9
         )
     )
 }

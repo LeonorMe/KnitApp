@@ -133,7 +133,7 @@ fun UserEntity.toUserDomain(): User {
     )
 }
 
-fun PostWithDetails.toPostDomain(): Post {
+fun PostWithDetails.toPostDomain(isLiked: Boolean = false): Post {
     return Post(
         id = post.id,
         userId = post.userId,
@@ -144,6 +144,8 @@ fun PostWithDetails.toPostDomain(): Post {
         imageUri = post.imageUri,
         description = post.description,
         status = post.status,
-        createdAt = post.createdAt
+        createdAt = post.createdAt,
+        likesCount = post.likesCount,
+        isLiked = isLiked
     )
 }

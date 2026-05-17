@@ -60,6 +60,9 @@ fun MalhaNavHost(
             CommunityFeedScreen(
                 onCreatePost = {
                     navController.navigate(MalhaDestination.CreatePost.route)
+                },
+                onNavigateToPattern = { patternId ->
+                    navController.navigate(MalhaDestination.patternDetailRoute(patternId))
                 }
             )
         }

@@ -1,17 +1,22 @@
 package com.malha.app.feature.social
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Comment
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -42,7 +47,9 @@ class CommunityViewModel(application: android.app.Application) : AndroidViewMode
         )
 
     fun likePost(postId: String) {
-        // TODO: Implement likes
+        viewModelScope.launch {
+            repository.toggleLikePost(postId)
+        }
     }
 
     fun observeComments(postId: String): StateFlow<List<Comment>> {
@@ -61,6 +68,7 @@ class CommunityViewModel(application: android.app.Application) : AndroidViewMode
 @Composable
 fun CommunityFeedScreen(
     onCreatePost: () -> Unit,
+    onNavigateToPattern: (String) -> Unit,
     viewModel: CommunityViewModel = viewModel()
 ) {
     val feed by viewModel.feed.collectAsState()
@@ -68,32 +76,66 @@ fun CommunityFeedScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Knitstagram") },
+                title = { 
+                    Text(
+                        text = "Knitstagram",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    ) 
+                },
                 actions = {
                     IconButton(onClick = onCreatePost) {
-                        Icon(Icons.Default.Add, contentDescription = "Create Post")
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Create Post",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background
+                )
             )
         }
     ) { padding ->
         LazyColumn(
-            modifier = Modifier.padding(padding).fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            modifier = Modifier
+                .padding(padding)
+                .fillMaxSize(),
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             if (feed.isEmpty()) {
                 item {
-                    Box(Modifier.fillParentMaxSize(), contentAlignment = Alignment.Center) {
-                        Text("No posts yet. Be the first to share your work!")
+                    Box(
+                        modifier = Modifier.fillParentMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text(
+                                text = "Sem publicações ainda.",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            Text(
+                                text = "Sê o primeiro a partilhar o teu trabalho!",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
             }
-            items(feed) { post ->
+            items(feed, key = { it.id }) { post ->
                 PostCard(
                     post = post, 
                     onLike = { viewModel.likePost(post.id) },
                     onAddComment = { viewModel.addComment(post.id, it) },
-                    observeComments = { viewModel.observeComments(post.id) }
+                    observeComments = { viewModel.observeComments(post.id) },
+                    onPatternClick = onNavigateToPattern
                 )
             }
         }
@@ -105,59 +147,114 @@ private fun PostCard(
     post: Post, 
     onLike: () -> Unit,
     onAddComment: (String) -> Unit,
-    observeComments: () -> StateFlow<List<Comment>>
+    observeComments: () -> StateFlow<List<Comment>>,
+    onPatternClick: (String) -> Unit
 ) {
+    val heartScale by animateFloatAsState(
+        targetValue = if (post.isLiked) 1.25f else 1.0f,
+        animationSpec = spring(dampingRatio = 0.5f, stiffness = 300f),
+        label = "HeartScale"
+    )
+
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        shape = MaterialTheme.shapes.large,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column {
             // User Header
             Row(
-                modifier = Modifier.padding(12.dp),
+                modifier = Modifier
+                    .padding(14.dp)
+                    .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Box(modifier = Modifier.size(40.dp)) {
-                    ImagePlaceholder(label = post.userName, imageUri = post.userProfilePic)
+                Box(modifier = Modifier.size(42.dp)) {
+                    ImagePlaceholder(
+                        label = post.userName.take(2).uppercase(),
+                        imageUri = post.userProfilePic,
+                        size = 42.dp
+                    )
                 }
-                Column {
-                    Text(post.userName, style = MaterialTheme.typography.titleMedium)
-                    if (post.patternName != null) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = post.userName,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    if (post.patternName != null && post.patternId != null) {
                         Text(
-                            text = "using ${post.patternName}",
+                            text = "usando ${post.patternName}",
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.primary
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier
+                                .clickable { onPatternClick(post.patternId) }
+                                .padding(vertical = 2.dp)
                         )
                     }
                 }
-                Spacer(Modifier.weight(1f))
-                Badge(
-                    containerColor = if (post.status == "finished") MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.secondaryContainer
+                
+                Surface(
+                    color = if (post.status == "finished") MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.secondaryContainer,
+                    shape = MaterialTheme.shapes.small
                 ) {
-                    Text(post.status.uppercase(), modifier = Modifier.padding(4.dp))
+                    Text(
+                        text = if (post.status == "finished") "Concluído" else "Em curso",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = if (post.status == "finished") MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onSecondaryContainer,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                    )
                 }
             }
 
             // Image
-            Box(modifier = Modifier.fillMaxWidth().height(300.dp)) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(320.dp)
+            ) {
                 ImagePlaceholder(
                     label = "Project Photo",
-                    imageUri = post.imageUri
+                    imageUri = post.imageUri,
+                    size = 320.dp,
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
 
-            // Interactions
-            Row(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
+            // Interactions (Hidden Like Counter - Only Interactive Heart Icon)
+            Row(
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 var showComments by remember { mutableStateOf(false) }
+                
                 IconButton(onClick = onLike) {
-                    Icon(Icons.Default.FavoriteBorder, contentDescription = "Like")
+                    Icon(
+                        imageVector = if (post.isLiked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                        contentDescription = "Like",
+                        tint = if (post.isLiked) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.scale(heartScale)
+                    )
                 }
+                
                 IconButton(onClick = { showComments = true }) {
-                    Icon(Icons.Default.Comment, contentDescription = "Comment")
+                    Icon(
+                        imageVector = Icons.Default.Comment,
+                        contentDescription = "Comment",
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
                 }
+                
                 IconButton(onClick = { /* TODO: Share */ }) {
-                    Icon(Icons.Default.Share, contentDescription = "Share")
+                    Icon(
+                        imageVector = Icons.Default.Share,
+                        contentDescription = "Share",
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
                 }
                 
                 if (showComments) {
@@ -170,27 +267,35 @@ private fun PostCard(
             }
 
             // Caption
-            Column(modifier = Modifier.padding(start = 12.dp, end = 12.dp, bottom = 12.dp)) {
+            Column(
+                modifier = Modifier.padding(start = 14.dp, end = 14.dp, bottom = 14.dp)
+            ) {
                 Text(
                     text = buildAnnotatedString {
-                        withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
+                        withStyle(SpanStyle(fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)) {
                             append("${post.userName} ")
                         }
                         append(post.description)
                     },
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
+                
                 Text(
-                    text = "View all comments",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 4.dp)
+                    text = "Ver comentários",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier
+                        .padding(top = 6.dp)
+                        .clickable { } // Or open comments directly
                 )
             }
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun CommentsDialog(
     onDismiss: () -> Unit,
@@ -202,22 +307,68 @@ private fun CommentsDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Comments") },
+        title = { 
+            Text(
+                text = "Comentários",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            ) 
+        },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                LazyColumn(modifier = Modifier.heightIn(max = 300.dp)) {
-                    items(comments) { comment ->
-                        Column(modifier = Modifier.padding(vertical = 4.dp)) {
-                            Text(comment.userName, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
-                            Text(comment.content, style = MaterialTheme.typography.bodyMedium)
+            Column(
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                if (comments.isEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = 100.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Sem comentários ainda.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.heightIn(max = 240.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(comments) { comment ->
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp)
+                            ) {
+                                Text(
+                                    text = comment.userName,
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    text = comment.content,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
                         }
                     }
                 }
+                
                 OutlinedTextField(
                     value = newComment,
                     onValueChange = { newComment = it },
-                    label = { Text("Add a comment...") },
-                    modifier = Modifier.fillMaxWidth()
+                    placeholder = { Text("Adiciona um comentário...") },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = MaterialTheme.shapes.medium,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant
+                    )
                 )
             }
         },
@@ -227,13 +378,16 @@ private fun CommentsDialog(
                 onClick = {
                     onPostComment(newComment)
                     newComment = ""
-                }
+                },
+                shape = MaterialTheme.shapes.medium
             ) {
-                Text("Post")
+                Text("Publicar")
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Close") }
+            TextButton(onClick = onDismiss) { 
+                Text("Fechar") 
+            }
         }
     )
 }
