@@ -23,63 +23,88 @@ import com.malha.app.core.design.component.ImagePlaceholder
 import com.malha.app.domain.model.Material
 import com.malha.app.domain.model.MaterialType
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MaterialsScreen(viewModel: MaterialsViewModel = viewModel()) {
     val uiState by viewModel.uiState.collectAsState()
     var showCreateDialog by remember { mutableStateOf(false) }
 
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background
-    ) {
-        LazyColumn(
-            modifier = Modifier.padding(PaddingValues(horizontal = 24.dp, vertical = 28.dp)),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            item {
-                Text(
-                    text = "Materials",
-                    style = MaterialTheme.typography.headlineLarge,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-            }
-            item {
-                Text(
-                    text = "Track yarn, needles, hooks, and accessories for your projects.",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            if (uiState.errorMessage != null) {
-                item {
-                    Text(
-                        text = uiState.errorMessage.orEmpty(),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
-            }
-            item {
-                Button(
-                    onClick = {
-                        viewModel.clearError()
-                        showCreateDialog = true
-                    },
-                    enabled = !uiState.isCreating,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Add material")
-                }
-            }
+    val tabs = listOf("Fios", "Agulhas", "Acessórios", "Lista de compras", "Loja")
+    var selectedTabIndex by remember { mutableStateOf(0) }
 
-            MaterialType.entries.forEach { type ->
-                val materials = uiState.materials.filter { it.type == type }
-                item {
-                    MaterialCategoryCard(
-                        type = type,
-                        materials = materials,
-                        isLoading = uiState.isLoading
+    Scaffold(
+        topBar = {
+            Column {
+                TopAppBar(
+                    title = { Text("A Minha Caixa") },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.background
                     )
+                )
+                TabRow(selectedTabIndex = selectedTabIndex) {
+                    tabs.forEachIndexed { index, title ->
+                        Tab(
+                            selected = selectedTabIndex == index,
+                            onClick = { selectedTabIndex = index },
+                            text = { Text(title) }
+                        )
+                    }
+                }
+            }
+        },
+        floatingActionButton = {
+            FloatingActionButton(onClick = {
+                viewModel.clearError()
+                showCreateDialog = true
+            }) {
+                Icon(androidx.compose.material.icons.Icons.Default.Add, contentDescription = "Add material")
+            }
+        }
+    ) { padding ->
+        Surface(
+            modifier = Modifier.fillMaxSize().padding(padding),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            LazyColumn(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                if (uiState.errorMessage != null) {
+                    item {
+                        Text(
+                            text = uiState.errorMessage.orEmpty(),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
+                
+                val type = when (selectedTabIndex) {
+                    0 -> MaterialType.Yarn
+                    1 -> MaterialType.Needle
+                    2 -> MaterialType.Accessory
+                    else -> null // Lista de compras / Loja mocked later
+                }
+
+                if (type != null) {
+                    val materials = uiState.materials.filter { it.type == type }
+                    item {
+                        MaterialCategoryCard(
+                            type = type,
+                            materials = materials,
+                            isLoading = uiState.isLoading
+                        )
+                    }
+                } else {
+                    item {
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
+                            Text(
+                                text = "Comming Soon: ${tabs[selectedTabIndex]}",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
                 }
             }
         }
