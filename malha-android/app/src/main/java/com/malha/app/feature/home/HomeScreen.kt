@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -71,7 +72,7 @@ fun HomeScreen(
                         }
                         IconButton(onClick = onNavigateToProfile) {
                             Icon(
-                                imageVector = androidx.compose.material.icons.Icons.Outlined.Face,
+                                imageVector = Icons.Default.Person,
                                 contentDescription = "Profile",
                                 modifier = Modifier.size(32.dp)
                             )

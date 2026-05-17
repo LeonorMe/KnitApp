@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.malha.app.core.design.component.ImagePlaceholder
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProjectsScreen(
     onOpenProject: (String) -> Unit,

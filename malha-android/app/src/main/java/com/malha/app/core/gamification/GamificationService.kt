@@ -12,7 +12,7 @@ class GamificationService {
         val complexityBonus = when {
             step.type.name.contains("REPEAT") -> 5
             step.type.name.contains("JOIN") -> 15
-            step.stitchCount != null && step.stitchCount > 100 -> 10
+            (step.stitchCountData?.toIntOrNull() ?: 0) > 100 -> 10
             else -> 0
         }
         return base + complexityBonus
