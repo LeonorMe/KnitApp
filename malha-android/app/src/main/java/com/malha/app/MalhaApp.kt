@@ -29,19 +29,47 @@ fun MalhaApp() {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
 
+    val isHomeHierarchy = currentRoute == "home" || 
+                          currentRoute == "profile" || 
+                          currentRoute == "settings" || 
+                          currentRoute == "profile_edit" || 
+                          currentRoute?.startsWith("project/") == true
+                          
+    val isCommunityHierarchy = currentRoute == "community" || 
+                               currentRoute == "create_post" ||
+                               currentRoute?.startsWith("pattern/") == true
+
     Scaffold(
         bottomBar = {
             NavigationBar {
                 MalhaDestination.topLevel.forEach { destination ->
+                    val isSelected = when (destination) {
+                        MalhaDestination.Home -> isHomeHierarchy
+                        MalhaDestination.Community -> isCommunityHierarchy
+                        else -> currentRoute == destination.route
+                    }
+
                     NavigationBarItem(
-                        selected = currentRoute == destination.route,
+                        selected = isSelected,
                         onClick = {
-                            navController.navigate(destination.route) {
-                                popUpTo(navController.graph.startDestinationId) {
-                                    saveState = true
+                            if (destination == MalhaDestination.Home) {
+                                // Clear all subpages of Home and return directly to root Home
+                                navController.navigate(destination.route) {
+                                    popUpTo(navController.graph.startDestinationId) {
+                                        saveState = false
+                                        inclusive = false
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = false
                                 }
-                                launchSingleTop = true
-                                restoreState = true
+                            } else {
+                                navController.navigate(destination.route) {
+                                    popUpTo(navController.graph.startDestinationId) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
                             }
                         },
                         icon = {
