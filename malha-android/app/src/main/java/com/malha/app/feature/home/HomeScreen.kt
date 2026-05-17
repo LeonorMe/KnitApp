@@ -20,6 +20,7 @@ import com.malha.app.core.design.component.ImagePlaceholder
 @Composable
 fun HomeScreen(
     onOpenProject: (String) -> Unit,
+    onNavigateToProfile: () -> Unit,
     viewModel: HomeViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -51,11 +52,31 @@ fun HomeScreen(
                 verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
                 item {
-                    Text(
-                        text = "Malha",
-                        style = MaterialTheme.typography.headlineLarge,
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column {
+                            Text(
+                                text = "Boa noite, Ana",
+                                style = MaterialTheme.typography.headlineLarge,
+                                color = MaterialTheme.colorScheme.onBackground
+                            )
+                            Text(
+                                text = "50 Moedas", // Placeholder for coins
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                        IconButton(onClick = onNavigateToProfile) {
+                            Icon(
+                                imageVector = androidx.compose.material.icons.Icons.Outlined.Face,
+                                contentDescription = "Profile",
+                                modifier = Modifier.size(32.dp)
+                            )
+                        }
+                    }
                 }
 
                 items(uiState.insights) { insight ->

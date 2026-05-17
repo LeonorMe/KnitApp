@@ -9,9 +9,12 @@ sealed class MalhaDestination(
 ) {
     data object Home : MalhaDestination("home", R.string.nav_home)
     data object Projects : MalhaDestination("projects", R.string.nav_projects)
-    data object Patterns : MalhaDestination("patterns", R.string.nav_patterns)
+    data object Aidi : MalhaDestination("aidi", R.string.nav_aidi)
     data object Materials : MalhaDestination("materials", R.string.nav_materials)
     data object Community : MalhaDestination("community", R.string.nav_community)
+    
+    // Hidden from bottom bar but accessible
+    data object Patterns : MalhaDestination("patterns", R.string.nav_patterns)
     data object Profile : MalhaDestination("profile", R.string.nav_profile)
     data object Settings : MalhaDestination("settings", R.string.nav_settings)
     
@@ -22,7 +25,7 @@ sealed class MalhaDestination(
     data object ProfileEdit : MalhaDestination("profile_edit", R.string.title_settings)
 
     companion object {
-        val topLevel = listOf(Home, Projects, Patterns, Materials, Community, Profile)
+        val topLevel = listOf(Home, Projects, Aidi, Materials, Community)
 
         fun projectExecutionRoute(projectId: String): String {
             return "project/$projectId"

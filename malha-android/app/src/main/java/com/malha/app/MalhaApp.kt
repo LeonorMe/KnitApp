@@ -16,10 +16,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.vectorResource
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.malha.app.core.navigation.MalhaDestination
 import com.malha.app.core.navigation.MalhaNavHost
+import com.malha.app.R
 
 @Composable
 fun MalhaApp() {
@@ -50,6 +52,7 @@ fun MalhaApp() {
                                     MalhaDestination.Patterns -> Icons.AutoMirrored.Outlined.List
                                     MalhaDestination.Materials -> Icons.Outlined.Build
                                     MalhaDestination.Community -> Icons.Outlined.Face
+                                    MalhaDestination.Aidi -> androidx.compose.ui.graphics.vector.ImageVector.vectorResource(id = R.drawable.aidi_icon)
                                     MalhaDestination.Profile -> Icons.Outlined.Face
                                     MalhaDestination.Settings -> Icons.Outlined.Settings
                                     else -> Icons.Outlined.Home

@@ -17,6 +17,7 @@ import com.malha.app.feature.settings.SettingsScreen
 import com.malha.app.feature.social.CommunityFeedScreen
 import com.malha.app.feature.social.CreatePostScreen
 import com.malha.app.feature.social.ProfileScreen
+import com.malha.app.feature.aidi.AidiScreen
 
 @Composable
 fun MalhaNavHost(
@@ -32,6 +33,9 @@ fun MalhaNavHost(
             HomeScreen(
                 onOpenProject = { projectId ->
                     navController.navigate(MalhaDestination.projectExecutionRoute(projectId))
+                },
+                onNavigateToProfile = {
+                    navController.navigate(MalhaDestination.Profile.route)
                 }
             )
         }
@@ -58,6 +62,9 @@ fun MalhaNavHost(
                     navController.navigate(MalhaDestination.CreatePost.route)
                 }
             )
+        }
+        composable(MalhaDestination.Aidi.route) {
+            AidiScreen()
         }
         composable(MalhaDestination.Profile.route) {
             ProfileScreen()
