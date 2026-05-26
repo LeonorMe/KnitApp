@@ -9,10 +9,12 @@ import com.malha.app.core.firebase.AuthService
 import com.malha.app.core.firebase.CloudDataService
 import com.malha.app.core.firebase.FirebaseAuthService
 import com.malha.app.core.firebase.FirestoreCloudDataService
+import com.malha.app.data.material.CloudBackedMaterialRepository
 import com.malha.app.data.material.MaterialRepository
 import com.malha.app.data.material.RoomMaterialRepository
 import com.malha.app.data.pattern.PatternRepository
 import com.malha.app.data.pattern.RoomPatternRepository
+import com.malha.app.data.project.CloudBackedProjectRepository
 import com.malha.app.data.project.ProjectRepository
 import com.malha.app.data.project.RoomProjectRepository
 import com.malha.app.core.preferences.PreferencesRepository
@@ -22,14 +24,25 @@ import com.malha.app.data.social.SocialRepository
 class AppContainer(context: Context) {
     private val database = DatabaseProvider.getDatabase(context)
 
-    val projectRepository: ProjectRepository = RoomProjectRepository(
+    val authService: AuthService = FirebaseAuthService()
+    val cloudDataService: CloudDataService = FirestoreCloudDataService()
+
+    private val localProjectRepository: ProjectRepository = RoomProjectRepository(
         projectDao = database.projectDao(),
         projectStepProgressDao = database.projectStepProgressDao()
     )
+    val projectRepository: ProjectRepository = CloudBackedProjectRepository(
+        local = localProjectRepository,
+        authService = authService,
+        cloudDataService = cloudDataService
+    )
     val patternRepository: PatternRepository = RoomPatternRepository(database.patternDao())
-    val materialRepository: MaterialRepository = RoomMaterialRepository(database.materialDao())
-    val authService: AuthService = FirebaseAuthService()
-    val cloudDataService: CloudDataService = FirestoreCloudDataService()
+    private val localMaterialRepository: MaterialRepository = RoomMaterialRepository(database.materialDao())
+    val materialRepository: MaterialRepository = CloudBackedMaterialRepository(
+        local = localMaterialRepository,
+        authService = authService,
+        cloudDataService = cloudDataService
+    )
     val aidiAssistantService: AidiAssistantService = LocalAidiAssistantService()
     val preferencesRepository = PreferencesRepository(context)
     val socialRepository: SocialRepository = RoomSocialRepository(database.socialDao())

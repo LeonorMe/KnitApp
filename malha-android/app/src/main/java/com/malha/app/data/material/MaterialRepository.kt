@@ -12,5 +12,5 @@ interface MaterialRepository {
         quantity: Double,
         unit: String,
         imageUri: String? = null
-    )
+    ): String
 }

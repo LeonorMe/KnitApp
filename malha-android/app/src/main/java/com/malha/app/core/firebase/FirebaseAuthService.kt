@@ -44,7 +44,8 @@ class FirebaseAuthService(
         return AuthUser(
             id = uid,
             displayName = displayName,
-            email = email
+            email = email,
+            photoUrl = photoUrl?.toString()
         )
     }
 }

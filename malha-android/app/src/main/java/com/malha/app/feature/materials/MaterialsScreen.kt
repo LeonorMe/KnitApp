@@ -16,13 +16,16 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material.icons.filled.PhotoLibrary
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.malha.app.core.design.component.ImagePlaceholder
+import com.malha.app.core.share.MalhaShare
 import com.malha.app.domain.model.Material
 import com.malha.app.domain.model.MaterialType
 
@@ -173,6 +176,7 @@ private fun MaterialCategoryCard(
 
 @Composable
 private fun MaterialRow(material: Material) {
+    val context = LocalContext.current
     Row(
         horizontalArrangement = Arrangement.spacedBy(14.dp),
         modifier = Modifier
@@ -194,6 +198,9 @@ private fun MaterialRow(material: Material) {
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+        }
+        IconButton(onClick = { MalhaShare.shareMaterial(context, material) }) {
+            Icon(Icons.Default.Share, contentDescription = "Share material")
         }
     }
 }

@@ -17,6 +17,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -27,6 +28,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.malha.app.core.app.appContainer
 import com.malha.app.core.design.component.ImagePlaceholder
+import com.malha.app.core.share.MalhaShare
 import com.malha.app.data.social.SocialRepository
 import com.malha.app.domain.model.Comment
 import com.malha.app.domain.model.Post
@@ -150,6 +152,7 @@ private fun PostCard(
     observeComments: () -> StateFlow<List<Comment>>,
     onPatternClick: (String) -> Unit
 ) {
+    val context = LocalContext.current
     val heartScale by animateFloatAsState(
         targetValue = if (post.isLiked) 1.25f else 1.0f,
         animationSpec = spring(dampingRatio = 0.5f, stiffness = 300f),
@@ -249,7 +252,7 @@ private fun PostCard(
                     )
                 }
                 
-                IconButton(onClick = { /* TODO: Share */ }) {
+                IconButton(onClick = { MalhaShare.sharePost(context, post) }) {
                     Icon(
                         imageVector = Icons.Default.Share,
                         contentDescription = "Share",

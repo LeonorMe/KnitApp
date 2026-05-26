@@ -1,7 +1,10 @@
 package com.malha.app.feature.settings
 
+import android.Manifest
 import android.app.Activity
+import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -24,6 +27,7 @@ import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.PersonAdd
+import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -37,6 +41,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.Icon
@@ -55,6 +60,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.malha.app.R
+import com.malha.app.core.design.component.ImagePlaceholder
 import com.malha.app.core.preferences.AppLanguage
 import com.malha.app.core.preferences.AppTheme
 import com.malha.app.core.preferences.AppUnits
@@ -66,6 +72,21 @@ fun SettingsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        viewModel.updateDailyReminder(
+            enabled = granted,
+            hour = uiState.preferences.dailyReminderHour,
+            minute = uiState.preferences.dailyReminderMinute
+        )
+    }
+    val profilePhotoPicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+        onResult = { uri ->
+            if (uri != null) viewModel.updateProfilePhoto(uri.toString())
+        }
+    )
     val googleSignInClient = remember(context) {
         val webClientId = context.resolveGoogleWebClientId()
         val optionsBuilder = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -154,7 +175,12 @@ fun SettingsScreen(
                     googleSignInClient.signOut()
                     viewModel.signOut()
                 },
-                onEditProfile = onNavigateToProfileEdit
+                onEditProfile = onNavigateToProfileEdit,
+                onChangePhoto = {
+                    profilePhotoPicker.launch(
+                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                    )
+                }
             )
 
             SettingsSection(title = stringResource(R.string.section_appearance)) {
@@ -175,6 +201,32 @@ fun SettingsScreen(
                 UnitsSelector(
                     currentUnits = uiState.preferences.units,
                     onUnitsSelected = viewModel::updateUnits
+                )
+            }
+
+            SettingsSection(title = "Daily reminder") {
+                DailyReminderSettings(
+                    enabled = uiState.preferences.dailyReminderEnabled,
+                    hour = uiState.preferences.dailyReminderHour,
+                    minute = uiState.preferences.dailyReminderMinute,
+                    onEnabledChange = { enabled ->
+                        if (enabled && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                        } else {
+                            viewModel.updateDailyReminder(
+                                enabled = enabled,
+                                hour = uiState.preferences.dailyReminderHour,
+                                minute = uiState.preferences.dailyReminderMinute
+                            )
+                        }
+                    },
+                    onTimeChange = { hour, minute ->
+                        viewModel.updateDailyReminder(
+                            enabled = uiState.preferences.dailyReminderEnabled,
+                            hour = hour,
+                            minute = minute
+                        )
+                    }
                 )
             }
 
@@ -218,12 +270,73 @@ private fun SettingsSection(
 }
 
 @Composable
+private fun DailyReminderSettings(
+    enabled: Boolean,
+    hour: Int,
+    minute: Int,
+    onEnabledChange: (Boolean) -> Unit,
+    onTimeChange: (Int, Int) -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(18.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text("Quiet project reminder", style = MaterialTheme.typography.titleLarge)
+                    Text(
+                        "A daily nudge to continue one project, at a time you choose.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Switch(
+                    checked = enabled,
+                    onCheckedChange = onEnabledChange
+                )
+            }
+
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                OutlinedTextField(
+                    value = hour.toString().padStart(2, '0'),
+                    onValueChange = { value ->
+                        value.toIntOrNull()?.let { onTimeChange(it.coerceIn(0, 23), minute) }
+                    },
+                    label = { Text("Hour") },
+                    singleLine = true,
+                    modifier = Modifier.weight(1f)
+                )
+                OutlinedTextField(
+                    value = minute.toString().padStart(2, '0'),
+                    onValueChange = { value ->
+                        value.toIntOrNull()?.let { onTimeChange(hour, it.coerceIn(0, 59)) }
+                    },
+                    label = { Text("Minute") },
+                    singleLine = true,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+    }
+}
+
+@Composable
 private fun ProfileCard(
     uiState: SettingsUiState,
     onSignIn: () -> Unit,
     onCreateAccount: () -> Unit,
     onSignOut: () -> Unit,
-    onEditProfile: () -> Unit
+    onEditProfile: () -> Unit,
+    onChangePhoto: () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -253,8 +366,13 @@ private fun ProfileCard(
                     )
                 }
                 if (uiState.user != null) {
-                    TextButton(onClick = onEditProfile) {
-                        Text("Edit")
+                    Row {
+                        TextButton(onClick = onChangePhoto) {
+                            Text("Photo")
+                        }
+                        TextButton(onClick = onEditProfile) {
+                            Text("Edit")
+                        }
                     }
                 }
             }
@@ -301,6 +419,26 @@ private fun ProfileCard(
                     }
                 } else {
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Box(modifier = Modifier.size(72.dp)) {
+                                ImagePlaceholder(
+                                    label = uiState.preferences.username ?: user.displayName ?: "User",
+                                    imageUri = uiState.preferences.profilePhotoUri ?: user.photoUrl,
+                                    size = 72.dp
+                                )
+                            }
+                            OutlinedButton(
+                                onClick = onChangePhoto,
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Icon(Icons.Default.PhotoLibrary, contentDescription = null)
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Change profile photo")
+                            }
+                        }
                         Text(
                             text = uiState.preferences.username ?: user.displayName ?: "Signed in",
                             style = MaterialTheme.typography.bodyLarge,

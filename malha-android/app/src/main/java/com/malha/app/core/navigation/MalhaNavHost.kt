@@ -6,6 +6,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navDeepLink
 import androidx.navigation.navArgument
 import com.malha.app.feature.execution.ProjectExecutionScreen
 import com.malha.app.feature.home.HomeScreen
@@ -86,6 +87,11 @@ fun MalhaNavHost(
         }
         composable(
             route = MalhaDestination.ProjectExecution.route,
+            deepLinks = listOf(
+                navDeepLink {
+                    uriPattern = "https://malha.app/project-template/{projectId}"
+                }
+            ),
             arguments = listOf(
                 navArgument("projectId") {
                     type = NavType.StringType
@@ -97,6 +103,11 @@ fun MalhaNavHost(
         }
         composable(
             route = MalhaDestination.PatternDetail.route,
+            deepLinks = listOf(
+                navDeepLink {
+                    uriPattern = "https://malha.app/pattern/{patternId}"
+                }
+            ),
             arguments = listOf(
                 navArgument("patternId") {
                     type = NavType.StringType

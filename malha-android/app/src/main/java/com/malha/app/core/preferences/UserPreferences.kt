@@ -23,5 +23,9 @@ data class UserPreferences(
     val textSizeMultiplier: Float = 1.0f,
     val username: String? = null,
     val bio: String? = null,
+    val profilePhotoUri: String? = null,
+    val dailyReminderEnabled: Boolean = false,
+    val dailyReminderHour: Int = 18,
+    val dailyReminderMinute: Int = 0,
     val lastDailyRewardTimestamp: Long = 0L
 )

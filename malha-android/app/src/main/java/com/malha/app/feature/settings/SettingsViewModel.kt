@@ -52,10 +52,40 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     fun updateProfile(username: String, bio: String) {
         viewModelScope.launch { 
             appContainer.preferencesRepository.updateProfile(username, bio)
-            // Also sync to cloud if signed in
             uiState.value.user?.let { user ->
-                // This would need more complex logic to update CloudDataService
+                appContainer.cloudDataService.updateUserProfile(
+                    userId = user.id,
+                    username = username,
+                    bio = bio,
+                    profilePhotoUri = uiState.value.preferences.profilePhotoUri
+                )
             }
+        }
+    }
+
+    fun updateProfilePhoto(profilePhotoUri: String?) {
+        viewModelScope.launch {
+            appContainer.preferencesRepository.updateProfilePhoto(profilePhotoUri)
+            uiState.value.user?.let { user ->
+                appContainer.cloudDataService.updateUserProfile(
+                    userId = user.id,
+                    username = uiState.value.preferences.username ?: user.displayName,
+                    bio = uiState.value.preferences.bio,
+                    profilePhotoUri = profilePhotoUri
+                )
+            }
+        }
+    }
+
+    fun updateDailyReminder(enabled: Boolean, hour: Int, minute: Int) {
+        viewModelScope.launch {
+            appContainer.preferencesRepository.updateDailyReminder(enabled, hour, minute)
+            com.malha.app.core.notification.DailyReminderScheduler.setDailyReminder(
+                context = getApplication(),
+                enabled = enabled,
+                hour = hour,
+                minute = minute
+            )
         }
     }
 
@@ -143,12 +173,16 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             appContainer.cloudDataService.observeUserProfile(userId).collectLatest { profile ->
                 val cloudName = profile?.get("displayName") as? String
                 val cloudBio = profile?.get("bio") as? String
+                val cloudPhoto = profile?.get("profilePhotoUri") as? String
                 if (!cloudName.isNullOrBlank() || !cloudBio.isNullOrBlank()) {
                     val currentPrefs = uiState.value.preferences
                     appContainer.preferencesRepository.updateProfile(
                         username = cloudName ?: currentPrefs.username,
                         bio = cloudBio ?: currentPrefs.bio
                     )
+                }
+                if (!cloudPhoto.isNullOrBlank()) {
+                    appContainer.preferencesRepository.updateProfilePhoto(cloudPhoto)
                 }
             }
         }

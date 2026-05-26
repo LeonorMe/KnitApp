@@ -20,13 +20,16 @@ import com.malha.app.R
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.malha.app.core.design.component.ImagePlaceholder
+import com.malha.app.core.share.MalhaShare
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,6 +38,7 @@ fun ProjectsScreen(
     viewModel: ProjectsViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
     var showCreateDialog by remember { mutableStateOf(false) }
 
     val tabs = listOf("Em curso", "Planeados", "Concluídos", "Importados")
@@ -120,6 +124,9 @@ fun ProjectsScreen(
                                             progress = { animatedProgress },
                                             modifier = Modifier.fillMaxWidth()
                                         )
+                                    }
+                                    IconButton(onClick = { MalhaShare.shareProject(context, project) }) {
+                                        Icon(Icons.Default.Share, contentDescription = "Share project")
                                     }
                                 }
                             }

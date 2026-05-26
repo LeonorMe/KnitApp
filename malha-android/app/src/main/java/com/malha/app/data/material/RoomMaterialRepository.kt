@@ -23,11 +23,12 @@ class RoomMaterialRepository(
         quantity: Double,
         unit: String,
         imageUri: String?
-    ) {
+    ): String {
         val now = System.currentTimeMillis()
+        val materialId = UUID.randomUUID().toString()
         materialDao.insertMaterial(
             MaterialEntity(
-                id = UUID.randomUUID().toString(),
+                id = materialId,
                 name = name,
                 imageUri = imageUri,
                 type = type.storageValue,
@@ -41,5 +42,6 @@ class RoomMaterialRepository(
                 updatedAt = now
             )
         )
+        return materialId
     }
 }

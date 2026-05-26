@@ -5,7 +5,8 @@ import kotlinx.coroutines.flow.Flow
 data class AuthUser(
     val id: String,
     val displayName: String?,
-    val email: String?
+    val email: String?,
+    val photoUrl: String? = null
 )
 
 interface AuthService {
