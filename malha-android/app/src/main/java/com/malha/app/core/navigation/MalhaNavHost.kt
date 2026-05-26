@@ -35,7 +35,7 @@ fun MalhaNavHost(
                     navController.navigate(MalhaDestination.projectExecutionRoute(projectId))
                 },
                 onNavigateToProfile = {
-                    navController.navigate(MalhaDestination.Profile.route)
+                    navController.navigate(MalhaDestination.Settings.route)
                 }
             )
         }

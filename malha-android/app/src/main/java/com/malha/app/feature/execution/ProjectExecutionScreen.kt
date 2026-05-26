@@ -1,5 +1,9 @@
 package com.malha.app.feature.execution
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -165,7 +169,9 @@ fun ProjectExecutionScreen(
 private fun ProjectInfoCard(project: Project) {
     Card(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .animateContentSize()
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(project.name, style = MaterialTheme.typography.titleLarge)
@@ -176,6 +182,12 @@ private fun ProjectInfoCard(project: Project) {
 
 @Composable
 private fun ExecutionProgress(uiState: ProjectExecutionUiState) {
+    val animatedProgress by animateFloatAsState(
+        targetValue = (uiState.project?.progressPercent ?: 0) / 100f,
+        animationSpec = tween(durationMillis = 700),
+        label = "execution-progress"
+    )
+
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -191,7 +203,7 @@ private fun ExecutionProgress(uiState: ProjectExecutionUiState) {
             )
         }
         LinearProgressIndicator(
-            progress = { (uiState.project?.progressPercent ?: 0) / 100f },
+            progress = { animatedProgress },
             modifier = Modifier.fillMaxWidth()
         )
     }
@@ -201,25 +213,34 @@ private fun ExecutionProgress(uiState: ProjectExecutionUiState) {
 private fun StepCard(currentStep: PatternStep?, onStitchClick: (String) -> Unit) {
     Card(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .animateContentSize()
     ) {
         Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text("Current Instruction", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
-            if (currentStep != null) {
-                StitchLinkText(
-                    text = currentStep.instructionData,
-                    knownStitches = KNOWN_STITCHES,
-                    onStitchClick = onStitchClick
-                )
-                if (currentStep.stitchCountData != null) {
-                    Text(
-                        "Target: ${currentStep.stitchCountData} stitches",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.secondary
-                    )
+            AnimatedContent(
+                targetState = currentStep,
+                label = "current-step-card"
+            ) { step ->
+                if (step != null) {
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        StitchLinkText(
+                            text = step.instructionData,
+                            knownStitches = KNOWN_STITCHES,
+                            onStitchClick = onStitchClick
+                        )
+                        if (step.stitchCountData != null) {
+                            Text(
+                                "Target: ${step.stitchCountData} stitches",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.secondary
+                            )
+                        }
+                    }
+                } else {
+                    Text("All steps completed!", style = MaterialTheme.typography.headlineSmall)
                 }
-            } else {
-                Text("All steps completed!", style = MaterialTheme.typography.headlineSmall)
             }
         }
     }
@@ -228,7 +249,10 @@ private fun StepCard(currentStep: PatternStep?, onStitchClick: (String) -> Unit)
 @Composable
 private fun NoteCard(uiState: ProjectExecutionUiState, onEditNote: () -> Unit) {
     Card(
-        modifier = Modifier.fillMaxWidth().clickable { onEditNote() },
+        modifier = Modifier
+            .fillMaxWidth()
+            .animateContentSize()
+            .clickable { onEditNote() },
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {

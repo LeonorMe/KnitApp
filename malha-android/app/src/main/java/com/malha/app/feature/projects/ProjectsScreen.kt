@@ -1,5 +1,9 @@
 package com.malha.app.feature.projects
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
@@ -69,31 +73,38 @@ fun ProjectsScreen(
             modifier = Modifier.fillMaxSize().padding(padding),
             color = MaterialTheme.colorScheme.background
         ) {
-            if (uiState.isLoading) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
-                    Text("Loading projects...")
-                }
-            } else {
-                val filteredProjects = when (selectedTabIndex) {
-                    0 -> uiState.projects // "Em curso" mock
-                    1 -> emptyList() // "Planeados" mock
-                    2 -> emptyList() // "Concluídos" mock
-                    else -> emptyList() // "Importados" mock
-                }
+            val filteredProjects = when (selectedTabIndex) {
+                0 -> uiState.projects // "Em curso" mock
+                1 -> emptyList() // "Planeados" mock
+                2 -> emptyList() // "Concluídos" mock
+                else -> emptyList() // "Importados" mock
+            }
 
-                if (filteredProjects.isEmpty()) {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
+            AnimatedContent(
+                targetState = uiState.isLoading to filteredProjects.isEmpty(),
+                label = "projects-tab-content"
+            ) { (isLoading, isEmpty) ->
+                when {
+                    isLoading -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
+                        Text("Loading projects...")
+                    }
+                    isEmpty -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
                         Text("No projects in this category.", color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
-                } else {
-                    LazyColumn(
+                    else -> LazyColumn(
                         contentPadding = PaddingValues(16.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         items(filteredProjects) { project ->
+                            val animatedProgress by animateFloatAsState(
+                                targetValue = project.progressPercent / 100f,
+                                animationSpec = tween(durationMillis = 700),
+                                label = "project-list-progress"
+                            )
                             Card(
                                 modifier = Modifier
                                     .fillMaxWidth()
+                                    .animateContentSize()
                                     .clickable { onOpenProject(project.id) }
                             ) {
                                 Row(
@@ -106,7 +117,7 @@ fun ProjectsScreen(
                                         Text("Progresso: ${project.progressPercent}%", style = MaterialTheme.typography.bodyMedium)
                                         Spacer(modifier = Modifier.height(8.dp))
                                         LinearProgressIndicator(
-                                            progress = { project.progressPercent / 100f },
+                                            progress = { animatedProgress },
                                             modifier = Modifier.fillMaxWidth()
                                         )
                                     }

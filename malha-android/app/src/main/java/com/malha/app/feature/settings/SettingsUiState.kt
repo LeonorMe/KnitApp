@@ -7,9 +7,15 @@ data class SettingsUiState(
     val user: AuthUser? = null,
     val preferences: UserPreferences = UserPreferences(),
     val isSigningIn: Boolean = false,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val successMessage: String? = null,
+    val authMode: AuthMode? = null
 ) {
     val isSignedIn: Boolean
         get() = user != null
 }
 
+enum class AuthMode {
+    Login,
+    CreateAccount
+}

@@ -1,0 +1,39 @@
+id: 1
+name: "Cardigan Lilás"
+level: 3
+year: 1980
+tamanho: ?
+aviamentos / materials: 
+    fio: "520g de lã Mohair, sendo 240g em lilás, 120g em cinzento e 160g em branco"
+    agulha: "1 par de ag. nº 4 e 1 par nº 4,5"
+    extra: "6 botões de madrepérola lilás"
+pontos_empregados: "
+    P. canelado 1/1. P. de conchas, com duas cores (número de m. divisível por 8 - 
+    1ª mescla: 2 fios de lã lilás e 1 fio cinzento; 2ª mescla: 2 fios brancos e 1 fio lilás) -
+    1ª, 2ª e 3ª cars.
+    (1ª mescla): em direito; 
+    4ª car. (com 2ª mescla): << 1m. passada em av., 
+    6 em av. enrolado 2 vezes o fio na ag. em cada m., 1 m. passada em av. >>; 
+    5ª car. (com a 2ª mescla): << 1 m. passada em av., passar as 5 m. seguintes para a ag. direita, deixando as laçadas, voltar a passar estas 6 m. para a ag. esquerda, cruzá-las, 
+    trabalhando primeiro a 4ª m., depois a 5ª, depois a 6ª m., a seguir,
+    sucessivamente, a 1ª, a 2ª e a 3ª m., 1 m. passada em av <<; 6ª car. 
+    (com a 2ª mescla): << 1 m. passada em av., 6 m. av., 1 m.  passada am av. >>
+    7ª car. (com a 2ª mescla): << 1 m. passada em av., 6 m. dir., 1m. passada em av. >>
+    8ª car. (com a 1ª mescla): << em av. a m. passada, metendo a ag. na m., e,
+    sob os dois fios esticados por detrás do trabalho, 6 m. av., 1 m av.,
+    metendo a ag. na m. sob os fios esticados por de trás do trabalho >>;
+    9ª car. (com a 1ª mescla): em av.;
+    10ª car. (com a 2ª mescla): recomeçar da 4ª car., trocando o bordado, iniciar com << 3 m.
+    av., 2 m, passadas em av., 6 m. av., enrolando e vezes o fio na ag. >> .
+
+amostra: "A um quadrado de 10 cm de cada lado, trabalhando em p. de conchas,
+    com as ag. nº 4,5, correspondem 30 m. e 40 car.
+
+execução:
+    costas: "Com as ag. nº 4 e a mescla nº 1, montar 82 m. e trabalhar 4 cm em p. canelado 1/1:
+    continuar, com as ag. nº 4,5 em p. de conchas, aumentando, na primeira car., 70 m., bem
+    distibuídas. A 38 cm de altura total diminuir, de ambos os lados, para o raglan,
+    52 veses 1 m., cada 2 cars. rematar numa só car, as restantes m."
+    frente-direita: "Com as ag. nº 4 e a 1ª mescla, montar 40 m. e trabalhar 4 cm em p.
+    canelando 1/1: continuar, com as ag. nº4/5, em p. de conchas aumentando, na primeira car., 32 m,. bem distibuídas.
+    A 32 cm de altura total diminuir, no lado direito do trabalho, para o decote, 2o vzeses em vez...

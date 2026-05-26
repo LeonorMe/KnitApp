@@ -3,15 +3,27 @@ package com.malha.app.feature.settings
 import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Login
+import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.CloudDone
+import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -27,6 +39,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -54,12 +67,15 @@ fun SettingsScreen(
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
     val googleSignInClient = remember(context) {
+        val webClientId = context.resolveGoogleWebClientId()
+        val optionsBuilder = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestEmail()
+        if (webClientId.isNotBlank()) {
+            optionsBuilder.requestIdToken(webClientId)
+        }
         GoogleSignIn.getClient(
             context,
-            GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(context.getString(R.string.default_web_client_id))
-                .requestEmail()
-                .build()
+            optionsBuilder.build()
         )
     }
     val launcher = rememberLauncherForActivityResult(
@@ -77,6 +93,15 @@ fun SettingsScreen(
         } else {
             viewModel.showSignInError("Google sign-in was cancelled.")
         }
+    }
+
+    fun launchGoogleAuth(mode: AuthMode) {
+        if (context.resolveGoogleWebClientId().isBlank()) {
+            viewModel.showSignInError("Google Sign-In needs a web client ID in google-services.json.")
+            return
+        }
+        viewModel.beginAuth(mode)
+        launcher.launch(googleSignInClient.signInIntent)
     }
 
     Surface(
@@ -100,19 +125,30 @@ fun SettingsScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
-            if (uiState.errorMessage != null) {
+            AnimatedVisibility(visible = uiState.errorMessage != null) {
                 Text(
                     text = uiState.errorMessage.orEmpty(),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.error
                 )
             }
+            AnimatedVisibility(visible = uiState.successMessage != null) {
+                Text(
+                    text = uiState.successMessage.orEmpty(),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
 
             ProfileCard(
                 uiState = uiState,
                 onSignIn = {
-                    viewModel.clearError()
-                    launcher.launch(googleSignInClient.signInIntent)
+                    viewModel.clearMessages()
+                    launchGoogleAuth(AuthMode.Login)
+                },
+                onCreateAccount = {
+                    viewModel.clearMessages()
+                    launchGoogleAuth(AuthMode.CreateAccount)
                 },
                 onSignOut = {
                     googleSignInClient.signOut()
@@ -157,6 +193,15 @@ fun SettingsScreen(
     }
 }
 
+private fun android.content.Context.resolveGoogleWebClientId(): String {
+    val resourceId = resources.getIdentifier(
+        "default_web_client_id",
+        "string",
+        packageName
+    )
+    return if (resourceId != 0) getString(resourceId) else ""
+}
+
 @Composable
 private fun SettingsSection(
     title: String,
@@ -176,6 +221,7 @@ private fun SettingsSection(
 private fun ProfileCard(
     uiState: SettingsUiState,
     onSignIn: () -> Unit,
+    onCreateAccount: () -> Unit,
     onSignOut: () -> Unit,
     onEditProfile: () -> Unit
 ) {
@@ -193,11 +239,19 @@ private fun ProfileCard(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(
-                    text = "Profile",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Icon(
+                        imageVector = if (uiState.user == null) Icons.Default.AccountCircle else Icons.Default.CloudDone,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(28.dp)
+                    )
+                    Text(
+                        text = if (uiState.user == null) "Malha account" else "Connected account",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
                 if (uiState.user != null) {
                     TextButton(onClick = onEditProfile) {
                         Text("Edit")
@@ -205,42 +259,85 @@ private fun ProfileCard(
                 }
             }
 
-            if (uiState.user == null) {
-                Text(
-                    text = "Sign in to sync projects, patterns, materials, and future community features with Firestore.",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Button(
-                    onClick = onSignIn,
-                    enabled = !uiState.isSigningIn,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(if (uiState.isSigningIn) stringResource(R.string.action_signing_in) else stringResource(R.string.action_sign_in_google))
-                }
-            } else {
-                Text(
-                    text = uiState.preferences.username ?: uiState.user.displayName ?: "Signed in",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                if (uiState.preferences.bio != null) {
-                    Text(
-                        text = uiState.preferences.bio!!,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-                Text(
-                    text = uiState.user.email ?: uiState.user.id,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                OutlinedButton(
-                    onClick = onSignOut,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(stringResource(R.string.action_sign_out))
+            AnimatedContent(
+                targetState = uiState.user,
+                label = "settings-account-state"
+            ) { user ->
+                if (user == null) {
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Text(
+                            text = "Use Google to create or access your Malha account. Your profile is stored in Firebase Auth and Firestore.",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Button(
+                            onClick = onCreateAccount,
+                            enabled = !uiState.isSigningIn,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Icon(Icons.Default.PersonAdd, contentDescription = null)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                when {
+                                    uiState.isSigningIn && uiState.authMode == AuthMode.CreateAccount -> stringResource(R.string.action_signing_in)
+                                    else -> stringResource(R.string.action_create_google_account)
+                                }
+                            )
+                        }
+                        OutlinedButton(
+                            onClick = onSignIn,
+                            enabled = !uiState.isSigningIn,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Icon(Icons.AutoMirrored.Filled.Login, contentDescription = null)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                when {
+                                    uiState.isSigningIn && uiState.authMode == AuthMode.Login -> stringResource(R.string.action_signing_in)
+                                    else -> stringResource(R.string.action_sign_in_google)
+                                }
+                            )
+                        }
+                    }
+                } else {
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Text(
+                            text = uiState.preferences.username ?: user.displayName ?: "Signed in",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        if (uiState.preferences.bio != null) {
+                            Text(
+                                text = uiState.preferences.bio,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Text(
+                            text = user.email ?: user.id,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 4.dp)
+                        ) {
+                            Text(
+                                text = "Firestore sync ready",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                        OutlinedButton(
+                            onClick = onSignOut,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(stringResource(R.string.action_sign_out))
+                        }
+                    }
                 }
             }
         }

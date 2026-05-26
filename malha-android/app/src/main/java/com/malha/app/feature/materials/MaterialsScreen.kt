@@ -4,6 +4,9 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -16,7 +19,6 @@ import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -70,8 +72,8 @@ fun MaterialsScreen(viewModel: MaterialsViewModel = viewModel()) {
                 modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                if (uiState.errorMessage != null) {
-                    item {
+                item {
+                    AnimatedVisibility(visible = uiState.errorMessage != null) {
                         Text(
                             text = uiState.errorMessage.orEmpty(),
                             style = MaterialTheme.typography.bodyLarge,
@@ -79,31 +81,32 @@ fun MaterialsScreen(viewModel: MaterialsViewModel = viewModel()) {
                         )
                     }
                 }
-                
-                val type = when (selectedTabIndex) {
-                    0 -> MaterialType.Yarn
-                    1 -> MaterialType.Needle
-                    2 -> MaterialType.Accessory
-                    else -> null // Lista de compras / Loja mocked later
-                }
+                item {
+                    AnimatedContent(
+                        targetState = selectedTabIndex,
+                        label = "materials-tab-content"
+                    ) { tabIndex ->
+                        val selectedType = when (tabIndex) {
+                            0 -> MaterialType.Yarn
+                            1 -> MaterialType.Needle
+                            2 -> MaterialType.Accessory
+                            else -> null
+                        }
 
-                if (type != null) {
-                    val materials = uiState.materials.filter { it.type == type }
-                    item {
-                        MaterialCategoryCard(
-                            type = type,
-                            materials = materials,
-                            isLoading = uiState.isLoading
-                        )
-                    }
-                } else {
-                    item {
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
-                            Text(
-                                text = "Comming Soon: ${tabs[selectedTabIndex]}",
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                        if (selectedType != null) {
+                            MaterialCategoryCard(
+                                type = selectedType,
+                                materials = uiState.materials.filter { it.type == selectedType },
+                                isLoading = uiState.isLoading
                             )
+                        } else {
+                            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = androidx.compose.ui.Alignment.Center) {
+                                Text(
+                                    text = "Coming soon: ${tabs[tabIndex]}",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
                         }
                     }
                 }
@@ -133,7 +136,9 @@ private fun MaterialCategoryCard(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant
         ),
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .animateContentSize()
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -170,7 +175,9 @@ private fun MaterialCategoryCard(
 private fun MaterialRow(material: Material) {
     Row(
         horizontalArrangement = Arrangement.spacedBy(14.dp),
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .animateContentSize()
     ) {
         ImagePlaceholder(label = material.name, imageUri = material.imageUri)
         Column(

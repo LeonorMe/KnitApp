@@ -1,6 +1,7 @@
 package com.malha.app.core.firebase
 
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -37,8 +38,7 @@ class FirestoreCloudDataService(
         firestore
             .collection(CloudCollections.USERS)
             .document(user.id)
-            .set(profile)
+            .set(profile, SetOptions.merge())
             .await()
     }
 }
-
