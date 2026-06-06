@@ -28,6 +28,16 @@ class MainActivity : ComponentActivity() {
                 applyLocale(preferences.language)
             }
 
+            // Handle automatic background anonymous sign-in
+            val authService = this.appContainer.authService
+            LaunchedEffect(Unit) {
+                if (authService.currentUser == null) {
+                    runCatching {
+                        authService.signInAnonymously()
+                    }
+                }
+            }
+
             MalhaTheme(
                 appTheme = preferences.theme,
                 textSizeMultiplier = preferences.textSizeMultiplier

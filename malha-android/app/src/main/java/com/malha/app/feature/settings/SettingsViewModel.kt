@@ -120,6 +120,14 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                 appContainer.cloudDataService.upsertUserProfile(user)
                 user
             }.onSuccess { user ->
+                val currentPrefs = uiState.value.preferences
+                val newUsername = currentPrefs.username ?: user.displayName
+                val newPhoto = currentPrefs.profilePhotoUri ?: user.photoUrl
+                appContainer.preferencesRepository.updateProfile(newUsername, currentPrefs.bio)
+                if (newPhoto != null) {
+                    appContainer.preferencesRepository.updateProfilePhoto(newPhoto)
+                }
+
                 _uiState.update {
                     it.copy(
                         user = user,
@@ -145,9 +153,15 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun signOut() {
-        appContainer.authService.signOut()
-        _uiState.update {
-            SettingsUiState(preferences = it.preferences, successMessage = "Signed out.")
+        viewModelScope.launch {
+            appContainer.authService.signOut()
+            appContainer.preferencesRepository.clearProfile()
+            runCatching {
+                appContainer.authService.signInAnonymously()
+            }
+            _uiState.update {
+                SettingsUiState(preferences = it.preferences, successMessage = "Signed out.")
+            }
         }
     }
 

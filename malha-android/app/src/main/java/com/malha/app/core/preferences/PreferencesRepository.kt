@@ -89,4 +89,12 @@ class PreferencesRepository(private val context: Context) {
     suspend fun updateLastDailyReward(timestamp: Long) {
         context.dataStore.edit { it[Keys.LAST_REWARD_TS] = timestamp }
     }
+
+    suspend fun clearProfile() {
+        context.dataStore.edit { preferences ->
+            preferences.remove(Keys.USERNAME)
+            preferences.remove(Keys.BIO)
+            preferences.remove(Keys.PROFILE_PHOTO_URI)
+        }
+    }
 }

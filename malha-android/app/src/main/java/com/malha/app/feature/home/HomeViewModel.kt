@@ -12,8 +12,9 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     val uiState: StateFlow<HomeUiState> = combine(
         appContainer.projectRepository.observeActiveProjects(),
         appContainer.materialRepository.observeMaterials(),
-        appContainer.preferencesRepository.userPreferences
-    ) { projects, materials, prefs ->
+        appContainer.preferencesRepository.userPreferences,
+        appContainer.socialRepository.observeCurrentUser()
+    ) { projects, materials, prefs, currentUser ->
         HomeUiState(
             isLoading = false,
             projects = projects,
@@ -21,7 +22,10 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                 projects = projects,
                 materials = materials
             ),
-            showDailyYarn = !DateUtils.isToday(prefs.lastDailyRewardTimestamp)
+            showDailyYarn = !DateUtils.isToday(prefs.lastDailyRewardTimestamp),
+            userName = prefs.username ?: currentUser?.name ?: "Guest",
+            profilePhotoUri = prefs.profilePhotoUri ?: currentUser?.profilePicUri,
+            coinBalance = currentUser?.coins ?: 0
         )
     }
     .stateIn(

@@ -29,19 +29,26 @@ class FirestoreCloudDataService(
     }
 
     override suspend fun upsertUserProfile(user: AuthUser) {
-        val profile = mapOf(
+        val docRef = firestore.collection(CloudCollections.USERS).document(user.id)
+        val doc = runCatching { docRef.get().await() }.getOrNull()
+
+        val profile = mutableMapOf<String, Any?>(
             "id" to user.id,
-            "displayName" to user.displayName,
             "email" to user.email,
-            "profilePhotoUri" to user.photoUrl,
             "updatedAt" to System.currentTimeMillis()
         )
 
-        firestore
-            .collection(CloudCollections.USERS)
-            .document(user.id)
-            .set(profile, SetOptions.merge())
-            .await()
+        val existingName = doc?.getString("displayName")
+        if (existingName.isNullOrBlank()) {
+            profile["displayName"] = user.displayName
+        }
+
+        val existingPhoto = doc?.getString("profilePhotoUri")
+        if (existingPhoto.isNullOrBlank()) {
+            profile["profilePhotoUri"] = user.photoUrl
+        }
+
+        docRef.set(profile, SetOptions.merge()).await()
     }
 
     override suspend fun updateUserProfile(

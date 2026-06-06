@@ -36,6 +36,14 @@ class FirebaseAuthService(
         return user.toAuthUser()
     }
 
+    override suspend fun signInAnonymously(): AuthUser {
+        val result = firebaseAuth.signInAnonymously().await()
+        val user = requireNotNull(result.user) {
+            "Anonymous sign-in completed without a Firebase user."
+        }
+        return user.toAuthUser()
+    }
+
     override fun signOut() {
         firebaseAuth.signOut()
     }
@@ -45,7 +53,8 @@ class FirebaseAuthService(
             id = uid,
             displayName = displayName,
             email = email,
-            photoUrl = photoUrl?.toString()
+            photoUrl = photoUrl?.toString(),
+            isAnonymous = isAnonymous
         )
     }
 }

@@ -4,35 +4,54 @@ import com.malha.app.core.database.dao.SocialDao
 import com.malha.app.core.database.entity.CommentEntity
 import com.malha.app.core.database.entity.PostEntity
 import com.malha.app.core.database.entity.UserEntity
+import com.malha.app.core.firebase.AuthService
 import com.malha.app.data.mapper.toPostDomain
 import com.malha.app.data.mapper.toUserDomain
 import com.malha.app.domain.model.Comment
 import com.malha.app.domain.model.Post
 import com.malha.app.domain.model.User
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import java.util.UUID
 
+@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class RoomSocialRepository(
     private val socialDao: SocialDao,
-    private val currentUserId: String = "default-user" // Mocked for now
+    private val authService: AuthService
 ) : SocialRepository {
 
     private val likedPostIds = mutableSetOf<String>()
 
+    private val currentUserId: String
+        get() = authService.currentUser?.id ?: "default-user"
+
     override fun observeCurrentUser(): Flow<User?> {
-        return socialDao.observeUser(currentUserId).map { it?.toUserDomain() }
+        return authService.authState.flatMapLatest { authUser ->
+            val userId = authUser?.id ?: "default-user"
+            socialDao.observeUser(userId).map { userEntity ->
+                userEntity?.toUserDomain() ?: User(
+                    id = userId,
+                    name = authUser?.displayName ?: "New Crafter",
+                    bio = "Exploring the world of knitting.",
+                    profilePicUri = authUser?.photoUrl,
+                    coins = 100
+                )
+            }
+        }
     }
 
     override suspend fun getCurrentUser(): User? {
-        var user = socialDao.getUser(currentUserId)?.toUserDomain()
+        val userId = currentUserId
+        var user = socialDao.getUser(userId)?.toUserDomain()
         if (user == null) {
+            val authUser = authService.currentUser
             // Seed initial user
             val newUser = UserEntity(
-                id = currentUserId,
-                name = "New Crafter",
+                id = userId,
+                name = authUser?.displayName ?: "New Crafter",
                 bio = "Exploring the world of knitting.",
-                profilePicUri = null,
+                profilePicUri = authUser?.photoUrl,
                 coins = 100,
                 updatedAt = System.currentTimeMillis()
             )

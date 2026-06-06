@@ -45,7 +45,10 @@ class AppContainer(context: Context) {
     )
     val aidiAssistantService: AidiAssistantService = LocalAidiAssistantService()
     val preferencesRepository = PreferencesRepository(context)
-    val socialRepository: SocialRepository = RoomSocialRepository(database.socialDao())
+    val socialRepository: SocialRepository = RoomSocialRepository(
+        socialDao = database.socialDao(),
+        authService = authService
+    )
 
     val databaseSeeder = DatabaseSeeder(
         patternDao = database.patternDao(),

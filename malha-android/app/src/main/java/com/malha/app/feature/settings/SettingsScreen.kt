@@ -109,7 +109,12 @@ fun SettingsScreen(
             }.onSuccess { account ->
                 viewModel.signInWithGoogleToken(account.idToken)
             }.onFailure { error ->
-                viewModel.showSignInError(error.message ?: "Google sign-in was cancelled.")
+                val message = if (error is ApiException) {
+                    "Google Sign-In error (Status Code ${error.statusCode}): ${error.localizedMessage}"
+                } else {
+                    error.message ?: "Google sign-in was cancelled."
+                }
+                viewModel.showSignInError(message)
             }
         } else {
             viewModel.showSignInError("Google sign-in was cancelled.")
@@ -354,18 +359,18 @@ private fun ProfileCard(
             ) {
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     Icon(
-                        imageVector = if (uiState.user == null) Icons.Default.AccountCircle else Icons.Default.CloudDone,
+                        imageVector = if (uiState.user == null || uiState.user.isAnonymous) Icons.Default.AccountCircle else Icons.Default.CloudDone,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(28.dp)
                     )
                     Text(
-                        text = if (uiState.user == null) "Malha account" else "Connected account",
+                        text = if (uiState.user == null || uiState.user.isAnonymous) "Malha account" else "Connected account",
                         style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                 }
-                if (uiState.user != null) {
+                if (uiState.user != null && !uiState.user.isAnonymous) {
                     Row {
                         TextButton(onClick = onChangePhoto) {
                             Text("Photo")
@@ -381,7 +386,7 @@ private fun ProfileCard(
                 targetState = uiState.user,
                 label = "settings-account-state"
             ) { user ->
-                if (user == null) {
+                if (user == null || user.isAnonymous) {
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         Text(
                             text = "Use Google to create or access your Malha account. Your profile is stored in Firebase Auth and Firestore.",

@@ -6,7 +6,8 @@ data class AuthUser(
     val id: String,
     val displayName: String?,
     val email: String?,
-    val photoUrl: String? = null
+    val photoUrl: String? = null,
+    val isAnonymous: Boolean = false
 )
 
 interface AuthService {
@@ -14,5 +15,6 @@ interface AuthService {
     val authState: Flow<AuthUser?>
     fun isSignedIn(): Boolean
     suspend fun signInWithGoogleIdToken(idToken: String): AuthUser
+    suspend fun signInAnonymously(): AuthUser
     fun signOut()
 }

@@ -105,6 +105,7 @@ fun HomeScreen(
                     item {
                         HomeHeader(
                             userName = uiState.userName,
+                            profilePhotoUri = uiState.profilePhotoUri,
                             coinBalance = uiState.coinBalance,
                             onNavigateToProfile = onNavigateToProfile
                         )
@@ -262,6 +263,7 @@ fun HomeScreen(
 @Composable
 private fun HomeHeader(
     userName: String,
+    profilePhotoUri: String?,
     coinBalance: Int,
     onNavigateToProfile: () -> Unit
 ) {
@@ -284,12 +286,31 @@ private fun HomeHeader(
                 color = MaterialTheme.colorScheme.primary
             )
         }
-        IconButton(onClick = onNavigateToProfile) {
-            Icon(
-                imageVector = Icons.Default.Person,
-                contentDescription = "Profile",
-                modifier = Modifier.size(32.dp)
-            )
+        if (!profilePhotoUri.isNullOrEmpty()) {
+            Surface(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clickable(onClick = onNavigateToProfile),
+                shape = androidx.compose.foundation.shape.CircleShape,
+                color = MaterialTheme.colorScheme.surfaceVariant
+            ) {
+                ImagePlaceholder(
+                    label = userName.take(1).uppercase(),
+                    imageUri = profilePhotoUri,
+                    size = 40.dp
+                )
+            }
+        } else {
+            IconButton(
+                onClick = onNavigateToProfile,
+                modifier = Modifier.size(40.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Person,
+                    contentDescription = "Profile",
+                    modifier = Modifier.size(32.dp)
+                )
+            }
         }
     }
 }
