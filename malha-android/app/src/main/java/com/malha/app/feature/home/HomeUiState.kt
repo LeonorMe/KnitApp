@@ -4,7 +4,7 @@ import com.malha.app.domain.model.Project
 
 data class HomeUiState(
     val isLoading: Boolean = true,
-    val userName: String = "Ana",
+    val userName: String = "Crafter",
     val profilePhotoUri: String? = null,
     val coinBalance: Int = 50,
     val projects: List<Project> = emptyList(),

@@ -7,7 +7,7 @@
     <string name="nav_projects">Projects</string>
     <string name="nav_patterns">Patterns</string>
     <string name="nav_materials">Materials</string>
-    <string name="nav_aidi">Aidi</string>
+    <string name="nav_aidi" translatable="false">Aidi</string>
     <string name="nav_community">Community</string>
     <string name="nav_profile">Profile</string>
     <string name="nav_settings">Settings</string>
@@ -88,4 +88,7 @@
     <string name="execution_select_size">Select Size</string>
     <string name="action_next_step">Next Step</string>
     <string name="action_mark_done">Mark Done</string>
+    <string name="greeting">Hello, %1$s</string>
+    <string name="google_sign_in_was_cancelled">Google sign-in was cancelled.</string>
+    <string name="google_sign_in_needs_a_web_client_id_in_google_services_json">Google Sign-In needs a web client ID in google-services.json.</string>
 </resources>

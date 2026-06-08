@@ -6,7 +6,9 @@
     <string name="nav_home">Inicio</string>
     <string name="nav_projects">Proyectos</string>
     <string name="nav_patterns">Patrones</string>
-    <string name="nav_materials">Materiales</string>
+    <string name="nav_materials">Material</string>
+    <string name="nav_community">Comunidad</string>
+    <string name="nav_profile">Perfil</string>
     <string name="nav_settings">Ajustes</string>
 
     <!-- Home Screen -->
@@ -42,6 +44,8 @@
     <string name="theme_light">Claro</string>
     <string name="theme_dark">Oscuro</string>
     <string name="theme_warm">Cálido (Reducir Luz Azul)</string>
+    <string name="unit_metric">Metrico (cm/m)</string>
+    <string name="unit_imperial">Imperial (pol/jard)</string>
     <string name="action_sign_out">Cerrar sesión</string>
     <string name="action_sign_in_google">Iniciar sesión con Google</string>
     <string name="action_signing_in">Iniciando sesión...</string>
@@ -80,4 +84,6 @@
     <string name="execution_select_size">Seleccionar Talla</string>
     <string name="action_next_step">Siguiente Paso</string>
     <string name="action_mark_done">Marcar como Hecho</string>
+    <string name="greeting">Hola, %1$s</string>
+    <string name="section_language">Idioma</string>
 </resources>

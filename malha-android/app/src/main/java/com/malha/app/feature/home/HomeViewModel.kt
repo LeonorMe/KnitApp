@@ -23,7 +23,9 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                 materials = materials
             ),
             showDailyYarn = !DateUtils.isToday(prefs.lastDailyRewardTimestamp),
-            userName = prefs.username ?: currentUser?.name ?: "Guest",
+            userName = (prefs.username ?: currentUser?.name ?: "Guest")
+                .trim()
+                .substringBefore(" "),
             profilePhotoUri = prefs.profilePhotoUri ?: currentUser?.profilePicUri,
             coinBalance = currentUser?.coins ?: 0
         )

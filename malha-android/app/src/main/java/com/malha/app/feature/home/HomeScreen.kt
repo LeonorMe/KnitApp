@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Person
@@ -48,12 +49,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.malha.app.R
 import com.malha.app.core.design.component.DailyYarnShakeDialog
 import com.malha.app.core.design.component.ImagePlaceholder
 
+@Preview
 @Composable
 fun HomeScreen(
     onOpenProject: (String) -> Unit,
@@ -260,6 +267,7 @@ fun HomeScreen(
     }
 }
 
+@Preview
 @Composable
 private fun HomeHeader(
     userName: String,
@@ -276,15 +284,40 @@ private fun HomeHeader(
     ) {
         Column {
             Text(
-                text = "Boa noite, $userName",
+                text = stringResource(R.string.greeting, userName),
                 style = MaterialTheme.typography.headlineLarge,
                 color = MaterialTheme.colorScheme.onBackground
             )
-            Text(
-                text = "$coinBalance Moedas",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.primary
-            )
+            Surface(
+                onClick = {
+                    // TODO navigate to store
+                },
+                shape = RoundedCornerShape(50)
+
+            ){
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier.padding(
+                        horizontal = 10.dp,
+                        vertical = 6.dp
+                    )
+                ){
+                    Icon(
+                        painter = painterResource(R.drawable.ic_coin),
+                        contentDescription = "Coins",
+                        tint = Color.Unspecified,
+                    )
+
+                    Spacer(modifier = Modifier.width(4.dp))
+
+                    Text(
+                        text = "$coinBalance",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
         }
         if (!profilePhotoUri.isNullOrEmpty()) {
             Surface(
@@ -315,6 +348,7 @@ private fun HomeHeader(
     }
 }
 
+@Preview
 @Composable
 private fun SectionTitle(text: String) {
     Text(
@@ -324,6 +358,7 @@ private fun SectionTitle(text: String) {
     )
 }
 
+@Preview
 @Composable
 private fun InfoText(text: String) {
     Text(
@@ -333,6 +368,7 @@ private fun InfoText(text: String) {
     )
 }
 
+@Preview
 @Composable
 private fun DailyActionCard(
     title: String,

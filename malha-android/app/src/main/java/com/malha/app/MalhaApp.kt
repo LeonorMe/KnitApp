@@ -3,11 +3,14 @@ package com.malha.app
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.List
+import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.Build
 import androidx.compose.material.icons.outlined.Face
 import androidx.compose.material.icons.outlined.Folder
+import androidx.compose.material.icons.outlined.Groups
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -75,13 +78,13 @@ fun MalhaApp() {
                         icon = {
                             Icon(
                                 imageVector = when (destination) {
-                                    MalhaDestination.Home -> Icons.Outlined.Home
-                                    MalhaDestination.Projects -> Icons.Outlined.Folder
+                                    MalhaDestination.Home -> androidx.compose.ui.graphics.vector.ImageVector.vectorResource(id = R.drawable.home_24px)
+                                    MalhaDestination.Projects -> androidx.compose.ui.graphics.vector.ImageVector.vectorResource(id = R.drawable.ic_project)
                                     MalhaDestination.Patterns -> Icons.AutoMirrored.Outlined.List
-                                    MalhaDestination.Materials -> Icons.Outlined.Build
-                                    MalhaDestination.Community -> Icons.Outlined.Face
-                                    MalhaDestination.Aidi -> androidx.compose.ui.graphics.vector.ImageVector.vectorResource(id = R.drawable.aidi_icon)
-                                    MalhaDestination.Profile -> Icons.Outlined.Face
+                                    MalhaDestination.Materials -> androidx.compose.ui.graphics.vector.ImageVector.vectorResource(id = R.drawable.ic_materials)
+                                    MalhaDestination.Community -> Icons.Outlined.Groups
+                                    MalhaDestination.Aidi -> androidx.compose.ui.graphics.vector.ImageVector.vectorResource(id = R.drawable.ic_aidi)
+                                    MalhaDestination.Profile -> Icons.Outlined.AccountCircle
                                     MalhaDestination.Settings -> Icons.Outlined.Settings
                                     else -> Icons.Outlined.Home
                                 },

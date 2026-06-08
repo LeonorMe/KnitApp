@@ -112,18 +112,18 @@ fun SettingsScreen(
                 val message = if (error is ApiException) {
                     "Google Sign-In error (Status Code ${error.statusCode}): ${error.localizedMessage}"
                 } else {
-                    error.message ?: "Google sign-in was cancelled."
+                    error.message ?: context.getString(R.string.google_sign_in_was_cancelled)
                 }
                 viewModel.showSignInError(message)
             }
         } else {
-            viewModel.showSignInError("Google sign-in was cancelled.")
+            viewModel.showSignInError(context.getString(R.string.google_sign_in_was_cancelled))
         }
     }
 
     fun launchGoogleAuth(mode: AuthMode) {
         if (context.resolveGoogleWebClientId().isBlank()) {
-            viewModel.showSignInError("Google Sign-In needs a web client ID in google-services.json.")
+            viewModel.showSignInError(context.getString(R.string.google_sign_in_needs_a_web_client_id_in_google_services_json))
             return
         }
         viewModel.beginAuth(mode)
@@ -510,7 +510,9 @@ private fun ThemeSelector(
             readOnly = true,
             label = { Text("Theme") },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            modifier = Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryNotEditable)
+            modifier = Modifier
+                .fillMaxWidth()
+                .menuAnchor(MenuAnchorType.PrimaryNotEditable)
         )
         ExposedDropdownMenu(
             expanded = expanded,
@@ -562,7 +564,9 @@ private fun LanguageSelector(
             readOnly = true,
             label = { Text("App Language") },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            modifier = Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryNotEditable)
+            modifier = Modifier
+                .fillMaxWidth()
+                .menuAnchor(MenuAnchorType.PrimaryNotEditable)
         )
         ExposedDropdownMenu(
             expanded = expanded,
@@ -612,7 +616,9 @@ private fun UnitsSelector(
             readOnly = true,
             label = { Text("Measurement Units") },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            modifier = Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryNotEditable)
+            modifier = Modifier
+                .fillMaxWidth()
+                .menuAnchor(MenuAnchorType.PrimaryNotEditable)
         )
         ExposedDropdownMenu(
             expanded = expanded,

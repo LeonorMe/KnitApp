@@ -6,7 +6,9 @@
     <string name="nav_home">Início</string>
     <string name="nav_projects">Projetos</string>
     <string name="nav_patterns">Receitas</string>
-    <string name="nav_materials">Materiais</string>
+    <string name="nav_materials">Material</string>
+    <string name="nav_community">Comunidade</string>
+    <string name="nav_profile">Perfil</string>
     <string name="nav_settings">Definições</string>
 
     <!-- Home Screen -->
@@ -84,4 +86,5 @@
     <string name="execution_select_size">Selecionar Tamanho</string>
     <string name="action_next_step">Próximo Passo</string>
     <string name="action_mark_done">Marcar como Feito</string>
+    <string name="greeting">Olá, %1$s</string>
 </resources>
