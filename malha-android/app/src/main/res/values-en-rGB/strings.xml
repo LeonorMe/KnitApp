@@ -70,4 +70,19 @@
     <string name="dialog_step_note_title">Step note</string>
     <string name="input_personal_note">Personal note</string>
     <string name="action_save">Save</string>
+
+    <!-- Execution Screen -->
+    <string name="title_execution">Execution</string>
+    <string name="execution_project_not_found">Project not found.</string>
+    <string name="execution_knitting_companion_active">Knitting companion active</string>
+    <string name="execution_progress">Progress: %1$d%%</string>
+    <string name="execution_step_of">Step %1$d of %2$d</string>
+    <string name="execution_current_instruction">Current Instruction</string>
+    <string name="execution_target_stitches">Target: %1$s stitches</string>
+    <string name="execution_all_steps_done">All steps completed!</string>
+    <string name="execution_my_notes">My Notes</string>
+    <string name="execution_no_notes">No notes for this step. Click to add one.</string>
+    <string name="execution_select_size">Select Size</string>
+    <string name="action_next_step">Next Step</string>
+    <string name="action_mark_done">Mark Done</string>
 </resources>

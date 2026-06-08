@@ -33,8 +33,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.malha.app.R
 import com.malha.app.domain.model.Pattern
 import com.malha.app.domain.model.PatternStep
 import com.malha.app.domain.model.Project
@@ -69,7 +71,7 @@ fun ProjectExecutionScreen(
                 .fillMaxSize()
         ) {
             Text(
-                text = "Execution",
+                text = stringResource(R.string.title_execution),
                 style = MaterialTheme.typography.headlineLarge,
                 color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.padding(bottom = 16.dp)
@@ -77,7 +79,7 @@ fun ProjectExecutionScreen(
 
             if (project == null) {
                 Text(
-                    text = "Project not found.",
+                    text = stringResource(R.string.execution_project_not_found),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.error
                 )
@@ -175,7 +177,7 @@ private fun ProjectInfoCard(project: Project) {
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(project.name, style = MaterialTheme.typography.titleLarge)
-            Text("Knitting companion active", style = MaterialTheme.typography.bodyMedium)
+            Text(stringResource(R.string.execution_knitting_companion_active), style = MaterialTheme.typography.bodyMedium)
         }
     }
 }
@@ -194,11 +196,11 @@ private fun ExecutionProgress(uiState: ProjectExecutionUiState) {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                "Progress: ${uiState.project?.progressPercent}%",
+                stringResource(R.string.execution_progress, uiState.project?.progressPercent ?: 0),
                 style = MaterialTheme.typography.bodyLarge
             )
             Text(
-                "Step ${uiState.currentStepNumber} of ${uiState.totalSteps}",
+                stringResource(R.string.execution_step_of, uiState.currentStepNumber, uiState.totalSteps),
                 style = MaterialTheme.typography.bodyLarge
             )
         }
@@ -218,7 +220,7 @@ private fun StepCard(currentStep: PatternStep?, onStitchClick: (String) -> Unit)
             .animateContentSize()
     ) {
         Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text("Current Instruction", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+            Text(stringResource(R.string.execution_current_instruction), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
             AnimatedContent(
                 targetState = currentStep,
                 label = "current-step-card"
@@ -232,14 +234,14 @@ private fun StepCard(currentStep: PatternStep?, onStitchClick: (String) -> Unit)
                         )
                         if (step.stitchCountData != null) {
                             Text(
-                                "Target: ${step.stitchCountData} stitches",
+                                stringResource(R.string.execution_target_stitches, step.stitchCountData!!),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.secondary
                             )
                         }
                     }
                 } else {
-                    Text("All steps completed!", style = MaterialTheme.typography.headlineSmall)
+                    Text(stringResource(R.string.execution_all_steps_done), style = MaterialTheme.typography.headlineSmall)
                 }
             }
         }
@@ -256,9 +258,9 @@ private fun NoteCard(uiState: ProjectExecutionUiState, onEditNote: () -> Unit) {
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("My Notes", style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.execution_my_notes), style = MaterialTheme.typography.titleMedium)
             Text(
-                text = uiState.currentStepProgress?.note ?: "No notes for this step. Click to add one.",
+                text = uiState.currentStepProgress?.note ?: stringResource(R.string.execution_no_notes),
                 style = MaterialTheme.typography.bodyMedium,
                 color = if (uiState.currentStepProgress?.note == null) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface
             )
@@ -277,14 +279,14 @@ private fun Controls(uiState: ProjectExecutionUiState, viewModel: ProjectExecuti
             enabled = uiState.canGoPrevious,
             modifier = Modifier.weight(1f)
         ) {
-            Text("Previous")
+            Text(stringResource(R.string.action_previous))
         }
         Button(
             onClick = viewModel::markCurrentStepDone,
             enabled = uiState.canGoNext,
             modifier = Modifier.weight(1.5f)
         ) {
-            Text(if (uiState.currentStepProgress?.isDone == true) "Next Step" else "Mark Done")
+            Text(if (uiState.currentStepProgress?.isDone == true) stringResource(R.string.action_next_step) else stringResource(R.string.action_mark_done))
         }
     }
 }
@@ -298,23 +300,23 @@ private fun StepNoteDialog(
     var note by remember { mutableStateOf(currentNote) }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Step Note") },
+        title = { Text(stringResource(R.string.dialog_step_note_title)) },
         text = {
             OutlinedTextField(
                 value = note,
                 onValueChange = { note = it },
-                label = { Text("Personal note") },
+                label = { Text(stringResource(R.string.input_personal_note)) },
                 minLines = 4
             )
         },
         confirmButton = {
             Button(onClick = { onSave(note) }) {
-                Text("Save")
+                Text(stringResource(R.string.action_save))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.action_cancel))
             }
         }
     )
@@ -328,7 +330,7 @@ private fun SizeSelector(
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
-            text = "Select Size",
+            text = stringResource(R.string.execution_select_size),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onBackground
         )

@@ -69,4 +69,19 @@
     <string name="dialog_step_note_title">Nota do passo</string>
     <string name="input_personal_note">Nota pessoal</string>
     <string name="action_save">Guardar</string>
+
+    <!-- Execution Screen -->
+    <string name="title_execution">Execução</string>
+    <string name="execution_project_not_found">Projeto não encontrado.</string>
+    <string name="execution_knitting_companion_active">Companheiro de tricô ativo</string>
+    <string name="execution_progress">Progresso: %1$d%%</string>
+    <string name="execution_step_of">Passo %1$d de %2$d</string>
+    <string name="execution_current_instruction">Instrução Atual</string>
+    <string name="execution_target_stitches">Objetivo: %1$s pontos</string>
+    <string name="execution_all_steps_done">Todos os passos concluídos!</string>
+    <string name="execution_my_notes">As Minhas Notas</string>
+    <string name="execution_no_notes">Sem notas para este passo. Clica para adicionar.</string>
+    <string name="execution_select_size">Selecionar Tamanho</string>
+    <string name="action_next_step">Próximo Passo</string>
+    <string name="action_mark_done">Marcar como Feito</string>
 </resources>
