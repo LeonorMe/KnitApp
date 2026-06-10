@@ -51,6 +51,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -352,6 +353,13 @@ private fun ProjectCrateCard(
     project: com.malha.app.domain.model.Project,
     onOpenProject: (String) -> Unit
 ) {
+    val projectAccent = remember(project.colorHex) {
+        project.colorHex
+            ?.let { hex -> runCatching { Color(android.graphics.Color.parseColor(hex)) }.getOrNull() }
+            ?: Color(0xFF3F6B57)
+    }
+    val onAccent = if (projectAccent.luminance() < 0.38f) Color.White else Color(0xFF23352C)
+
     Box(
         modifier = Modifier
             .size(240.dp)
@@ -362,7 +370,7 @@ private fun ProjectCrateCard(
         Icon(
             painter = painterResource(id = R.drawable.ic_materials),
             contentDescription = null,
-            tint = Color(0xFF3F6B57),
+            tint = projectAccent,
             modifier = Modifier.fillMaxSize()
         )
 
@@ -376,7 +384,7 @@ private fun ProjectCrateCard(
                 containerColor = MaterialTheme.colorScheme.surface
             ),
             shape = RoundedCornerShape(6.dp),
-            border = BorderStroke(1.5.dp, Color(0xFF3F6B57).copy(alpha = 0.6f)),
+            border = BorderStroke(1.5.dp, projectAccent.copy(alpha = 0.72f)),
             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
         ) {
             Row(
@@ -413,7 +421,7 @@ private fun ProjectCrateCard(
                         text = "${project.progressPercent}%",
                         style = MaterialTheme.typography.bodySmall,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF3F6B57)
+                        color = projectAccent
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     LinearProgressIndicator(
@@ -422,8 +430,29 @@ private fun ProjectCrateCard(
                             .fillMaxWidth()
                             .height(4.dp)
                             .clip(RoundedCornerShape(2.dp)),
-                        color = Color(0xFF3F6B57),
-                        trackColor = Color(0xFF3F6B57).copy(alpha = 0.2f)
+                        color = projectAccent,
+                        trackColor = projectAccent.copy(alpha = 0.2f)
+                    )
+                }
+            }
+        }
+        if (project.colorHex != null) {
+            Surface(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .offset(x = (-42).dp, y = 34.dp)
+                    .size(28.dp),
+                shape = androidx.compose.foundation.shape.CircleShape,
+                color = projectAccent,
+                border = BorderStroke(2.dp, MaterialTheme.colorScheme.surface),
+                shadowElevation = 3.dp
+            ) {
+                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                    Text(
+                        text = project.name.take(1).uppercase(),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = onAccent
                     )
                 }
             }

@@ -82,5 +82,14 @@ class CloudBackedProjectRepository(
 
     override suspend fun updateProjectColor(projectId: String, colorHex: String?) {
         local.updateProjectColor(projectId, colorHex)
+        runCatching {
+            authService.currentUser?.let { user ->
+                cloudDataService.updateProjectColor(
+                    userId = user.id,
+                    projectId = projectId,
+                    colorHex = colorHex
+                )
+            }
+        }
     }
 }

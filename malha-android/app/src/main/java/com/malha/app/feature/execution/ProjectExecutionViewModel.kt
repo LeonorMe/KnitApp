@@ -121,6 +121,12 @@ class ProjectExecutionViewModel(
         selectedSizeState.update { size }
     }
 
+    fun updateProjectColor(colorHex: String?) {
+        viewModelScope.launch {
+            appContainer.projectRepository.updateProjectColor(projectId, colorHex)
+        }
+    }
+
     fun clearError() {
         errorMessage.update { null }
     }

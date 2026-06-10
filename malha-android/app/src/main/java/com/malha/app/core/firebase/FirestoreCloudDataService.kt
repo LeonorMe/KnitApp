@@ -100,6 +100,22 @@ class FirestoreCloudDataService(
             .await()
     }
 
+    override suspend fun updateProjectColor(userId: String, projectId: String, colorHex: String?) {
+        firestore
+            .collection(CloudCollections.USERS)
+            .document(userId)
+            .collection(CloudCollections.PROJECTS)
+            .document(projectId)
+            .set(
+                mapOf(
+                    "colorHex" to colorHex,
+                    "updatedAt" to System.currentTimeMillis()
+                ),
+                SetOptions.merge()
+            )
+            .await()
+    }
+
     override suspend fun upsertMaterial(
         userId: String,
         materialId: String,

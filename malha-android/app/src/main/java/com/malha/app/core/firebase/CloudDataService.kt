@@ -21,6 +21,7 @@ interface CloudDataService {
         progressPercent: Int,
         status: String
     )
+    suspend fun updateProjectColor(userId: String, projectId: String, colorHex: String?)
     suspend fun upsertMaterial(
         userId: String,
         materialId: String,
