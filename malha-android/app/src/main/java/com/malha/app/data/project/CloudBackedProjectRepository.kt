@@ -79,4 +79,8 @@ class CloudBackedProjectRepository(
     ) {
         local.saveStepProgress(projectId, patternStepId, isDone, note)
     }
+
+    override suspend fun updateProjectColor(projectId: String, colorHex: String?) {
+        local.updateProjectColor(projectId, colorHex)
+    }
 }

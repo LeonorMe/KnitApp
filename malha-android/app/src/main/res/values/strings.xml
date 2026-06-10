@@ -88,7 +88,7 @@
     <string name="execution_select_size">Select Size</string>
     <string name="action_next_step">Next Step</string>
     <string name="action_mark_done">Mark Done</string>
-    <string name="greeting">Hello, %1$s</string>
+    <string name="greeting">Olá, %1$s</string>
     <string name="google_sign_in_was_cancelled">Google sign-in was cancelled.</string>
     <string name="google_sign_in_needs_a_web_client_id_in_google_services_json">Google Sign-In needs a web client ID in google-services.json.</string>
 </resources>

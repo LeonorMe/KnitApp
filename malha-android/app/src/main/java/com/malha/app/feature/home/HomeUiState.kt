@@ -10,7 +10,8 @@ data class HomeUiState(
     val projects: List<Project> = emptyList(),
     val aidiSuggestions: List<HomeInsight> = emptyList(),
     val weeklySummary: String = "Esta semana: 3h, 1 ponto novo aprendido",
-    val showDailyYarn: Boolean = false
+    val showDailyYarn: Boolean = false,
+    val showSquareChallenge: Boolean = false
 ) {
     val activeProjectCount: Int = projects.size
     val aidiSummary: String

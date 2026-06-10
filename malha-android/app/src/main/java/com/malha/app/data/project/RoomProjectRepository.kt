@@ -75,6 +75,14 @@ class RoomProjectRepository(
         )
     }
 
+    override suspend fun updateProjectColor(projectId: String, colorHex: String?) {
+        projectDao.updateColor(
+            projectId = projectId,
+            colorHex = colorHex,
+            updatedAt = System.currentTimeMillis()
+        )
+    }
+
     override suspend fun saveStepProgress(
         projectId: String,
         patternStepId: String,

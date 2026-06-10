@@ -18,11 +18,9 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         HomeUiState(
             isLoading = false,
             projects = projects,
-            aidiSuggestions = HomeInsightEngine.buildInsights(
-                projects = projects,
-                materials = materials
-            ),
+            aidiSuggestions = emptyList(),
             showDailyYarn = !DateUtils.isToday(prefs.lastDailyRewardTimestamp),
+            showSquareChallenge = !DateUtils.isToday(prefs.lastSquareChallengeTimestamp),
             userName = (prefs.username ?: currentUser?.name ?: "Guest")
                 .trim()
                 .substringBefore(" "),
@@ -46,6 +44,13 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             appContainer.socialRepository.addCoins(amount)
             appContainer.preferencesRepository.updateLastDailyReward(System.currentTimeMillis())
+        }
+    }
+
+    fun claimSquareReward(amount: Int) {
+        viewModelScope.launch {
+            appContainer.socialRepository.addCoins(amount)
+            appContainer.preferencesRepository.updateLastSquareChallenge(System.currentTimeMillis())
         }
     }
 }

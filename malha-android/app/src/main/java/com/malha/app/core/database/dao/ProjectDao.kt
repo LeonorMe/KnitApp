@@ -42,4 +42,7 @@ interface ProjectDao {
         progressPercent: Int,
         updatedAt: Long
     ): Int
+
+    @Query("UPDATE projects SET colorHex = :colorHex, updatedAt = :updatedAt WHERE id = :projectId")
+    suspend fun updateColor(projectId: String, colorHex: String?, updatedAt: Long): Int
 }

@@ -27,5 +27,6 @@ data class UserPreferences(
     val dailyReminderEnabled: Boolean = false,
     val dailyReminderHour: Int = 18,
     val dailyReminderMinute: Int = 0,
-    val lastDailyRewardTimestamp: Long = 0L
+    val lastDailyRewardTimestamp: Long = 0L,
+    val lastSquareChallengeTimestamp: Long = 0L
 )

@@ -27,6 +27,7 @@ class PreferencesRepository(private val context: Context) {
         val DAILY_REMINDER_HOUR = intPreferencesKey("daily_reminder_hour")
         val DAILY_REMINDER_MINUTE = intPreferencesKey("daily_reminder_minute")
         val LAST_REWARD_TS = androidx.datastore.preferences.core.longPreferencesKey("last_reward_ts")
+        val LAST_SQUARE_TS = androidx.datastore.preferences.core.longPreferencesKey("last_square_ts")
     }
 
     val userPreferences: Flow<UserPreferences> = context.dataStore.data.map { preferences ->
@@ -41,7 +42,8 @@ class PreferencesRepository(private val context: Context) {
             dailyReminderEnabled = preferences[Keys.DAILY_REMINDER_ENABLED] ?: false,
             dailyReminderHour = preferences[Keys.DAILY_REMINDER_HOUR] ?: 18,
             dailyReminderMinute = preferences[Keys.DAILY_REMINDER_MINUTE] ?: 0,
-            lastDailyRewardTimestamp = preferences[Keys.LAST_REWARD_TS] ?: 0L
+            lastDailyRewardTimestamp = preferences[Keys.LAST_REWARD_TS] ?: 0L,
+            lastSquareChallengeTimestamp = preferences[Keys.LAST_SQUARE_TS] ?: 0L
         )
     }
 
@@ -88,6 +90,10 @@ class PreferencesRepository(private val context: Context) {
 
     suspend fun updateLastDailyReward(timestamp: Long) {
         context.dataStore.edit { it[Keys.LAST_REWARD_TS] = timestamp }
+    }
+
+    suspend fun updateLastSquareChallenge(timestamp: Long) {
+        context.dataStore.edit { it[Keys.LAST_SQUARE_TS] = timestamp }
     }
 
     suspend fun clearProfile() {

@@ -13,7 +13,8 @@ fun ProjectEntity.toDomain(): Project {
         patternId = patternId,
         progressPercent = progressPercent,
         currentStepIndex = currentStepIndex,
-        updatedAt = updatedAt
+        updatedAt = updatedAt,
+        colorHex = colorHex
     )
 }
 

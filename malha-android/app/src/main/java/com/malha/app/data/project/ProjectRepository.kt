@@ -11,6 +11,7 @@ interface ProjectRepository {
     suspend fun createProject(name: String, patternId: String?): String
     suspend fun archiveProject(projectId: String)
     suspend fun updateProgress(projectId: String, stepIndex: Int, progressPercent: Int)
+    suspend fun updateProjectColor(projectId: String, colorHex: String?)
     suspend fun saveStepProgress(
         projectId: String,
         patternStepId: String,

@@ -29,5 +29,6 @@ data class ProjectEntity(
     val startedAt: Long?,
     val completedAt: Long?,
     val createdAt: Long,
-    val updatedAt: Long
+    val updatedAt: Long,
+    val colorHex: String? = null
 )

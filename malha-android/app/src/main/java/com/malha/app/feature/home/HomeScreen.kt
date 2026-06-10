@@ -1,6 +1,5 @@
 package com.malha.app.feature.home
 
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.fadeIn
@@ -8,10 +7,12 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -19,20 +20,19 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -49,18 +49,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.malha.app.R
+import com.malha.app.core.design.component.DailySquareChallengeDialog
 import com.malha.app.core.design.component.DailyYarnShakeDialog
 import com.malha.app.core.design.component.ImagePlaceholder
 
-@Preview
 @Composable
 fun HomeScreen(
     onOpenProject: (String) -> Unit,
@@ -69,29 +72,14 @@ fun HomeScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var showShakeDialog by remember { mutableStateOf(false) }
+    var showSquareDialog by remember { mutableStateOf(false) }
     var contentVisible by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         contentVisible = true
     }
 
-    Scaffold(
-        floatingActionButton = {
-            AnimatedVisibility(
-                visible = uiState.showDailyYarn,
-                enter = scaleIn(animationSpec = tween(260)) + fadeIn(animationSpec = tween(260)),
-                exit = scaleOut(animationSpec = tween(180)) + fadeOut(animationSpec = tween(180))
-            ) {
-                FloatingActionButton(
-                    onClick = { showShakeDialog = true },
-                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer
-                ) {
-                    Icon(Icons.Default.AutoAwesome, contentDescription = "Daily Yarn")
-                }
-            }
-        }
-    ) { padding ->
+    Scaffold { padding ->
         Surface(
             modifier = Modifier
                 .fillMaxSize()
@@ -105,151 +93,145 @@ fun HomeScreen(
                     initialOffsetY = { it / 14 }
                 )
             ) {
-                LazyColumn(
-                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 28.dp),
-                    verticalArrangement = Arrangement.spacedBy(14.dp)
-                ) {
-                    item {
-                        HomeHeader(
-                            userName = uiState.userName,
+                Box(modifier = Modifier.fillMaxSize()) {
+                    // 1. Scrollable Page Content
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 24.dp)
+                    ) {
+                        // Polished Top Bar
+                        HomeTopBar(
                             profilePhotoUri = uiState.profilePhotoUri,
                             coinBalance = uiState.coinBalance,
-                            onNavigateToProfile = onNavigateToProfile
+                            onNavigateToProfile = onNavigateToProfile,
+                            onNavigateToStore = onNavigateToProfile // TODO: Navigate to store
                         )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(bottom = 32.dp),
+                            verticalArrangement = Arrangement.spacedBy(24.dp)
+                        ) {
+                            item {
+                                Text(
+                                    text = stringResource(R.string.greeting, uiState.userName),
+                                    style = MaterialTheme.typography.headlineLarge,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onBackground
+                                )
+                                Spacer(modifier = Modifier.height(12.dp))
+                                Text(
+                                    text = "A continuar",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f)
+                                )
+                            }
+
+                            if (uiState.isLoading) {
+                                item {
+                                    Box(
+                                        modifier = Modifier.fillMaxWidth().padding(32.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        CircularProgressIndicator()
+                                    }
+                                }
+                            } else if (uiState.projects.isEmpty()) {
+                                item {
+                                    Text(
+                                        text = "Não tens projetos ativos. Cria um para começar!",
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.fillMaxWidth().padding(vertical = 48.dp),
+                                        textAlign = TextAlign.Center
+                                    )
+                                }
+                            } else {
+                                itemsIndexed(uiState.projects) { index, project ->
+                                    val alignment = if (index % 2 == 0) Alignment.TopStart else Alignment.TopEnd
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .animateContentSize(),
+                                        contentAlignment = alignment
+                                    ) {
+                                        ProjectCrateCard(
+                                            project = project,
+                                            onOpenProject = onOpenProject
+                                        )
+                                    }
+                                }
+                            }
+                        }
                     }
 
-                    item { SectionTitle("A continuar") }
-
-                    item {
-                        AnimatedContent(
-                            targetState = HomeProjectContentState(
-                                isLoading = uiState.isLoading,
-                                isEmpty = uiState.projects.isEmpty()
-                            ),
-                            label = "home-projects-content"
-                        ) { state ->
-                            when {
-                                state.isLoading -> InfoText("Loading projects...")
-                                state.isEmpty -> InfoText("No active projects yet.")
-                                else -> LazyRow(
-                                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                                    contentPadding = PaddingValues(horizontal = 4.dp)
-                                ) {
-                                    items(uiState.projects.take(3)) { project ->
-                                        val animatedProgress by animateFloatAsState(
-                                            targetValue = project.progressPercent / 100f,
-                                            animationSpec = tween(durationMillis = 700),
-                                            label = "home-project-progress"
-                                        )
-                                        Card(
-                                            colors = CardDefaults.cardColors(
-                                                containerColor = MaterialTheme.colorScheme.surface
-                                            ),
-                                            modifier = Modifier
-                                                .width(280.dp)
-                                                .animateContentSize()
-                                                .clickable { onOpenProject(project.id) }
-                                        ) {
-                                            Column(
-                                                modifier = Modifier.padding(16.dp),
-                                                verticalArrangement = Arrangement.spacedBy(10.dp)
-                                            ) {
-                                                ImagePlaceholder(label = project.name, imageUri = project.imageUri)
-                                                Text(
-                                                    text = project.name,
-                                                    style = MaterialTheme.typography.titleLarge,
-                                                    color = MaterialTheme.colorScheme.onSurface
-                                                )
-                                                Text(
-                                                    text = "Progress: ${project.progressPercent}%",
-                                                    style = MaterialTheme.typography.bodyLarge,
-                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                                )
-                                                LinearProgressIndicator(
-                                                    progress = { animatedProgress },
-                                                    modifier = Modifier.fillMaxWidth()
-                                                )
-                                            }
+                    // 2. Static Overlay Daily Challenge Badges
+                    Column(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(top = 80.dp, end = 20.dp), // Overlay static on the right below top bar
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        // 10x10 Challenge Button
+                        AnimatedVisibility(
+                            visible = uiState.showSquareChallenge,
+                            enter = scaleIn(animationSpec = tween(300)) + fadeIn(),
+                            exit = scaleOut(animationSpec = tween(200)) + fadeOut()
+                        ) {
+                            ChallengeBadgeButton(
+                                icon = {
+                                    Canvas(modifier = Modifier.size(28.dp)) {
+                                        val size = size.width
+                                        val divisions = 4
+                                        val step = size / divisions
+                                        // Draw Grid Lines
+                                        for (i in 1 until divisions) {
+                                            drawLine(
+                                                color = Color(0xFF3F6B57),
+                                                start = androidx.compose.ui.geometry.Offset(i * step, 0f),
+                                                end = androidx.compose.ui.geometry.Offset(i * step, size),
+                                                strokeWidth = 2.5f
+                                            )
+                                            drawLine(
+                                                color = Color(0xFF3F6B57),
+                                                start = androidx.compose.ui.geometry.Offset(0f, i * step),
+                                                end = androidx.compose.ui.geometry.Offset(size, i * step),
+                                                strokeWidth = 2.5f
+                                            )
                                         }
                                     }
-                                }
-                            }
+                                },
+                                label = "10x10",
+                                badgeColor = Color(0xFFD0E7DD), // Light Sage Cream color
+                                onClick = { showSquareDialog = true }
+                            )
                         }
-                    }
 
-                    item { SectionTitle("Atividade diaria") }
-
-                    item {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        // Daily Yarn Shake Button
+                        AnimatedVisibility(
+                            visible = uiState.showDailyYarn,
+                            enter = scaleIn(animationSpec = tween(300)) + fadeIn(),
+                            exit = scaleOut(animationSpec = tween(200)) + fadeOut()
                         ) {
-                            DailyActionCard(
-                                title = "Desenrolar",
-                                subtitle = "Ganha moedas!",
-                                container = MaterialTheme.colorScheme.tertiaryContainer,
-                                content = MaterialTheme.colorScheme.onTertiaryContainer,
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .clickable { showShakeDialog = true }
-                            )
-                            DailyActionCard(
-                                title = "Desafio 10x10",
-                                subtitle = "+3 Moedas",
-                                container = MaterialTheme.colorScheme.secondaryContainer,
-                                content = MaterialTheme.colorScheme.onSecondaryContainer,
-                                modifier = Modifier.weight(1f)
+                            ChallengeBadgeButton(
+                                icon = {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.ic_aidi),
+                                        contentDescription = "Daily Yarn Shake",
+                                        tint = Color(0xFFD86B5A), // Warm color
+                                        modifier = Modifier.size(28.dp)
+                                    )
+                                },
+                                label = "Shake",
+                                badgeColor = Color(0xFFF9E7DF), // Warm tint
+                                onClick = { showShakeDialog = true }
                             )
                         }
-                    }
-
-                    if (uiState.aidiSuggestions.isNotEmpty()) {
-                        item { SectionTitle("A Aidi sugere") }
-
-                        items(uiState.aidiSuggestions) { suggestion ->
-                            Card(
-                                colors = CardDefaults.cardColors(
-                                    containerColor = MaterialTheme.colorScheme.surfaceVariant
-                                ),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .animateContentSize()
-                            ) {
-                                Column(
-                                    modifier = Modifier.padding(16.dp),
-                                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    Text(
-                                        text = suggestion.title,
-                                        style = MaterialTheme.typography.titleMedium,
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
-                                    Text(
-                                        text = suggestion.message,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                    Button(
-                                        onClick = { /* Navigate to Aidi detail */ },
-                                        modifier = Modifier.align(Alignment.End)
-                                    ) {
-                                        Text("Ver detalhes")
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    item {
-                        Spacer(modifier = Modifier.height(24.dp))
-                        Text(
-                            text = uiState.weeklySummary,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.fillMaxWidth(),
-                            textAlign = TextAlign.Center
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
             }
@@ -265,132 +247,221 @@ fun HomeScreen(
             }
         )
     }
+
+    if (showSquareDialog) {
+        DailySquareChallengeDialog(
+            onDismiss = { showSquareDialog = false },
+            onRewardClaimed = { amount ->
+                viewModel.claimSquareReward(amount)
+                showSquareDialog = false
+            }
+        )
+    }
 }
 
-@Preview
 @Composable
-private fun HomeHeader(
-    userName: String,
+private fun HomeTopBar(
     profilePhotoUri: String?,
     coinBalance: Int,
-    onNavigateToProfile: () -> Unit
+    onNavigateToProfile: () -> Unit,
+    onNavigateToStore: () -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .animateContentSize(),
+            .padding(vertical = 16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Column {
-            Text(
-                text = stringResource(R.string.greeting, userName),
-                style = MaterialTheme.typography.headlineLarge,
-                color = MaterialTheme.colorScheme.onBackground
+        // Left: App Logo/Title
+        Text(
+            text = "Malha",
+            style = MaterialTheme.typography.headlineLarge.copy(
+                fontFamily = androidx.compose.ui.text.font.FontFamily.Serif,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF3F6B57) // Deep Sage Logo color
             )
-            Surface(
-                onClick = {
-                    // TODO navigate to store
-                },
-                shape = RoundedCornerShape(50)
+        )
 
-            ){
+        // Right: Coins + Profile
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            // Coins Indicator
+            Surface(
+                onClick = onNavigateToStore,
+                shape = RoundedCornerShape(50),
+                color = MaterialTheme.colorScheme.surface,
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+            ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    modifier = Modifier.padding(
-                        horizontal = 10.dp,
-                        vertical = 6.dp
-                    )
-                ){
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                ) {
                     Icon(
-                        painter = painterResource(R.drawable.ic_coin),
+                        painter = painterResource(id = R.drawable.ic_coin),
                         contentDescription = "Coins",
                         tint = Color.Unspecified,
+                        modifier = Modifier.size(20.dp)
                     )
-
-                    Spacer(modifier = Modifier.width(4.dp))
-
+                    Spacer(modifier = Modifier.width(2.dp))
                     Text(
                         text = "$coinBalance",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.primary
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF3F6B57)
+                    )
+                }
+            }
+
+            // Profile Picture Circle
+            if (!profilePhotoUri.isNullOrEmpty()) {
+                Surface(
+                    onClick = onNavigateToProfile,
+                    modifier = Modifier.size(40.dp),
+                    shape = androidx.compose.foundation.shape.CircleShape,
+                    color = MaterialTheme.colorScheme.surfaceVariant
+                ) {
+                    ImagePlaceholder(
+                        label = "P",
+                        imageUri = profilePhotoUri,
+                        size = 40.dp
+                    )
+                }
+            } else {
+                IconButton(
+                    onClick = onNavigateToProfile,
+                    modifier = Modifier.size(40.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = "Profile",
+                        tint = Color(0xFF3F6B57),
+                        modifier = Modifier.size(32.dp)
                     )
                 }
             }
         }
-        if (!profilePhotoUri.isNullOrEmpty()) {
-            Surface(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clickable(onClick = onNavigateToProfile),
-                shape = androidx.compose.foundation.shape.CircleShape,
-                color = MaterialTheme.colorScheme.surfaceVariant
-            ) {
-                ImagePlaceholder(
-                    label = userName.take(1).uppercase(),
-                    imageUri = profilePhotoUri,
-                    size = 40.dp
-                )
-            }
-        } else {
-            IconButton(
-                onClick = onNavigateToProfile,
-                modifier = Modifier.size(40.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Person,
-                    contentDescription = "Profile",
-                    modifier = Modifier.size(32.dp)
-                )
-            }
-        }
     }
 }
 
-@Preview
 @Composable
-private fun SectionTitle(text: String) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.titleLarge,
-        color = MaterialTheme.colorScheme.onBackground
-    )
-}
-
-@Preview
-@Composable
-private fun InfoText(text: String) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.bodyLarge,
-        color = MaterialTheme.colorScheme.onSurfaceVariant
-    )
-}
-
-@Preview
-@Composable
-private fun DailyActionCard(
-    title: String,
-    subtitle: String,
-    container: androidx.compose.ui.graphics.Color,
-    content: androidx.compose.ui.graphics.Color,
-    modifier: Modifier = Modifier
+private fun ProjectCrateCard(
+    project: com.malha.app.domain.model.Project,
+    onOpenProject: (String) -> Unit
 ) {
-    Card(
-        colors = CardDefaults.cardColors(containerColor = container),
-        modifier = modifier.animateContentSize()
+    Box(
+        modifier = Modifier
+            .size(240.dp)
+            .clickable { onOpenProject(project.id) },
+        contentAlignment = Alignment.TopCenter
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = content)
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(title, style = MaterialTheme.typography.titleMedium, color = content)
-            Text(subtitle, style = MaterialTheme.typography.bodyMedium, color = content)
+        // Crate Vector background decoration
+        Icon(
+            painter = painterResource(id = R.drawable.ic_materials),
+            contentDescription = null,
+            tint = Color(0xFF3F6B57),
+            modifier = Modifier.fillMaxSize()
+        )
+
+        // Project detail front card, positioned inside the crate opening
+        Card(
+            modifier = Modifier
+                .padding(top = 114.dp)
+                .width(160.dp)
+                .height(84.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface
+            ),
+            shape = RoundedCornerShape(6.dp),
+            border = BorderStroke(1.5.dp, Color(0xFF3F6B57).copy(alpha = 0.6f)),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                // Project Thumbnail
+                ImagePlaceholder(
+                    label = project.name.take(1).uppercase(),
+                    imageUri = project.imageUri,
+                    size = 48.dp,
+                    modifier = Modifier.clip(RoundedCornerShape(4.dp))
+                )
+
+                // Project Details
+                Column(
+                    verticalArrangement = Arrangement.Center,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(
+                        text = project.name,
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontWeight = FontWeight.Bold
+                        ),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = "${project.progressPercent}%",
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF3F6B57)
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    LinearProgressIndicator(
+                        progress = { project.progressPercent / 100f },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(4.dp)
+                            .clip(RoundedCornerShape(2.dp)),
+                        color = Color(0xFF3F6B57),
+                        trackColor = Color(0xFF3F6B57).copy(alpha = 0.2f)
+                    )
+                }
+            }
         }
     }
 }
 
-private data class HomeProjectContentState(
-    val isLoading: Boolean,
-    val isEmpty: Boolean
-)
+@Composable
+private fun ChallengeBadgeButton(
+    icon: @Composable () -> Unit,
+    label: String,
+    badgeColor: Color,
+    onClick: () -> Unit
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Surface(
+            onClick = onClick,
+            modifier = Modifier.size(56.dp),
+            shape = androidx.compose.foundation.shape.CircleShape,
+            color = badgeColor,
+            border = BorderStroke(1.5.dp, Color(0xFF3F6B57).copy(alpha = 0.5f)),
+            shadowElevation = 4.dp
+        ) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                icon()
+            }
+        }
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f)
+        )
+    }
+}
