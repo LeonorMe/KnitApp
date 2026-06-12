@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface SocialRepository {
     fun observeCurrentUser(): Flow<User?>
+    fun observeUser(userId: String): Flow<User?>
     suspend fun getCurrentUser(): User?
     suspend fun updateProfile(name: String, bio: String?, profilePicUri: String?)
     

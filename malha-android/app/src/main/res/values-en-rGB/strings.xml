@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Malha</string>
 
     <!-- Navigation -->
     <string name="nav_home">Home</string>
@@ -50,6 +49,7 @@
     <string name="unit_imperial">Imperial (in/yd)</string>
     <string name="action_sign_out">Sign out</string>
     <string name="action_sign_in_google">Sign in with Google</string>
+    <string name="action_create_google_account">Create account with Google</string>
     <string name="action_signing_in">Signing in...</string>
     <string name="dialog_new_project_title">New project</string>
     <string name="input_project_name">Project name</string>
@@ -86,5 +86,35 @@
     <string name="execution_select_size">Select Size</string>
     <string name="action_next_step">Next Step</string>
     <string name="action_mark_done">Mark Done</string>
-    <string name="greeting">Boa noite, %1$s</string>
+    <string name="greeting">Hello, %1$s</string>
+    <string name="google_sign_in_needs_a_web_client_id_in_google_services_json">Google Sign-In needs a web client ID in google-services.json.</string>
+    <string name="nothing_publised">Nothing published yet.</string>
+    <string name="community">Community</string>
+    <string name="create_post">Create Post</string>
+    <string name="be_the_first_to_share_your_work">Be the first to share your work!</string>
+    <string name="google_sign_in_was_cancelled">Google sign-in was cancelled.</string>
+    <string name="community_search_placeholder">Search posts by keyword</string>
+    <string name="community_no_search_results">No posts where found for your search.</string>
+    <string name="community_status_finished">Completed</string>
+    <string name="community_status_ongoing">On going</string>
+    <string name="community_like">Like</string>
+    <string name="community_comment">Comment</string>
+    <string name="community_share">Share</string>
+    <string name="community_view_comments">See comments</string>
+    <string name="community_comments_title">Comments</string>
+    <string name="community_no_comments">There are no comments yet</string>
+    <string name="community_add_comment_placeholder">Add a comment...</string>
+    <string name="community_publish_comment">Publish</string>
+    <string name="action_close">Close</string>
+    <string name="profile_unknown_crafter">Crafter</string>
+    <string name="profile_default_bio">...</string>
+    <string name="profile_post_image">Post</string>
+    <string name="profile_edit_profile">Edit profile</string>
+    <string name="profile_coins">Coins</string>
+    <string name="profile_name">Name</string>
+    <string name="profile_bio">Bio</string>
+    <string name="profile_level_beginner">Beginner</string>
+    <string name="profile_level_steady">Steady</string>
+    <string name="profile_level_confident">Confident</string>
+    <string name="profile_level_advanced">Advanced</string>
 </resources>

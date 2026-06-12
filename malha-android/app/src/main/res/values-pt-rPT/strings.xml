@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Malha</string>
 
     <!-- Navigation -->
     <string name="nav_home">Início</string>
@@ -50,6 +49,7 @@
     <string name="unit_imperial">Imperial (pol/jard)</string>
     <string name="action_sign_out">Terminar sessão</string>
     <string name="action_sign_in_google">Iniciar sessão com o Google</string>
+    <string name="action_create_google_account">Cria uma conta com o Google</string>
     <string name="action_signing_in">A iniciar sessão...</string>
     <string name="dialog_new_project_title">Novo projeto</string>
     <string name="input_project_name">Nome do projeto</string>
@@ -87,4 +87,11 @@
     <string name="action_next_step">Próximo Passo</string>
     <string name="action_mark_done">Marcar como Feito</string>
     <string name="greeting">Olá, %1$s</string>
+    <string name="google_sign_in_needs_a_web_client_id_in_google_services_json">Autenticação Google precisa de um cliente ID.</string>
+    <string name="nothing_publised">Sem publicações ainda.</string>
+    <string name="create_post">Cria uma publicação</string>
+    <string name="be_the_first_to_share_your_work">Sê o primeiro a partilhar o teu trabalho!</string>
+    <string name="community">Comunidade</string>
+    <string name="google_sign_in_was_cancelled">A autenticação Google foi cancelada.</string>
+    <string name="profile_default_bio">...</string>
 </resources>

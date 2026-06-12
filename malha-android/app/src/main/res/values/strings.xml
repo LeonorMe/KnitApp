@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Malha</string>
+    <string name="app_name" translatable="false">MyWool</string>
 
     <!-- Navigation -->
     <string name="nav_home">Home</string>
     <string name="nav_projects">Projects</string>
     <string name="nav_patterns">Patterns</string>
     <string name="nav_materials">Materials</string>
-    <string name="nav_aidi" translatable="false">Aidi</string>
+    <string name="nav_aidi" translatable="false">MyWool</string>
     <string name="nav_community">Community</string>
     <string name="nav_profile">Profile</string>
     <string name="nav_settings">Settings</string>
@@ -91,4 +91,36 @@
     <string name="greeting">Olá, %1$s</string>
     <string name="google_sign_in_was_cancelled">Google sign-in was cancelled.</string>
     <string name="google_sign_in_needs_a_web_client_id_in_google_services_json">Google Sign-In needs a web client ID in google-services.json.</string>
+    <string name="nothing_publised">Nothing published yet.</string>
+    <string name="community">Community</string>
+    <string name="create_post">Create Post</string>
+    <string name="be_the_first_to_share_your_work">Be the first to share your work!</string>
+    <string name="community_search_placeholder">Search posts by keyword</string>
+    <string name="community_no_search_results">No posts where found for your search.</string>
+    <string name="community_using_pattern" translatable="false">using pattern...</string>
+    <string name="community_status_finished">Completed</string>
+    <string name="community_status_ongoing">On going</string>
+    <string name="community_like">Like</string>
+    <string name="community_comment">Comment</string>
+    <string name="community_share">Share</string>
+    <string name="community_view_comments">See comments</string>
+    <string name="community_comments_title">Comments</string>
+    <string name="community_no_comments">There are no comments yet.</string>
+    <string name="community_add_comment_placeholder">Add a comment...</string>
+    <string name="community_publish_comment">Publish</string>
+    <string name="action_close">Close</string>
+    <string name="profile_unknown_crafter">Crafter</string>
+    <string name="profile_default_bio">...</string>
+    <string name="profile_post_image">Post</string>
+    <string name="profile_completed">Completed</string>
+    <string name="profile_level">Level</string>
+    <string name="profile_posts">Posts</string>
+    <string name="profile_edit_profile">Edit profile</string>
+    <string name="profile_coins">Coins</string>
+    <string name="profile_name">Name</string>
+    <string name="profile_bio">Bio</string>
+    <string name="profile_level_beginner">Beginner</string>
+    <string name="profile_level_steady">Steady</string>
+    <string name="profile_level_confident">Confident</string>
+    <string name="profile_level_advanced">Advanced</string>
 </resources>

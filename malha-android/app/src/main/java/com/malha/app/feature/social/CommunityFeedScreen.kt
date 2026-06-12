@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Comment
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
@@ -18,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -26,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.malha.app.R
 import com.malha.app.core.app.appContainer
 import com.malha.app.core.design.component.ImagePlaceholder
 import com.malha.app.core.share.MalhaShare
@@ -71,16 +74,33 @@ class CommunityViewModel(application: android.app.Application) : AndroidViewMode
 fun CommunityFeedScreen(
     onCreatePost: () -> Unit,
     onNavigateToPattern: (String) -> Unit,
+    onNavigateToProfile: (String) -> Unit,
     viewModel: CommunityViewModel = viewModel()
 ) {
     val feed by viewModel.feed.collectAsState()
+    var query by remember { mutableStateOf("") }
+    val filteredFeed = remember(feed, query) {
+        if (query.isBlank()) {
+            feed
+        } else {
+            val normalized = query.trim().lowercase()
+            feed.filter { post ->
+                listOfNotNull(
+                    post.userName,
+                    post.patternName,
+                    post.description,
+                    post.status
+                ).any { it.lowercase().contains(normalized) }
+            }
+        }
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { 
                     Text(
-                        text = "Knitstagram",
+                        text = stringResource(R.string.community),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold
                     ) 
@@ -89,7 +109,7 @@ fun CommunityFeedScreen(
                     IconButton(onClick = onCreatePost) {
                         Icon(
                             imageVector = Icons.Default.Add,
-                            contentDescription = "Create Post",
+                            contentDescription = stringResource(R.string.create_post),
                             tint = MaterialTheme.colorScheme.primary
                         )
                     }
@@ -107,7 +127,22 @@ fun CommunityFeedScreen(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            if (feed.isEmpty()) {
+            item {
+                OutlinedTextField(
+                    value = query,
+                    onValueChange = { query = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    leadingIcon = {
+                        Icon(Icons.Default.Search, contentDescription = null)
+                    },
+                    placeholder = {
+                        Text(stringResource(R.string.community_search_placeholder))
+                    }
+                )
+            }
+
+            if (filteredFeed.isEmpty()) {
                 item {
                     Box(
                         modifier = Modifier.fillParentMaxSize(),
@@ -118,12 +153,16 @@ fun CommunityFeedScreen(
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             Text(
-                                text = "Sem publicações ainda.",
+                                text = if (query.isBlank()) {
+                                    stringResource(R.string.nothing_publised)
+                                } else {
+                                    stringResource(R.string.community_no_search_results)
+                                },
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.SemiBold
                             )
                             Text(
-                                text = "Sê o primeiro a partilhar o teu trabalho!",
+                                text = stringResource(R.string.be_the_first_to_share_your_work),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -131,13 +170,14 @@ fun CommunityFeedScreen(
                     }
                 }
             }
-            items(feed, key = { it.id }) { post ->
+            items(filteredFeed, key = { it.id }) { post ->
                 PostCard(
                     post = post, 
                     onLike = { viewModel.likePost(post.id) },
                     onAddComment = { viewModel.addComment(post.id, it) },
                     observeComments = { viewModel.observeComments(post.id) },
-                    onPatternClick = onNavigateToPattern
+                    onPatternClick = onNavigateToPattern,
+                    onAuthorClick = { onNavigateToProfile(post.userId) }
                 )
             }
         }
@@ -150,7 +190,8 @@ private fun PostCard(
     onLike: () -> Unit,
     onAddComment: (String) -> Unit,
     observeComments: () -> StateFlow<List<Comment>>,
-    onPatternClick: (String) -> Unit
+    onPatternClick: (String) -> Unit,
+    onAuthorClick: () -> Unit
 ) {
     val context = LocalContext.current
     val heartScale by animateFloatAsState(
@@ -175,13 +216,22 @@ private fun PostCard(
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Box(modifier = Modifier.size(42.dp)) {
-                    ImagePlaceholder(
-                        label = post.userName.take(2).uppercase(),
-                        imageUri = post.userProfilePic,
-                        size = 42.dp
-                    )
+                    Surface(
+                        onClick = onAuthorClick,
+                        shape = MaterialTheme.shapes.medium
+                    ) {
+                        ImagePlaceholder(
+                            label = post.userName.take(2).uppercase(),
+                            imageUri = post.userProfilePic,
+                            size = 42.dp
+                        )
+                    }
                 }
-                Column(modifier = Modifier.weight(1f)) {
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clickable(onClick = onAuthorClick)
+                ) {
                     Text(
                         text = post.userName,
                         style = MaterialTheme.typography.titleMedium,
@@ -189,7 +239,7 @@ private fun PostCard(
                     )
                     if (post.patternName != null && post.patternId != null) {
                         Text(
-                            text = "usando ${post.patternName}",
+                            text = stringResource(R.string.community_using_pattern, post.patternName.orEmpty()),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.primary,
                             fontWeight = FontWeight.SemiBold,
@@ -205,7 +255,11 @@ private fun PostCard(
                     shape = MaterialTheme.shapes.small
                 ) {
                     Text(
-                        text = if (post.status == "finished") "Concluído" else "Em curso",
+                        text = if (post.status == "finished") {
+                            stringResource(R.string.community_status_finished)
+                        } else {
+                            stringResource(R.string.community_status_ongoing)
+                        },
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
                         color = if (post.status == "finished") MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onSecondaryContainer,
@@ -238,7 +292,7 @@ private fun PostCard(
                 IconButton(onClick = onLike) {
                     Icon(
                         imageVector = if (post.isLiked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                        contentDescription = "Like",
+                        contentDescription = stringResource(R.string.community_like),
                         tint = if (post.isLiked) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.scale(heartScale)
                     )
@@ -247,7 +301,7 @@ private fun PostCard(
                 IconButton(onClick = { showComments = true }) {
                     Icon(
                         imageVector = Icons.Default.Comment,
-                        contentDescription = "Comment",
+                        contentDescription = stringResource(R.string.community_comment),
                         tint = MaterialTheme.colorScheme.onSurface
                     )
                 }
@@ -255,7 +309,7 @@ private fun PostCard(
                 IconButton(onClick = { MalhaShare.sharePost(context, post) }) {
                     Icon(
                         imageVector = Icons.Default.Share,
-                        contentDescription = "Share",
+                        contentDescription = stringResource(R.string.community_share),
                         tint = MaterialTheme.colorScheme.onSurface
                     )
                 }
@@ -285,7 +339,7 @@ private fun PostCard(
                 )
                 
                 Text(
-                    text = "Ver comentários",
+                    text = stringResource(R.string.community_view_comments),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.SemiBold,
@@ -312,7 +366,7 @@ private fun CommentsDialog(
         onDismissRequest = onDismiss,
         title = { 
             Text(
-                text = "Comentários",
+                text = stringResource(R.string.community_comments_title),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             ) 
@@ -330,7 +384,7 @@ private fun CommentsDialog(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "Sem comentários ainda.",
+                            text = stringResource(R.string.community_no_comments),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -365,7 +419,7 @@ private fun CommentsDialog(
                 OutlinedTextField(
                     value = newComment,
                     onValueChange = { newComment = it },
-                    placeholder = { Text("Adiciona um comentário...") },
+                    placeholder = { Text(stringResource(R.string.community_add_comment_placeholder)) },
                     modifier = Modifier.fillMaxWidth(),
                     shape = MaterialTheme.shapes.medium,
                     colors = OutlinedTextFieldDefaults.colors(
@@ -384,12 +438,12 @@ private fun CommentsDialog(
                 },
                 shape = MaterialTheme.shapes.medium
             ) {
-                Text("Publicar")
+                Text(stringResource(R.string.community_publish_comment))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) { 
-                Text("Fechar") 
+                Text(stringResource(R.string.action_close)) 
             }
         }
     )

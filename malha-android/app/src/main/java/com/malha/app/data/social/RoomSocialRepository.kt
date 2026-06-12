@@ -41,6 +41,12 @@ class RoomSocialRepository(
         }
     }
 
+    override fun observeUser(userId: String): Flow<User?> {
+        return socialDao.observeUser(userId).map { userEntity ->
+            userEntity?.toUserDomain()
+        }
+    }
+
     override suspend fun getCurrentUser(): User? {
         val userId = currentUserId
         var user = socialDao.getUser(userId)?.toUserDomain()

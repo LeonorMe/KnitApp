@@ -276,7 +276,7 @@ private fun HomeTopBar(
     ) {
         // Left: App Logo/Title
         Text(
-            text = "Malha",
+            text = stringResource(R.string.app_name),
             style = MaterialTheme.typography.headlineLarge.copy(
                 fontFamily = androidx.compose.ui.text.font.FontFamily.Serif,
                 fontWeight = FontWeight.Bold,

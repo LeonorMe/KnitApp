@@ -65,6 +65,9 @@ fun MalhaNavHost(
                 },
                 onNavigateToPattern = { patternId ->
                     navController.navigate(MalhaDestination.patternDetailRoute(patternId))
+                },
+                onNavigateToProfile = {
+                    navController.navigate(MalhaDestination.Settings.route)
                 }
             )
         }

@@ -16,6 +16,7 @@ sealed class MalhaDestination(
     // Hidden from bottom bar but accessible
     data object Patterns : MalhaDestination("patterns", R.string.nav_patterns)
     data object Profile : MalhaDestination("profile", R.string.nav_profile)
+    data object PublicProfile : MalhaDestination("profile/{userId}", R.string.nav_profile)
     data object Settings : MalhaDestination("settings", R.string.nav_settings)
     
     // Sub-screens
@@ -33,6 +34,10 @@ sealed class MalhaDestination(
 
         fun patternDetailRoute(patternId: String): String {
             return "pattern/$patternId"
+        }
+
+        fun publicProfileRoute(userId: String): String {
+            return "profile/$userId"
         }
     }
 }

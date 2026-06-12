@@ -4,8 +4,8 @@
 
 The Android app should use the same brand as the marketing site:
 
-- Product name: **Malha**
-- AI assistant / mascot: **Aidi**
+- Product name: **MyWool**
+- AI assistant / mascot: **MyWool**
 
 Strengths:
 
