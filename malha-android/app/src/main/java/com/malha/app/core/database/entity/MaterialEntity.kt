@@ -14,6 +14,7 @@ data class MaterialEntity(
     
     // Structured Data
     val fiber: String?,
+    val weightCategory: String? = null,
     val gramsPerBall: Int?,
     val needleType: String?,
     val sizeMm: Double?,

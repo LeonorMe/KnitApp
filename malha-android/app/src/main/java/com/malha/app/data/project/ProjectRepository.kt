@@ -18,4 +18,12 @@ interface ProjectRepository {
         isDone: Boolean,
         note: String?
     )
+    suspend fun updateProjectSettings(
+        projectId: String,
+        name: String,
+        colorHex: String?,
+        selectedSize: String?,
+        materialIds: List<String>
+    )
+    fun observeProjectMaterials(projectId: String): Flow<List<String>>
 }

@@ -1,7 +1,9 @@
 package com.malha.app.core.app
 
 import android.content.Context
+import com.malha.app.BuildConfig
 import com.malha.app.core.ai.AidiAssistantService
+import com.malha.app.core.ai.CloudAidiAssistantService
 import com.malha.app.core.ai.LocalAidiAssistantService
 import com.malha.app.core.database.DatabaseProvider
 import com.malha.app.core.database.seed.DatabaseSeeder
@@ -36,14 +38,29 @@ class AppContainer(context: Context) {
         authService = authService,
         cloudDataService = cloudDataService
     )
+
     val patternRepository: PatternRepository = RoomPatternRepository(database.patternDao())
+
     private val localMaterialRepository: MaterialRepository = RoomMaterialRepository(database.materialDao())
     val materialRepository: MaterialRepository = CloudBackedMaterialRepository(
         local = localMaterialRepository,
         authService = authService,
         cloudDataService = cloudDataService
     )
-    val aidiAssistantService: AidiAssistantService = LocalAidiAssistantService()
+
+    /**
+     * Aidi assistant — uses the Anthropic cloud API when a key is available,
+     * otherwise falls back to the local rule-based engine so the app works offline.
+     */
+    val aidiAssistantService: AidiAssistantService = run {
+        val apiKey = try { BuildConfig.ANTHROPIC_API_KEY } catch (_: Throwable) { "" }
+        if (apiKey.isNotBlank()) {
+            CloudAidiAssistantService(apiKey = apiKey)
+        } else {
+            LocalAidiAssistantService()
+        }
+    }
+
     val preferencesRepository = PreferencesRepository(context)
     val socialRepository: SocialRepository = RoomSocialRepository(
         socialDao = database.socialDao(),

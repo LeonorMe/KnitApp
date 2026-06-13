@@ -21,6 +21,7 @@ sealed class MalhaDestination(
     
     // Sub-screens
     data object ProjectExecution : MalhaDestination("project/{projectId}", R.string.title_projects)
+    data object ProjectSettings : MalhaDestination("project_settings/{projectId}", R.string.title_projects)
     data object PatternDetail : MalhaDestination("pattern/{patternId}", R.string.title_patterns)
     data object CreatePost : MalhaDestination("create_post", R.string.nav_community)
     data object ProfileEdit : MalhaDestination("profile_edit", R.string.title_settings)
@@ -30,6 +31,10 @@ sealed class MalhaDestination(
 
         fun projectExecutionRoute(projectId: String): String {
             return "project/$projectId"
+        }
+
+        fun projectSettingsRoute(projectId: String): String {
+            return "project_settings/$projectId"
         }
 
         fun patternDetailRoute(patternId: String): String {

@@ -14,7 +14,10 @@ object DatabaseProvider {
                 MalhaDatabase::class.java,
                 "malha.db"
             )
-                .addMigrations(MalhaDatabase.MIGRATION_6_7)
+                .addMigrations(
+                    MalhaDatabase.MIGRATION_6_7,
+                    MalhaDatabase.MIGRATION_7_8
+                )
                 .fallbackToDestructiveMigration()
                 .build()
                 .also { database = it }

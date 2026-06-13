@@ -1,0 +1,9 @@
+# Copy this file to local.properties and fill in real values.
+# local.properties is git-ignored and must never be committed.
+
+# Anthropic API key — used by Aidi (CloudAidiAssistantService).
+# Leave blank to use the offline rule-based fallback instead.
+anthropic.api.key=
+
+# Android SDK location (generated automatically by Android Studio)
+# sdk.dir=/Users/yourname/Library/Android/sdk

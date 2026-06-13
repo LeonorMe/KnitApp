@@ -3,12 +3,11 @@ package com.malha.app.feature.execution
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.malha.app.MalhaApplication
 import com.malha.app.core.app.appContainer
 import com.malha.app.domain.model.Pattern
-import com.malha.app.domain.model.PatternStep
 import com.malha.app.domain.model.Project
 import com.malha.app.domain.model.ProjectStepProgress
-import com.malha.app.MalhaApplication
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -25,30 +24,26 @@ class ProjectExecutionViewModel(
     application: Application,
     private val projectId: String
 ) : AndroidViewModel(application) {
+
     private val errorMessage = MutableStateFlow<String?>(null)
     private val selectedSizeState = MutableStateFlow<String?>(null)
+
     private val projectFlow = appContainer.projectRepository.observeProject(projectId)
+
     private val patternFlow = projectFlow.flatMapLatest { project ->
-        val patternId = project?.patternId
-        if (patternId == null) {
-            flowOf(null)
-        } else {
-            appContainer.patternRepository.observePattern(patternId)
-        }
+        val patternId = project?.patternId ?: return@flatMapLatest flowOf(null)
+        appContainer.patternRepository.observePattern(patternId)
     }
-    
+
     private val currentStepProgressFlow = combine(projectFlow, patternFlow) { project, pattern ->
         val currentStep = pattern?.allSteps?.getOrNull(project?.currentStepIndex ?: 0)
         project to currentStep
     }.flatMapLatest { (project, currentStep) ->
-        if (project == null || currentStep == null) {
-            flowOf(null)
-        } else {
-            appContainer.projectRepository.observeStepProgress(
-                projectId = project.id,
-                patternStepId = currentStep.id
-            )
-        }
+        if (project == null || currentStep == null) return@flatMapLatest flowOf(null)
+        appContainer.projectRepository.observeStepProgress(
+            projectId = project.id,
+            patternStepId = currentStep.id
+        )
     }
 
     val uiState: StateFlow<ProjectExecutionUiState> = combine(
@@ -76,9 +71,7 @@ class ProjectExecutionViewModel(
         val state = uiState.value
         val project = state.project ?: return
         val nextIndex = (project.currentStepIndex - 1).coerceAtLeast(0)
-        viewModelScope.launch {
-            updateStep(nextIndex, state.totalSteps)
-        }
+        viewModelScope.launch { updateStep(nextIndex, state.totalSteps) }
     }
 
     fun nextStep() {
@@ -86,9 +79,7 @@ class ProjectExecutionViewModel(
         val project = state.project ?: return
         if (state.totalSteps == 0) return
         val nextIndex = (project.currentStepIndex + 1).coerceAtMost(state.totalSteps - 1)
-        viewModelScope.launch {
-            updateStep(nextIndex, state.totalSteps)
-        }
+        viewModelScope.launch { updateStep(nextIndex, state.totalSteps) }
     }
 
     fun markCurrentStepDone() {
@@ -102,6 +93,7 @@ class ProjectExecutionViewModel(
         } else {
             project.currentStepIndex
         }
+
         viewModelScope.launch {
             appContainer.projectRepository.saveStepProgress(
                 projectId = project.id,
@@ -113,18 +105,35 @@ class ProjectExecutionViewModel(
         }
     }
 
+    /**
+     * Save or update a personal note for the current step.
+     */
+    fun saveNote(note: String) {
+        val state = uiState.value
+        val project = state.project ?: return
+        val currentStep = state.currentStep ?: return
+
+        viewModelScope.launch {
+            runCatching {
+                appContainer.projectRepository.saveStepProgress(
+                    projectId = project.id,
+                    patternStepId = currentStep.id,
+                    isDone = state.currentStepProgress?.isDone ?: false,
+                    note = note.trim().takeIf { it.isNotBlank() }
+                )
+            }.onFailure { error ->
+                errorMessage.update { error.message ?: "Could not save note." }
+            }
+        }
+    }
+
     private suspend fun updateStep(index: Int, total: Int) {
-        appContainer.projectRepository.updateProgress(projectId, index, (index.toFloat() / total.toFloat() * 100).toInt())
+        val progress = if (total > 0) (index.toFloat() / total.toFloat() * 100).toInt() else 0
+        appContainer.projectRepository.updateProgress(projectId, index, progress)
     }
 
     fun selectSize(size: String) {
         selectedSizeState.update { size }
-    }
-
-    fun updateProjectColor(colorHex: String?) {
-        viewModelScope.launch {
-            appContainer.projectRepository.updateProjectColor(projectId, colorHex)
-        }
     }
 
     fun clearError() {

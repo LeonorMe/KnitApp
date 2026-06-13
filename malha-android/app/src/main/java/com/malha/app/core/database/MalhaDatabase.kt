@@ -23,7 +23,7 @@ import com.malha.app.core.database.entity.*
         PostEntity::class,
         CommentEntity::class
     ],
-    version = 7,
+    version = 8,
     exportSchema = false
 )
 @TypeConverters(RoomConverters::class)
@@ -38,6 +38,12 @@ abstract class MalhaDatabase : RoomDatabase() {
         val MIGRATION_6_7 = object : Migration(6, 7) {
             override fun migrate(database: SupportSQLiteDatabase) {
                 database.execSQL("ALTER TABLE projects ADD COLUMN colorHex TEXT DEFAULT NULL")
+            }
+        }
+        val MIGRATION_7_8 = object : Migration(7, 8) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE materials ADD COLUMN weightCategory TEXT DEFAULT NULL")
+                database.execSQL("ALTER TABLE projects ADD COLUMN selectedSize TEXT DEFAULT NULL")
             }
         }
     }

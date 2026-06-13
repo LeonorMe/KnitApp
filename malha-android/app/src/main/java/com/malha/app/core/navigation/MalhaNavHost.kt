@@ -2,24 +2,24 @@ package com.malha.app.core.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.navDeepLink
 import androidx.navigation.navArgument
+import androidx.navigation.navDeepLink
+import com.malha.app.feature.aidi.AidiScreen
 import com.malha.app.feature.execution.ProjectExecutionScreen
 import com.malha.app.feature.home.HomeScreen
 import com.malha.app.feature.materials.MaterialsScreen
-import com.malha.app.feature.patterns.detail.PatternDetailScreen
 import com.malha.app.feature.patterns.PatternsScreen
+import com.malha.app.feature.patterns.detail.PatternDetailScreen
+import com.malha.app.feature.profile.ProfileEditScreen
 import com.malha.app.feature.projects.ProjectsScreen
 import com.malha.app.feature.settings.SettingsScreen
 import com.malha.app.feature.social.CommunityFeedScreen
 import com.malha.app.feature.social.CreatePostScreen
 import com.malha.app.feature.social.ProfileScreen
-import com.malha.app.feature.aidi.AidiScreen
 
 @Composable
 fun MalhaNavHost(
@@ -41,6 +41,7 @@ fun MalhaNavHost(
                 }
             )
         }
+
         composable(MalhaDestination.Projects.route) {
             ProjectsScreen(
                 onOpenProject = { projectId ->
@@ -48,6 +49,7 @@ fun MalhaNavHost(
                 }
             )
         }
+
         composable(MalhaDestination.Patterns.route) {
             PatternsScreen(
                 onOpenPattern = { patternId ->
@@ -55,9 +57,15 @@ fun MalhaNavHost(
                 }
             )
         }
+
         composable(MalhaDestination.Materials.route) {
-            MaterialsScreen()
+            MaterialsScreen(
+                onNavigateToPattern = { patternId ->
+                    navController.navigate(MalhaDestination.patternDetailRoute(patternId))
+                }
+            )
         }
+
         composable(MalhaDestination.Community.route) {
             CommunityFeedScreen(
                 onCreatePost = {
@@ -71,17 +79,21 @@ fun MalhaNavHost(
                 }
             )
         }
+
         composable(MalhaDestination.Aidi.route) {
             AidiScreen()
         }
+
         composable(MalhaDestination.Profile.route) {
             ProfileScreen()
         }
+
         composable(MalhaDestination.CreatePost.route) {
             CreatePostScreen(
                 onBack = { navController.popBackStack() }
             )
         }
+
         composable(MalhaDestination.Settings.route) {
             SettingsScreen(
                 onNavigateToProfileEdit = {
@@ -89,6 +101,13 @@ fun MalhaNavHost(
                 }
             )
         }
+
+        composable(MalhaDestination.ProfileEdit.route) {
+            ProfileEditScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
         composable(
             route = MalhaDestination.ProjectExecution.route,
             deepLinks = listOf(
@@ -97,14 +116,13 @@ fun MalhaNavHost(
                 }
             ),
             arguments = listOf(
-                navArgument("projectId") {
-                    type = NavType.StringType
-                }
+                navArgument("projectId") { type = NavType.StringType }
             )
         ) { entry ->
             val projectId = entry.arguments?.getString("projectId").orEmpty()
             ProjectExecutionScreen(projectId = projectId)
         }
+
         composable(
             route = MalhaDestination.PatternDetail.route,
             deepLinks = listOf(
@@ -113,9 +131,7 @@ fun MalhaNavHost(
                 }
             ),
             arguments = listOf(
-                navArgument("patternId") {
-                    type = NavType.StringType
-                }
+                navArgument("patternId") { type = NavType.StringType }
             )
         ) { entry ->
             val patternId = entry.arguments?.getString("patternId").orEmpty()

@@ -16,21 +16,23 @@ import kotlinx.coroutines.launch
 class MaterialsViewModel(application: Application) : AndroidViewModel(application) {
     private val creationState = MutableStateFlow(MaterialsCreationState())
 
-    val uiState: StateFlow<MaterialsUiState> = appContainer.materialRepository
-        .observeMaterials()
-        .combine(creationState) { materials, creation ->
-            MaterialsUiState(
-                isLoading = false,
-                materials = materials,
-                isCreating = creation.isCreating,
-                errorMessage = creation.errorMessage
-            )
-        }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = MaterialsUiState()
+    val uiState: StateFlow<MaterialsUiState> = combine(
+        appContainer.materialRepository.observeMaterials(),
+        appContainer.patternRepository.observePatterns(),
+        creationState
+    ) { materials, patterns, creation ->
+        MaterialsUiState(
+            isLoading = false,
+            materials = materials,
+            patterns = patterns,
+            isCreating = creation.isCreating,
+            errorMessage = creation.errorMessage
         )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = MaterialsUiState()
+    )
 
     init {
         viewModelScope.launch {

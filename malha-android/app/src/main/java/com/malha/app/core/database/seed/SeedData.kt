@@ -51,6 +51,25 @@ object SeedData {
             availableSizes = "S,M,L",
             selectedSize = "M",
             updatedAt = now
+        ),
+        PatternEntity(
+            id = "square_purl_001",
+            title = "Simple Knit Square in purl",
+            designer = "MyWool",
+            year = 2026,
+            craft = CraftType.KNITTING,
+            difficulty = SkillLevel.BEGINNER,
+            gaugeWidth = 20,
+            gaugeHeight = 26,
+            gaugeUnit = "10",
+            sourceType = SourceType.MANUAL,
+            originalText = "A simple beginner-friendly knit square in purl.",
+            verificationStatus = VerificationStatus.COMMUNITY_VALIDATED,
+            aiConfidence = 1.0,
+            isPremium = false,
+            availableSizes = "S",
+            selectedSize = "S",
+            updatedAt = now
         )
     )
 
@@ -78,6 +97,30 @@ object SeedData {
             patternId = "demo_beanie_001",
             name = "Crown Shaping",
             orderIndex = 2
+        ),
+        PatternSectionEntity(
+            id = "section-square-setup",
+            patternId = "square_purl_001",
+            name = "Setup",
+            orderIndex = 0
+        ),
+        PatternSectionEntity(
+            id = "section-square-caston",
+            patternId = "square_purl_001",
+            name = "Cast On",
+            orderIndex = 1
+        ),
+        PatternSectionEntity(
+            id = "section-square-rows",
+            patternId = "square_purl_001",
+            name = "Rows",
+            orderIndex = 2
+        ),
+        PatternSectionEntity(
+            id = "section-square-finishing",
+            patternId = "square_purl_001",
+            name = "Finishing",
+            orderIndex = 3
         )
     )
 
@@ -258,6 +301,114 @@ object SeedData {
             everyNRows = 1,
             startRow = 1,
             endRow = 1,
+            condition = null,
+            stitchPatternId = null,
+            updatedAt = now
+        ),
+        PatternStepEntity(
+            id = "step-square-setup-1",
+            patternId = "square_purl_001",
+            sectionId = "section-square-setup",
+            orderIndex = 0,
+            stepType = StepType.NORMAL,
+            instruction = "Gather all materials: yarn, double-pointed needles, scissors and tapestry needle.",
+            rowNumber = null,
+            stitchCount = null,
+            confidence = 1.0,
+            repeatCount = null,
+            everyNRows = null,
+            startRow = null,
+            endRow = null,
+            condition = null,
+            stitchPatternId = null,
+            updatedAt = now
+        ),
+        PatternStepEntity(
+            id = "step-square-caston-1",
+            patternId = "square_purl_001",
+            sectionId = "section-square-caston",
+            orderIndex = 1,
+            stepType = StepType.CAST_ON,
+            instruction = "Cast on 20 stitches using the long-tail cast on method.",
+            rowNumber = null,
+            stitchCount = 20,
+            confidence = 1.0,
+            repeatCount = null,
+            everyNRows = null,
+            startRow = null,
+            endRow = null,
+            condition = null,
+            stitchPatternId = null,
+            updatedAt = now
+        ),
+        PatternStepEntity(
+            id = "step-square-rows-1",
+            patternId = "square_purl_001",
+            sectionId = "section-square-rows",
+            orderIndex = 2,
+            stepType = StepType.REPEAT_BLOCK,
+            instruction = "Purl 25 rows, 20 stitches each.",
+            rowNumber = null,
+            stitchCount = 20,
+            confidence = 1.0,
+            repeatCount = 25,
+            everyNRows = null,
+            startRow = null,
+            endRow = null,
+            condition = null,
+            stitchPatternId = null,
+            updatedAt = now
+        ),
+        PatternStepEntity(
+            id = "step-square-finish-1",
+            patternId = "square_purl_001",
+            sectionId = "section-square-finishing",
+            orderIndex = 3,
+            stepType = StepType.FINISHING,
+            instruction = "Cut the yarn leaving a 5 cm tail.",
+            rowNumber = null,
+            stitchCount = null,
+            confidence = 1.0,
+            repeatCount = null,
+            everyNRows = null,
+            startRow = null,
+            endRow = null,
+            condition = null,
+            stitchPatternId = null,
+            updatedAt = now
+        ),
+        PatternStepEntity(
+            id = "step-square-finish-2",
+            patternId = "square_purl_001",
+            sectionId = "section-square-finishing",
+            orderIndex = 4,
+            stepType = StepType.FINISHING,
+            instruction = "Thread the yarn tail through a tapestry needle.",
+            rowNumber = null,
+            stitchCount = null,
+            confidence = 1.0,
+            repeatCount = null,
+            everyNRows = null,
+            startRow = null,
+            endRow = null,
+            condition = null,
+            stitchPatternId = null,
+            updatedAt = now
+        ),
+        PatternStepEntity(
+            id = "step-square-finish-3",
+            patternId = "square_purl_001",
+            sectionId = "section-square-finishing",
+            orderIndex = 5,
+            stepType = StepType.FINISHING,
+            instruction = "Check the square for loose stitches or ends. The square is now complete.",
+            rowNumber = null,
+            stitchCount = null,
+            confidence = 1.0,
+            repeatCount = null,
+            everyNRows = null,
+            startRow = null,
+            endRow = null,
             condition = null,
             stitchPatternId = null,
             updatedAt = now

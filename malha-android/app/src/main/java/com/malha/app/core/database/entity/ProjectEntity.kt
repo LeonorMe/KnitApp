@@ -30,5 +30,6 @@ data class ProjectEntity(
     val completedAt: Long?,
     val createdAt: Long,
     val updatedAt: Long,
-    val colorHex: String? = null
+    val colorHex: String? = null,
+    val selectedSize: String? = null
 )

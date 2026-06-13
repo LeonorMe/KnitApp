@@ -1,9 +1,17 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.ksp)
     alias(libs.plugins.google.services)
+}
+
+// Load local.properties safely — key may be absent in CI / fresh clones
+val localProps = Properties().also { props ->
+    val localFile = rootProject.file("local.properties")
+    if (localFile.exists()) localFile.inputStream().use { props.load(it) }
 }
 
 android {
@@ -16,6 +24,18 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "0.1.0"
+
+        // Inject the Anthropic API key; empty string if not set so CloudAidiAssistantService
+        // falls back to the local engine automatically.
+        buildConfigField(
+            "String",
+            "ANTHROPIC_API_KEY",
+            "\"${localProps.getProperty("anthropic.api.key", "")}\""
+        )
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 
     buildTypes {

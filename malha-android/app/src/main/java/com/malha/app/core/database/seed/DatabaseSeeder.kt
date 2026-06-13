@@ -14,6 +14,7 @@ class DatabaseSeeder(
     suspend fun seedIfEmpty() {
         if (patternDao.countPatterns() == 0) {
             patternDao.insertPatterns(SeedData.patterns)
+            patternDao.insertSections(SeedData.sections)
             patternDao.insertSteps(SeedData.steps)
         }
         if (projectDao.countProjects() == 0) {
@@ -22,7 +23,6 @@ class DatabaseSeeder(
         if (materialDao.countMaterials() == 0) {
             materialDao.insertMaterials(SeedData.materials)
         }
-        // Seed Social Data
         if (socialDao.getUser("default-user") == null) {
             for (user in SeedData.users) {
                 socialDao.insertUser(user)

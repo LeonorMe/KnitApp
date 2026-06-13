@@ -14,7 +14,8 @@ fun ProjectEntity.toDomain(): Project {
         progressPercent = progressPercent,
         currentStepIndex = currentStepIndex,
         updatedAt = updatedAt,
-        colorHex = colorHex
+        colorHex = colorHex,
+        selectedSize = selectedSize
     )
 }
 
@@ -92,6 +93,7 @@ fun MaterialEntity.toDomain(): Material {
         quantity = quantity,
         unit = unit,
         fiber = fiber,
+        weightCategory = weightCategory,
         gramsPerBall = gramsPerBall,
         needleType = needleType,
         sizeMm = sizeMm,

@@ -45,4 +45,31 @@ interface ProjectDao {
 
     @Query("UPDATE projects SET colorHex = :colorHex, updatedAt = :updatedAt WHERE id = :projectId")
     suspend fun updateColor(projectId: String, colorHex: String?, updatedAt: Long): Int
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertProjectMaterials(projectMaterials: List<com.malha.app.core.database.entity.ProjectMaterialEntity>)
+
+    @Query("SELECT * FROM project_materials WHERE projectId = :projectId")
+    fun observeProjectMaterials(projectId: String): Flow<List<com.malha.app.core.database.entity.ProjectMaterialEntity>>
+
+    @Query("DELETE FROM project_materials WHERE projectId = :projectId")
+    suspend fun deleteProjectMaterials(projectId: String)
+
+    @Query(
+        """
+        UPDATE projects
+        SET name = :name,
+            colorHex = :colorHex,
+            selectedSize = :selectedSize,
+            updatedAt = :updatedAt
+        WHERE id = :projectId
+        """
+    )
+    suspend fun updateProjectSettings(
+        projectId: String,
+        name: String,
+        colorHex: String?,
+        selectedSize: String?,
+        updatedAt: Long
+    ): Int
 }

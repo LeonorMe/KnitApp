@@ -4,11 +4,8 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,16 +13,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -39,24 +31,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.malha.app.R
-import com.malha.app.domain.model.Pattern
+import com.malha.app.core.design.component.AidiCompanion
+import com.malha.app.core.design.component.KNOWN_STITCHES
+import com.malha.app.core.design.component.StitchDetailDialog
+import com.malha.app.core.design.component.StitchLinkText
 import com.malha.app.domain.model.PatternStep
 import com.malha.app.domain.model.Project
-import com.malha.app.core.design.component.AidiCompanion
-import com.malha.app.core.design.component.StitchLinkText
-import com.malha.app.core.design.component.StitchDetailDialog
-import com.malha.app.core.design.component.KNOWN_STITCHES
+import com.malha.app.R
+import androidx.compose.ui.res.stringResource
 
 @Composable
 fun ProjectExecutionScreen(
@@ -67,10 +53,9 @@ fun ProjectExecutionScreen(
 ) {
     val uiState = viewModel.uiState.collectAsState().value
     val project = uiState.project
-    val currentStep = uiState.currentStep
     var showNoteDialog by remember { mutableStateOf(false) }
     var selectedStitch by remember { mutableStateOf<String?>(null) }
-    
+
     val configuration = LocalConfiguration.current
     val isTablet = configuration.screenWidthDp > 600
 
@@ -113,14 +98,12 @@ fun ProjectExecutionScreen(
                     horizontalArrangement = Arrangement.spacedBy(24.dp)
                 ) {
                     Column(
-                        modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()),
+                        modifier = Modifier
+                            .weight(1f)
+                            .verticalScroll(rememberScrollState()),
                         verticalArrangement = Arrangement.spacedBy(18.dp)
                     ) {
                         ProjectInfoCard(project)
-                        ProjectColorPicker(
-                            currentColorHex = project.colorHex,
-                            onColorSelected = viewModel::updateProjectColor
-                        )
                         ExecutionProgress(uiState)
                         val pattern = uiState.pattern
                         if (pattern != null && pattern.availableSizes.isNotEmpty()) {
@@ -130,10 +113,12 @@ fun ProjectExecutionScreen(
                                 onSizeSelected = viewModel::selectSize
                             )
                         }
-                        StepCard(currentStep) { selectedStitch = it }
+                        StepCard(uiState.currentStep) { selectedStitch = it }
                     }
                     Column(
-                        modifier = Modifier.weight(0.8f).verticalScroll(rememberScrollState()),
+                        modifier = Modifier
+                            .weight(0.8f)
+                            .verticalScroll(rememberScrollState()),
                         verticalArrangement = Arrangement.spacedBy(18.dp)
                     ) {
                         AidiCompanion(modifier = Modifier.fillMaxWidth())
@@ -143,14 +128,12 @@ fun ProjectExecutionScreen(
                 }
             } else {
                 Column(
-                    modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()),
+                    modifier = Modifier
+                        .weight(1f)
+                        .verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.spacedBy(18.dp)
                 ) {
                     ProjectInfoCard(project)
-                    ProjectColorPicker(
-                        currentColorHex = project.colorHex,
-                        onColorSelected = viewModel::updateProjectColor
-                    )
                     ExecutionProgress(uiState)
                     val pattern = uiState.pattern
                     if (pattern != null && pattern.availableSizes.isNotEmpty()) {
@@ -160,7 +143,7 @@ fun ProjectExecutionScreen(
                             onSizeSelected = viewModel::selectSize
                         )
                     }
-                    StepCard(currentStep) { selectedStitch = it }
+                    StepCard(uiState.currentStep) { selectedStitch = it }
                     NoteCard(uiState) { showNoteDialog = true }
                     AidiCompanion(modifier = Modifier.size(100.dp))
                     Controls(uiState, viewModel)
@@ -174,7 +157,7 @@ fun ProjectExecutionScreen(
             currentNote = uiState.currentStepProgress?.note.orEmpty(),
             onDismiss = { showNoteDialog = false },
             onSave = { note ->
-                // viewModel.saveNote(note) // TODO: Implement
+                viewModel.saveNote(note)
                 showNoteDialog = false
             }
         )
@@ -190,130 +173,15 @@ fun ProjectExecutionScreen(
 
 @Composable
 private fun ProjectInfoCard(project: Project) {
-    // Parse stored colorHex (e.g. "#FF5733") into a Compose Color for the card container
-    val accentColor: Color? = remember(project.colorHex) {
-        project.colorHex?.let { hex ->
-            runCatching { Color(android.graphics.Color.parseColor(hex)) }.getOrNull()
-        }
-    }
     Card(
-        colors = CardDefaults.cardColors(
-            containerColor = accentColor ?: MaterialTheme.colorScheme.secondaryContainer
-        ),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
         modifier = Modifier
             .fillMaxWidth()
             .animateContentSize()
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                project.name,
-                style = MaterialTheme.typography.titleLarge,
-                color = if (accentColor != null && accentColor.luminance() < 0.35f)
-                    Color.White else Color.Unspecified
-            )
-            Text(
-                stringResource(R.string.execution_knitting_companion_active),
-                style = MaterialTheme.typography.bodyMedium,
-                color = if (accentColor != null && accentColor.luminance() < 0.35f)
-                    Color.White.copy(alpha = 0.8f) else Color.Unspecified
-            )
-        }
-    }
-}
-
-// ─── Colour picker ───────────────────────────────────────────────────────────
-
-/** 12 curated swatches that cover a pleasing range of hues. */
-private val PROJECT_PALETTE = listOf(
-    "#E57373", // Soft Red
-    "#FF8A65", // Coral / Orange
-    "#FFD54F", // Amber
-    "#AED581", // Light Green
-    "#4DB6AC", // Teal
-    "#4FC3F7", // Sky Blue
-    "#7986CB", // Indigo
-    "#BA68C8", // Purple
-    "#F06292", // Pink
-    "#A1887F", // Warm Brown
-    "#90A4AE", // Blue-Grey
-    "#3F6B57", // Sage (brand colour)
-)
-
-@Composable
-private fun ProjectColorPicker(
-    currentColorHex: String?,
-    onColorSelected: (String?) -> Unit
-) {
-    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Text(
-            text = "Cor do projeto",
-            style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // "No colour" reset swatch
-            val isNone = currentColorHex == null
-            Surface(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .clickable { onColorSelected(null) },
-                shape = CircleShape,
-                color = MaterialTheme.colorScheme.surfaceVariant,
-                border = BorderStroke(
-                    width = if (isNone) 3.dp else 1.5.dp,
-                    color = if (isNone) MaterialTheme.colorScheme.primary
-                    else MaterialTheme.colorScheme.outlineVariant
-                )
-            ) {
-                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                    Icon(
-                        imageVector = Icons.Default.Clear,
-                        contentDescription = "Sem cor",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
-            }
-
-            // Colour swatches
-            PROJECT_PALETTE.forEach { hex ->
-                val swatchColor = remember(hex) {
-                    runCatching { Color(android.graphics.Color.parseColor(hex)) }.getOrElse { Color.Gray }
-                }
-                val isSelected = hex.equals(currentColorHex, ignoreCase = true)
-                Surface(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .clickable { onColorSelected(hex) },
-                    shape = CircleShape,
-                    color = swatchColor,
-                    border = BorderStroke(
-                        width = if (isSelected) 3.dp else 1.5.dp,
-                        color = if (isSelected) MaterialTheme.colorScheme.primary
-                        else Color.Transparent
-                    )
-                ) {
-                    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                        if (isSelected) {
-                            Icon(
-                                imageVector = Icons.Default.Check,
-                                contentDescription = "Selecionado",
-                                tint = if (swatchColor.luminance() < 0.35f) Color.White else Color.Black,
-                                modifier = Modifier.size(18.dp)
-                            )
-                        }
-                    }
-                }
-            }
+            Text(project.name, style = MaterialTheme.typography.titleLarge)
+            Text("Knitting companion active", style = MaterialTheme.typography.bodyMedium)
         }
     }
 }
@@ -332,11 +200,11 @@ private fun ExecutionProgress(uiState: ProjectExecutionUiState) {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                stringResource(R.string.execution_progress, uiState.project?.progressPercent ?: 0),
+                "Progress: ${uiState.project?.progressPercent ?: 0}%",
                 style = MaterialTheme.typography.bodyLarge
             )
             Text(
-                stringResource(R.string.execution_step_of, uiState.currentStepNumber, uiState.totalSteps),
+                "Step ${uiState.currentStepNumber} of ${uiState.totalSteps}",
                 style = MaterialTheme.typography.bodyLarge
             )
         }
@@ -355,12 +223,16 @@ private fun StepCard(currentStep: PatternStep?, onStitchClick: (String) -> Unit)
             .fillMaxWidth()
             .animateContentSize()
     ) {
-        Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text(stringResource(R.string.execution_current_instruction), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
-            AnimatedContent(
-                targetState = currentStep,
-                label = "current-step-card"
-            ) { step ->
+        Column(
+            modifier = Modifier.padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                "Current Instruction",
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.primary
+            )
+            AnimatedContent(targetState = currentStep, label = "current-step-card") { step ->
                 if (step != null) {
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         StitchLinkText(
@@ -370,14 +242,14 @@ private fun StepCard(currentStep: PatternStep?, onStitchClick: (String) -> Unit)
                         )
                         if (step.stitchCountData != null) {
                             Text(
-                                stringResource(R.string.execution_target_stitches, step.stitchCountData!!),
+                                "Target: ${step.stitchCountData} stitches",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.secondary
                             )
                         }
                     }
                 } else {
-                    Text(stringResource(R.string.execution_all_steps_done), style = MaterialTheme.typography.headlineSmall)
+                    Text("All steps completed!", style = MaterialTheme.typography.headlineSmall)
                 }
             }
         }
@@ -393,12 +265,19 @@ private fun NoteCard(uiState: ProjectExecutionUiState, onEditNote: () -> Unit) {
             .clickable { onEditNote() },
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(stringResource(R.string.execution_my_notes), style = MaterialTheme.typography.titleMedium)
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text("My Notes", style = MaterialTheme.typography.titleMedium)
             Text(
-                text = uiState.currentStepProgress?.note ?: stringResource(R.string.execution_no_notes),
+                text = uiState.currentStepProgress?.note
+                    ?: "No notes for this step. Tap to add one.",
                 style = MaterialTheme.typography.bodyMedium,
-                color = if (uiState.currentStepProgress?.note == null) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface
+                color = if (uiState.currentStepProgress?.note == null)
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                else
+                    MaterialTheme.colorScheme.onSurface
             )
         }
     }
@@ -422,7 +301,7 @@ private fun Controls(uiState: ProjectExecutionUiState, viewModel: ProjectExecuti
             enabled = uiState.canGoNext,
             modifier = Modifier.weight(1.5f)
         ) {
-            Text(if (uiState.currentStepProgress?.isDone == true) stringResource(R.string.action_next_step) else stringResource(R.string.action_mark_done))
+            Text(if (uiState.currentStepProgress?.isDone == true) "Next Step" else "Mark Done")
         }
     }
 }
@@ -433,7 +312,8 @@ private fun StepNoteDialog(
     onDismiss: () -> Unit,
     onSave: (String) -> Unit
 ) {
-    var note by remember { mutableStateOf(currentNote) }
+    var note by remember(currentNote) { mutableStateOf(currentNote) }
+
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.dialog_step_note_title)) },

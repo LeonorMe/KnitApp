@@ -8,5 +8,6 @@ data class Project(
     val progressPercent: Int,
     val currentStepIndex: Int,
     val updatedAt: Long,
-    val colorHex: String? = null
+    val colorHex: String? = null,
+    val selectedSize: String? = null
 )

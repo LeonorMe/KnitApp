@@ -100,4 +100,38 @@ class RoomProjectRepository(
             )
         )
     }
+
+    override suspend fun updateProjectSettings(
+        projectId: String,
+        name: String,
+        colorHex: String?,
+        selectedSize: String?,
+        materialIds: List<String>
+    ) {
+        val now = System.currentTimeMillis()
+        projectDao.updateProjectSettings(
+            projectId = projectId,
+            name = name,
+            colorHex = colorHex,
+            selectedSize = selectedSize,
+            updatedAt = now
+        )
+        projectDao.deleteProjectMaterials(projectId)
+        projectDao.insertProjectMaterials(
+            materialIds.map { materialId ->
+                com.malha.app.core.database.entity.ProjectMaterialEntity(
+                    id = "$projectId:$materialId",
+                    projectId = projectId,
+                    materialId = materialId,
+                    plannedQuantity = null,
+                    usedQuantity = null
+                )
+            }
+        )
+    }
+
+    override fun observeProjectMaterials(projectId: String): Flow<List<String>> {
+        return projectDao.observeProjectMaterials(projectId)
+            .map { list -> list.map { it.materialId } }
+    }
 }

@@ -28,14 +28,18 @@ import com.malha.app.core.design.component.ImagePlaceholder
 import com.malha.app.core.share.MalhaShare
 import com.malha.app.domain.model.Material
 import com.malha.app.domain.model.MaterialType
+import com.malha.app.domain.model.Pattern
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MaterialsScreen(viewModel: MaterialsViewModel = viewModel()) {
+fun MaterialsScreen(
+    onNavigateToPattern: (String) -> Unit,
+    viewModel: MaterialsViewModel = viewModel()
+) {
     val uiState by viewModel.uiState.collectAsState()
     var showCreateDialog by remember { mutableStateOf(false) }
 
-    val tabs = listOf("Fios", "Agulhas", "Acessórios", "Lista de compras", "Loja")
+    val tabs = listOf("Fios", "Agulhas", "Acessórios", "Patterns", "Lista de compras", "Loja")
     var selectedTabIndex by remember { mutableStateOf(0) }
 
     Scaffold(
@@ -101,6 +105,11 @@ fun MaterialsScreen(viewModel: MaterialsViewModel = viewModel()) {
                                 type = selectedType,
                                 materials = uiState.materials.filter { it.type == selectedType },
                                 isLoading = uiState.isLoading
+                            )
+                        } else if (tabIndex == 3) {
+                            PatternsCategoryCard(
+                                patterns = uiState.patterns,
+                                onNavigateToPattern = onNavigateToPattern
                             )
                         } else {
                             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = androidx.compose.ui.Alignment.Center) {
@@ -345,5 +354,83 @@ private fun defaultUnitFor(type: MaterialType): String {
         MaterialType.Hook -> "hooks"
         MaterialType.Accessory -> "items"
         else -> "units"
+    }
+}
+
+@Composable
+private fun PatternsCategoryCard(
+    patterns: List<Pattern>,
+    onNavigateToPattern: (String) -> Unit
+) {
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        ),
+        modifier = Modifier
+            .fillMaxWidth()
+            .animateContentSize()
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                text = "Patterns",
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            if (patterns.isEmpty()) {
+                Text(
+                    text = "No patterns found.",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            } else {
+                patterns.forEach { pattern ->
+                    PatternRow(pattern = pattern, onClick = { onNavigateToPattern(pattern.id) })
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun PatternRow(pattern: Pattern, onClick: () -> Unit) {
+    Card(
+        onClick = onClick,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    text = pattern.title,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = "Designer: ${pattern.designer ?: "Unknown"} • ${pattern.craft.name.lowercase().capitalize()}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = "${pattern.allSteps.size} steps",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
     }
 }
