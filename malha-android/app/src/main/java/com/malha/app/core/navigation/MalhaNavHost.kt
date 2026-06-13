@@ -15,6 +15,7 @@ import com.malha.app.feature.materials.MaterialsScreen
 import com.malha.app.feature.patterns.PatternsScreen
 import com.malha.app.feature.patterns.detail.PatternDetailScreen
 import com.malha.app.feature.profile.ProfileEditScreen
+import com.malha.app.feature.projects.ProjectSettingsScreen
 import com.malha.app.feature.projects.ProjectsScreen
 import com.malha.app.feature.settings.SettingsScreen
 import com.malha.app.feature.social.CommunityFeedScreen
@@ -120,7 +121,26 @@ fun MalhaNavHost(
             )
         ) { entry ->
             val projectId = entry.arguments?.getString("projectId").orEmpty()
-            ProjectExecutionScreen(projectId = projectId)
+            ProjectExecutionScreen(
+                projectId = projectId,
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(
+            route = MalhaDestination.ProjectSettings.route,
+            arguments = listOf(
+                navArgument("projectId") { type = NavType.StringType }
+            )
+        ) { entry ->
+            val projectId = entry.arguments?.getString("projectId").orEmpty()
+            ProjectSettingsScreen(
+                projectId = projectId,
+                onStartProject = { pid ->
+                    navController.navigate(MalhaDestination.projectExecutionRoute(pid))
+                },
+                onBack = { navController.popBackStack() }
+            )
         }
 
         composable(
@@ -137,8 +157,8 @@ fun MalhaNavHost(
             val patternId = entry.arguments?.getString("patternId").orEmpty()
             PatternDetailScreen(
                 patternId = patternId,
-                onProjectStarted = { projectId ->
-                    navController.navigate(MalhaDestination.projectExecutionRoute(projectId))
+                onProjectCreated = { projectId ->
+                    navController.navigate(MalhaDestination.projectSettingsRoute(projectId))
                 }
             )
         }

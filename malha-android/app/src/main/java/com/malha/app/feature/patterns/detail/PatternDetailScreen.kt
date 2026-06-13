@@ -33,7 +33,7 @@ import com.malha.app.domain.model.Pattern
 @Composable
 fun PatternDetailScreen(
     patternId: String,
-    onProjectStarted: (String) -> Unit,
+    onProjectCreated: (String) -> Unit,
     viewModel: PatternDetailViewModel = viewModel(
         factory = PatternDetailViewModel.factory(patternId)
     )
@@ -43,7 +43,7 @@ fun PatternDetailScreen(
     var showStartDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(uiState.startedProjectId) {
-        uiState.startedProjectId?.let(onProjectStarted)
+        uiState.startedProjectId?.let(onProjectCreated)
     }
 
     Surface(

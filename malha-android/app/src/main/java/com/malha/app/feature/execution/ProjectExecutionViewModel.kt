@@ -88,11 +88,8 @@ class ProjectExecutionViewModel(
         val currentStep = state.currentStep ?: return
         if (state.totalSteps == 0) return
 
-        val nextIndex = if (project.currentStepIndex < state.totalSteps - 1) {
-            project.currentStepIndex + 1
-        } else {
-            project.currentStepIndex
-        }
+        val isLastStep = project.currentStepIndex == state.totalSteps - 1
+        val nextIndex = if (!isLastStep) project.currentStepIndex + 1 else project.currentStepIndex
 
         viewModelScope.launch {
             appContainer.projectRepository.saveStepProgress(
@@ -102,6 +99,10 @@ class ProjectExecutionViewModel(
                 note = state.currentStepProgress?.note
             )
             updateStep(nextIndex, state.totalSteps)
+            // Award coins on final step
+            if (isLastStep) {
+                runCatching { appContainer.socialRepository.addCoins(50) }
+            }
         }
     }
 
