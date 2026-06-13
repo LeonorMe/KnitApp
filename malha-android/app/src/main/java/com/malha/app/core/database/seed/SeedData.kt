@@ -446,6 +446,39 @@ object SeedData {
         )
     )
 
+    val demoMaterials = listOf(
+        MaterialEntity(
+            id = "material-medium-acrylic",
+            name = "Medium Acrylic",
+            imageUri = null,
+            type = "yarn",
+            quantity = 2.0,
+            unit = "skeins",
+            fiber = "100% Acrylic",
+            gramsPerBall = 100,
+            weightCategory = "medium 4",
+            needleType = null,
+            sizeMm = null,
+            lengthCm = null,
+            updatedAt = now
+        ),
+        MaterialEntity(
+            id = "material-dpn-4mm",
+            name = "Double-pointed needles 4.0 mm",
+            imageUri = null,
+            type = "needle",
+            quantity = 1.0,
+            unit = "sets",
+            fiber = null,
+            gramsPerBall = null,
+            weightCategory = null,
+            needleType = "double_pointed",
+            sizeMm = 4.0,
+            lengthCm = 20,
+            updatedAt = now
+        )
+    )
+
     val materials = listOf(
         MaterialEntity(
             id = "material-chunky-wool",
@@ -489,7 +522,7 @@ object SeedData {
             lengthCm = 35,
             updatedAt = now
         )
-    )
+    ) + demoMaterials
 
     val users = listOf(
         UserEntity(

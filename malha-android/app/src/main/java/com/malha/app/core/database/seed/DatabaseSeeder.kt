@@ -11,6 +11,12 @@ class DatabaseSeeder(
     private val materialDao: MaterialDao,
     private val socialDao: SocialDao
 ) {
+    suspend fun seed() {
+        seedIfEmpty()
+        ensureDemoPatternBundles()
+        ensureDemoMaterials()
+    }
+
     suspend fun seedIfEmpty() {
         if (patternDao.countPatterns() == 0) {
             patternDao.insertPatterns(SeedData.patterns)
@@ -32,6 +38,38 @@ class DatabaseSeeder(
             }
             for (comment in SeedData.comments) {
                 socialDao.insertComment(comment)
+            }
+        }
+    }
+
+    /**
+     * Upserts demo patterns that are required for manual testing.
+     * Runs even when the database already has patterns, so installs that predated
+     * newer seed data still receive full step graphs (e.g. square_purl_001).
+     */
+    private suspend fun ensureDemoPatternBundles() {
+        SeedData.patterns.forEach { pattern ->
+            val exists = patternDao.countPatternsById(pattern.id) > 0
+            val sectionCount = patternDao.countSectionsForPattern(pattern.id)
+            val stepCount = patternDao.countStepsForPattern(pattern.id)
+            if (!exists || sectionCount == 0 || stepCount == 0) {
+                patternDao.insertPattern(pattern)
+                val sections = SeedData.sections.filter { it.patternId == pattern.id }
+                val steps = SeedData.steps.filter { it.patternId == pattern.id }
+                if (sections.isNotEmpty()) {
+                    patternDao.insertSections(sections)
+                }
+                if (steps.isNotEmpty()) {
+                    patternDao.insertSteps(steps)
+                }
+            }
+        }
+    }
+
+    private suspend fun ensureDemoMaterials() {
+        SeedData.demoMaterials.forEach { material ->
+            if (materialDao.countMaterialsById(material.id) == 0) {
+                materialDao.insertMaterial(material)
             }
         }
     }

@@ -58,7 +58,7 @@ class ProjectExecutionViewModel(
             project = project,
             pattern = pattern,
             currentStepProgress = stepProgress,
-            selectedSize = selectedSize ?: pattern?.selectedSize,
+            selectedSize = selectedSize ?: project?.selectedSize ?: pattern?.selectedSize,
             errorMessage = error
         )
     }.stateIn(

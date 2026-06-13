@@ -24,6 +24,15 @@ interface PatternDao {
     @Query("SELECT COUNT(*) FROM patterns")
     suspend fun countPatterns(): Int
 
+    @Query("SELECT COUNT(*) FROM patterns WHERE id = :patternId")
+    suspend fun countPatternsById(patternId: String): Int
+
+    @Query("SELECT COUNT(*) FROM pattern_steps WHERE patternId = :patternId")
+    suspend fun countStepsForPattern(patternId: String): Int
+
+    @Query("SELECT COUNT(*) FROM pattern_sections WHERE patternId = :patternId")
+    suspend fun countSectionsForPattern(patternId: String): Int
+
     @Query("SELECT id FROM patterns ORDER BY title ASC LIMIT 1")
     suspend fun getFirstPatternId(): String?
 

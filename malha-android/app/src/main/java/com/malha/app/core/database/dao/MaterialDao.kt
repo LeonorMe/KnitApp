@@ -15,6 +15,9 @@ interface MaterialDao {
     @Query("SELECT COUNT(*) FROM materials")
     suspend fun countMaterials(): Int
 
+    @Query("SELECT COUNT(*) FROM materials WHERE id = :materialId")
+    suspend fun countMaterialsById(materialId: String): Int
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMaterials(materials: List<MaterialEntity>)
 

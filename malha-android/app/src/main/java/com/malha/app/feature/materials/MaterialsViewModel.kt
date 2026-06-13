@@ -36,7 +36,7 @@ class MaterialsViewModel(application: Application) : AndroidViewModel(applicatio
 
     init {
         viewModelScope.launch {
-            appContainer.databaseSeeder.seedIfEmpty()
+            appContainer.databaseSeeder.seed()
         }
     }
 

@@ -36,7 +36,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
 
     init {
         viewModelScope.launch {
-            appContainer.databaseSeeder.seedIfEmpty()
+            appContainer.databaseSeeder.seed()
         }
     }
 
