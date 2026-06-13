@@ -80,6 +80,20 @@ class CloudBackedProjectRepository(
         local.saveStepProgress(projectId, patternStepId, isDone, note)
     }
 
+    override suspend fun updateProjectSettings(
+        projectId: String,
+        name: String,
+        colorHex: String?,
+        selectedSize: String?,
+        materialIds: List<String>
+    ) {
+        TODO("Not yet implemented")
+    }
+
+    override fun observeProjectMaterials(projectId: String): Flow<List<String>> {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun updateProjectColor(projectId: String, colorHex: String?) {
         local.updateProjectColor(projectId, colorHex)
         runCatching {
