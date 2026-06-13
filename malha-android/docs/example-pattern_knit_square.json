@@ -1,0 +1,159 @@
+{
+  "pattern_id": "square_purl_001",
+  "pattern_version": "1.0",
+  "created_for": "MyWool",
+  "language": "en-UK",
+  "metadata": {
+    "name": "Simple Knit Square in purl",
+    "craft": "knitting",
+    "category": "square",
+    "difficulty": 1,
+    "difficulty_label": "Beginner",
+    "designer": "MyWool",
+    "description": "A simple beginner-friendly knit square in purl."
+  },
+  "sizes": {
+    "available": [
+      "S"
+    ],
+    "default": "S"
+  },
+  "materials": {
+    "yarns": [
+      {
+        "id": "yarn_001",
+        "name": "Medium Acrylic",
+        "fiber": "100% Acrylic",
+        "weight_category": "medium 4",
+        "grams_required": {
+          "U": 20
+        }
+      }
+    ],
+    "needles": [
+      {
+        "type": "double_pointed",
+        "size_mm": 4.0
+      }
+    ],
+    "extras": [
+      "scissors"
+    ]
+  },
+  "gauge": {
+    "stitches": 20,
+    "rows": 26,
+    "measurement_cm": 10,
+    "stitch_pattern": "purl"
+  },
+  "abbreviations": [
+    {
+      "abbr": "p",
+      "meaning": "purl"
+    }
+  ],
+  "execution_graph": {
+    "sections": [
+      {
+        "section_id": "setup",
+        "name": "Setup",
+        "steps": [
+          {
+            "step_id": "setup_001",
+            "type": "prepare_materials",
+            "instruction": "Gather all materials: yarn, double-pointed needles, scissors and tapestry needle.",
+            "voice_instruction": "Gather your knitting materials.",
+            "confidence": 1.0
+          }
+        ]
+      },
+      {
+        "section_id": "cast_on",
+        "name": "Cast On",
+        "steps": [
+          {
+            "step_id": "caston_001",
+            "type": "cast_on",
+            "instruction": {
+              "S": "Cast on 20 stitches using the long-tail cast on method."
+            },
+            "stitch_count": {
+              "S": 20
+            },
+            "voice_instruction": "Cast on the required number of stitches.",
+            "confidence": 1.0
+          }
+        ]
+      },
+      {
+        "section_id": "rows",
+        "name": "Rows",
+        "steps": [
+          {
+            "step_id": "rows_001",
+            "type": "repeat_rows",
+            "instruction": "Purl 25 rows, 20 stitches each.",
+            "row":"p20",
+            "rows": 25,
+            "repeat_logic": {
+              "repeat_until_end": true
+            },
+            "confidence": 1.0
+          }
+        ]
+      },
+      {
+        "section_id": "finishing",
+        "name": "Finishing",
+        "steps": [
+          {
+            "step_id": "finish_001",
+            "type": "cut_yarn",
+            "instruction": "Cut the yarn leaving a 5 cm tail.",
+            "confidence": 1.0
+          },
+          {
+            "step_id": "finish_002",
+            "type": "thread_yarn",
+            "instruction": "Thread the yarn tail through a tapestry needle.",
+            "confidence": 1.0
+          },
+          {
+            "step_id": "finish_005",
+            "type": "final_check",
+            "instruction": "Check the beanie for loose stitches or ends. The hat is now complete.",
+            "confidence": 1.0
+          }
+        ]
+      }
+    ]
+  },
+  "voice_navigation": {
+    "enabled": true,
+    "supported_commands": [
+      "next step",
+      "previous step",
+      "repeat instruction",
+      "mark step done",
+      "how many stitches",
+      "what row am I on"
+    ]
+  },
+  "gamification": {
+    "estimated_hours": {
+      "S": 1
+    },
+    "estimated_coin_reward": {
+      "S": 5
+    }
+  },
+  "community": {
+    "verified": true,
+    "rating": 5,
+    "completed_projects": 0
+  },
+  "original_source": {
+    "source_type": "demo_pattern",
+    "original_text": "Simple beginner knit square in purl created as a fully structured demo pattern for the MyWool app."
+  }
+}

@@ -14,6 +14,12 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.malha.app.MainActivity
 import com.malha.app.R
+import com.malha.app.core.preferences.PreferencesRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 class DailyReminderReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent?) {
@@ -46,6 +52,25 @@ class DailyReminderReceiver : BroadcastReceiver() {
             .build()
 
         NotificationManagerCompat.from(context).notify(NOTIFICATION_ID, notification)
+        
+        // Reschedule the next alarm
+        val pendingResult = goAsync()
+        CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
+            try {
+                val prefsRepo = PreferencesRepository(context)
+                val prefs = prefsRepo.userPreferences.first()
+                DailyReminderScheduler.setReminder(
+                    context = context,
+                    enabled = prefs.reminderEnabled,
+                    regularity = prefs.reminderRegularity,
+                    daysOfWeek = prefs.reminderDaysOfWeek,
+                    hour = prefs.reminderHour,
+                    minute = prefs.reminderMinute
+                )
+            } finally {
+                pendingResult.finish()
+            }
+        }
     }
 
     private fun createChannel(context: Context) {

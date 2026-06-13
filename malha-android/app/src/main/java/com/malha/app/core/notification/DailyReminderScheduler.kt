@@ -9,9 +9,11 @@ import java.util.Calendar
 object DailyReminderScheduler {
     private const val REQUEST_CODE = 4101
 
-    fun setDailyReminder(
+    fun setReminder(
         context: Context,
         enabled: Boolean,
+        regularity: com.malha.app.core.preferences.ReminderRegularity,
+        daysOfWeek: Set<Int>,
         hour: Int,
         minute: Int
     ) {
@@ -23,11 +25,14 @@ object DailyReminderScheduler {
             return
         }
 
-        val triggerAtMillis = nextTriggerMillis(hour, minute)
-        alarmManager.setInexactRepeating(
+        val triggerAtMillis = nextTriggerMillis(regularity, daysOfWeek, hour, minute)
+        // Use setExactAndAllowWhileIdle if permission granted, otherwise setAndAllowWhileIdle
+        // For simplicity and Android 12+ Exact Alarm permission restrictions, we'll use setWindow or basic set
+        // to avoid crashing if exact alarm permission isn't granted.
+        alarmManager.setWindow(
             AlarmManager.RTC_WAKEUP,
             triggerAtMillis,
-            AlarmManager.INTERVAL_DAY,
+            AlarmManager.INTERVAL_FIFTEEN_MINUTES,
             pendingIntent
         )
     }
@@ -42,16 +47,38 @@ object DailyReminderScheduler {
         )
     }
 
-    private fun nextTriggerMillis(hour: Int, minute: Int): Long {
+    private fun nextTriggerMillis(
+        regularity: com.malha.app.core.preferences.ReminderRegularity,
+        daysOfWeek: Set<Int>,
+        hour: Int,
+        minute: Int
+    ): Long {
         val calendar = Calendar.getInstance().apply {
             set(Calendar.HOUR_OF_DAY, hour.coerceIn(0, 23))
             set(Calendar.MINUTE, minute.coerceIn(0, 59))
             set(Calendar.SECOND, 0)
             set(Calendar.MILLISECOND, 0)
-            if (timeInMillis <= System.currentTimeMillis()) {
-                add(Calendar.DAY_OF_YEAR, 1)
+        }
+
+        val now = System.currentTimeMillis()
+
+        if (regularity == com.malha.app.core.preferences.ReminderRegularity.DAILY) {
+            if (calendar.timeInMillis <= now) {
+                calendar.add(Calendar.DAY_OF_YEAR, 1)
+            }
+        } else {
+            // Weekly
+            // If the time has already passed today, we consider it "next day" for calculation purposes
+            if (calendar.timeInMillis <= now) {
+                calendar.add(Calendar.DAY_OF_YEAR, 1)
+            }
+            // Find the next available day from daysOfWeek
+            val selectedDays = if (daysOfWeek.isEmpty()) setOf(Calendar.SUNDAY) else daysOfWeek
+            while (!selectedDays.contains(calendar.get(Calendar.DAY_OF_WEEK))) {
+                calendar.add(Calendar.DAY_OF_YEAR, 1)
             }
         }
+
         return calendar.timeInMillis
     }
 }

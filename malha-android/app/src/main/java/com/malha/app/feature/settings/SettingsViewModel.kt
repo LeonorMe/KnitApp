@@ -77,12 +77,20 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    fun updateDailyReminder(enabled: Boolean, hour: Int, minute: Int) {
+    fun updateReminder(
+        enabled: Boolean,
+        regularity: com.malha.app.core.preferences.ReminderRegularity,
+        daysOfWeek: Set<Int>,
+        hour: Int,
+        minute: Int
+    ) {
         viewModelScope.launch {
-            appContainer.preferencesRepository.updateDailyReminder(enabled, hour, minute)
-            com.malha.app.core.notification.DailyReminderScheduler.setDailyReminder(
+            appContainer.preferencesRepository.updateReminder(enabled, regularity, daysOfWeek, hour, minute)
+            com.malha.app.core.notification.DailyReminderScheduler.setReminder(
                 context = getApplication(),
                 enabled = enabled,
+                regularity = regularity,
+                daysOfWeek = daysOfWeek,
                 hour = hour,
                 minute = minute
             )

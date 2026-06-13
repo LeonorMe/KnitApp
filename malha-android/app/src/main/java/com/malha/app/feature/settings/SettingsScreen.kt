@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.PhotoLibrary
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -44,6 +45,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimePicker
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -64,6 +67,9 @@ import com.malha.app.core.design.component.ImagePlaceholder
 import com.malha.app.core.preferences.AppLanguage
 import com.malha.app.core.preferences.AppTheme
 import com.malha.app.core.preferences.AppUnits
+import com.malha.app.core.preferences.ReminderRegularity
+import java.text.DateFormatSymbols
+import java.util.Calendar
 
 @Composable
 fun SettingsScreen(
@@ -71,14 +77,16 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val context = LocalContext.current
+    val context = androidx.compose.ui.platform.LocalContext.current
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { granted ->
-        viewModel.updateDailyReminder(
+        viewModel.updateReminder(
             enabled = granted,
-            hour = uiState.preferences.dailyReminderHour,
-            minute = uiState.preferences.dailyReminderMinute
+            regularity = uiState.preferences.reminderRegularity,
+            daysOfWeek = uiState.preferences.reminderDaysOfWeek,
+            hour = uiState.preferences.reminderHour,
+            minute = uiState.preferences.reminderMinute
         )
     }
     val profilePhotoPicker = rememberLauncherForActivityResult(
@@ -209,25 +217,54 @@ fun SettingsScreen(
                 )
             }
 
-            SettingsSection(title = "Daily reminder") {
+            SettingsSection(title = "Project reminder") {
                 DailyReminderSettings(
-                    enabled = uiState.preferences.dailyReminderEnabled,
-                    hour = uiState.preferences.dailyReminderHour,
-                    minute = uiState.preferences.dailyReminderMinute,
+                    enabled = uiState.preferences.reminderEnabled,
+                    regularity = uiState.preferences.reminderRegularity,
+                    daysOfWeek = uiState.preferences.reminderDaysOfWeek,
+                    hour = uiState.preferences.reminderHour,
+                    minute = uiState.preferences.reminderMinute,
                     onEnabledChange = { enabled ->
                         if (enabled && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                             notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                         } else {
-                            viewModel.updateDailyReminder(
+                            viewModel.updateReminder(
                                 enabled = enabled,
-                                hour = uiState.preferences.dailyReminderHour,
-                                minute = uiState.preferences.dailyReminderMinute
+                                regularity = uiState.preferences.reminderRegularity,
+                                daysOfWeek = uiState.preferences.reminderDaysOfWeek,
+                                hour = uiState.preferences.reminderHour,
+                                minute = uiState.preferences.reminderMinute
                             )
                         }
                     },
+                    onRegularityChange = { regularity ->
+                        val newDays = if (regularity == ReminderRegularity.WEEKLY && uiState.preferences.reminderDaysOfWeek.isEmpty()) {
+                            setOf(Calendar.SUNDAY)
+                        } else {
+                            uiState.preferences.reminderDaysOfWeek
+                        }
+                        viewModel.updateReminder(
+                            enabled = uiState.preferences.reminderEnabled,
+                            regularity = regularity,
+                            daysOfWeek = newDays,
+                            hour = uiState.preferences.reminderHour,
+                            minute = uiState.preferences.reminderMinute
+                        )
+                    },
+                    onDaysChange = { days ->
+                        viewModel.updateReminder(
+                            enabled = uiState.preferences.reminderEnabled,
+                            regularity = uiState.preferences.reminderRegularity,
+                            daysOfWeek = days,
+                            hour = uiState.preferences.reminderHour,
+                            minute = uiState.preferences.reminderMinute
+                        )
+                    },
                     onTimeChange = { hour, minute ->
-                        viewModel.updateDailyReminder(
-                            enabled = uiState.preferences.dailyReminderEnabled,
+                        viewModel.updateReminder(
+                            enabled = uiState.preferences.reminderEnabled,
+                            regularity = uiState.preferences.reminderRegularity,
+                            daysOfWeek = uiState.preferences.reminderDaysOfWeek,
                             hour = hour,
                             minute = minute
                         )
@@ -274,12 +311,17 @@ private fun SettingsSection(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DailyReminderSettings(
     enabled: Boolean,
+    regularity: ReminderRegularity,
+    daysOfWeek: Set<Int>,
     hour: Int,
     minute: Int,
     onEnabledChange: (Boolean) -> Unit,
+    onRegularityChange: (ReminderRegularity) -> Unit,
+    onDaysChange: (Set<Int>) -> Unit,
     onTimeChange: (Int, Int) -> Unit
 ) {
     Card(
@@ -297,12 +339,12 @@ private fun DailyReminderSettings(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Text("Quiet project reminder", style = MaterialTheme.typography.titleLarge)
-                    Text(
-                        "A daily nudge to continue one project, at a time you choose.",
+                    Text(stringResource(R.string.continue_project_reminder), style = MaterialTheme.typography.titleLarge)
+                    /*Text(
+                        "A nudge to continue one project, at a time you choose.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    )*/
                 }
                 Switch(
                     checked = enabled,
@@ -310,25 +352,137 @@ private fun DailyReminderSettings(
                 )
             }
 
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                OutlinedTextField(
-                    value = hour.toString().padStart(2, '0'),
-                    onValueChange = { value ->
-                        value.toIntOrNull()?.let { onTimeChange(it.coerceIn(0, 23), minute) }
-                    },
-                    label = { Text("Hour") },
-                    singleLine = true,
-                    modifier = Modifier.weight(1f)
-                )
-                OutlinedTextField(
-                    value = minute.toString().padStart(2, '0'),
-                    onValueChange = { value ->
-                        value.toIntOrNull()?.let { onTimeChange(hour, it.coerceIn(0, 59)) }
-                    },
-                    label = { Text("Minute") },
-                    singleLine = true,
-                    modifier = Modifier.weight(1f)
-                )
+            if (enabled) {
+                var expanded by remember { mutableStateOf(false) }
+
+                ExposedDropdownMenuBox(
+                    expanded = expanded,
+                    onExpandedChange = { expanded = !expanded }
+                ) {
+                    OutlinedTextField(
+                        value = when (regularity) {
+                            ReminderRegularity.DAILY -> "Daily"
+                            ReminderRegularity.WEEKLY -> "Weekly"
+                        },
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Regularity") },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .menuAnchor(MenuAnchorType.PrimaryNotEditable)
+                    )
+                    ExposedDropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        ReminderRegularity.entries.forEach { reg ->
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        when (reg) {
+                                            ReminderRegularity.DAILY -> "Daily"
+                                            ReminderRegularity.WEEKLY -> "Weekly"
+                                        }
+                                    )
+                                },
+                                onClick = {
+                                    onRegularityChange(reg)
+                                    expanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+
+                if (regularity == ReminderRegularity.WEEKLY) {
+                    val weekdays = listOf(
+                        Calendar.MONDAY, Calendar.TUESDAY, Calendar.WEDNESDAY,
+                        Calendar.THURSDAY, Calendar.FRIDAY, Calendar.SATURDAY, Calendar.SUNDAY
+                    )
+                    val symbols = DateFormatSymbols().shortWeekdays
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        weekdays.forEach { day ->
+                            val isSelected = daysOfWeek.contains(day)
+                            Surface(
+                                modifier = Modifier
+                                    .size(36.dp),
+                                shape = androidx.compose.foundation.shape.CircleShape,
+                                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
+                                border = if (isSelected) null else androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                                onClick = {
+                                    val newDays = if (isSelected) {
+                                        daysOfWeek - day
+                                    } else {
+                                        daysOfWeek + day
+                                    }
+                                    // Prevent empty selection
+                                    if (newDays.isNotEmpty()) {
+                                        onDaysChange(newDays)
+                                    }
+                                }
+                            ) {
+                                Box(contentAlignment = androidx.compose.ui.Alignment.Center) {
+                                    Text(
+                                        text = symbols[day].take(1),
+                                        style = MaterialTheme.typography.labelLarge,
+                                        color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
+                var showTimePicker by remember { mutableStateOf(false) }
+
+                if (showTimePicker) {
+                    val timePickerState = rememberTimePickerState(
+                        initialHour = hour,
+                        initialMinute = minute,
+                        is24Hour = true
+                    )
+                    
+                    AlertDialog(
+                        onDismissRequest = { showTimePicker = false },
+                        confirmButton = {
+                            TextButton(onClick = {
+                                onTimeChange(timePickerState.hour, timePickerState.minute)
+                                showTimePicker = false
+                            }) {
+                                Text("OK")
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { showTimePicker = false }) {
+                                Text("Cancel")
+                            }
+                        },
+                        text = {
+                            TimePicker(state = timePickerState)
+                        }
+                    )
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Start,
+                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                ) {
+                    Text(
+                        "Time",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    OutlinedButton(onClick = { showTimePicker = true }) {
+                        val formattedTime = String.format(java.util.Locale.getDefault(), "%02d:%02d", hour, minute)
+                        Text(formattedTime)
+                    }
+                }
             }
         }
     }

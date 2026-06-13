@@ -117,4 +117,5 @@
     <string name="profile_level_steady">Steady</string>
     <string name="profile_level_confident">Confident</string>
     <string name="profile_level_advanced">Advanced</string>
+    <string name="continue_project_reminder">Continue project reminder</string>
 </resources>

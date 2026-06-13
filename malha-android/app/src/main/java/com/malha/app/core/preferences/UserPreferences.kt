@@ -16,6 +16,10 @@ enum class AppUnits {
     METRIC, IMPERIAL
 }
 
+enum class ReminderRegularity {
+    DAILY, WEEKLY
+}
+
 data class UserPreferences(
     val theme: AppTheme = AppTheme.SYSTEM,
     val language: AppLanguage = AppLanguage.SYSTEM,
@@ -24,9 +28,11 @@ data class UserPreferences(
     val username: String? = null,
     val bio: String? = null,
     val profilePhotoUri: String? = null,
-    val dailyReminderEnabled: Boolean = false,
-    val dailyReminderHour: Int = 18,
-    val dailyReminderMinute: Int = 0,
+    val reminderEnabled: Boolean = true,
+    val reminderRegularity: ReminderRegularity = ReminderRegularity.DAILY,
+    val reminderDaysOfWeek: Set<Int> = emptySet(),
+    val reminderHour: Int = 18,
+    val reminderMinute: Int = 30,
     val lastDailyRewardTimestamp: Long = 0L,
     val lastSquareChallengeTimestamp: Long = 0L
 )

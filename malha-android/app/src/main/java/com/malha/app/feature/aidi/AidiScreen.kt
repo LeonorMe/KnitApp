@@ -1,5 +1,6 @@
 package com.malha.app.feature.aidi
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -26,8 +27,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.malha.app.R
 import com.malha.app.core.ai.AidiMessage
 import com.malha.app.core.ai.AidiSender
 
@@ -48,17 +51,18 @@ fun AidiScreen(viewModel: AidiViewModel = viewModel()) {
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             Text(
-                text = "Aidi",
+                text = stringResource(R.string.nav_aidi),
                 style = MaterialTheme.typography.headlineLarge,
                 color = MaterialTheme.colorScheme.onBackground
-            )
+            )/*
             Text(
                 text = "AI craft assistance for planning, materials, pattern explanations, and progress decisions.",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            )*/
 
-            FlowRow(
+            // TODO maybe put has horizontal scroll
+            /*FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
@@ -69,7 +73,7 @@ fun AidiScreen(viewModel: AidiViewModel = viewModel()) {
                         enabled = !uiState.isThinking
                     )
                 }
-            }
+            }*/
 
             if (uiState.errorMessage != null) {
                 Text(

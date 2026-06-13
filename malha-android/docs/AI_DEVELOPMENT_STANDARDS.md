@@ -1,4 +1,23 @@
-# AI Development Constitution for Android Project
+This document is mandatory and overrides default coding behavior.
+
+Before making any code changes:
+
+1. Summarize the relevant rules that apply.
+2. Analyze the affected architecture.
+3. Identify risks and edge cases.
+4. Explain the implementation plan.
+
+Then implement the solution following all rules in the constitution.
+
+Do not take shortcuts.
+Do not use hardcoded strings, colors, dimensions, URLs, secrets, or magic values.
+Maintain production-quality code.
+Only modify files that require changes.
+Minimize token usage by showing only relevant code changes.
+
+---
+
+# AI Development Standards for Malha/MyWool
 
 ## Purpose
 
@@ -186,13 +205,14 @@ Every reusable composable should have previews.
 
 # Material 3 Standards
 
-Use Material 3 exclusively.
+Use Material 3.
 
 Requirements:
 
 * Dynamic color support when appropriate.
 * Dark mode support.
 * Light mode support.
+* Warm light mode support.
 * Material typography system.
 * Material spacing system.
 * Material motion patterns.
@@ -246,8 +266,9 @@ Use:
 
 * Material Symbols
 * Material Icons
+* Custom Icons I made just for this project
 
-Avoid custom icons unless necessary.
+Avoid making new custom icons unless necessary.
 
 ---
 
@@ -404,6 +425,8 @@ Never:
 
 * Lose user data during migrations
 * Destructively recreate databases in production
+
+Unless there are very specific orders to do so.
 
 ---
 
