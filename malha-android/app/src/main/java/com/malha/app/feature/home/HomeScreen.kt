@@ -2,6 +2,7 @@ package com.malha.app.feature.home
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
@@ -27,6 +28,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
@@ -37,6 +39,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -50,10 +53,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.compositeOver
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -64,6 +72,10 @@ import com.malha.app.R
 import com.malha.app.core.design.component.DailySquareChallengeDialog
 import com.malha.app.core.design.component.DailyYarnShakeDialog
 import com.malha.app.core.design.component.ImagePlaceholder
+import com.malha.app.core.preferences.AppTheme
+import androidx.core.graphics.toColorInt
+import com.malha.app.domain.model.Project
+import kotlinx.coroutines.delay
 
 @Composable
 fun HomeScreen(
@@ -85,7 +97,7 @@ fun HomeScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding),
-            color = MaterialTheme.colorScheme.background
+            color = colorScheme.background
         ) {
             AnimatedVisibility(
                 visible = contentVisible,
@@ -119,23 +131,25 @@ fun HomeScreen(
                             item {
                                 Text(
                                     text = stringResource(R.string.greeting, uiState.userName),
-                                    style = MaterialTheme.typography.headlineLarge,
+                                    style = MaterialTheme.typography.headlineMedium,
                                     fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onBackground
+                                    color = colorScheme.onBackground.copy(alpha = 0.9f)
                                 )
                                 Spacer(modifier = Modifier.height(12.dp))
                                 Text(
-                                    text = "A continuar",
+                                    text = stringResource(R.string.to_continue),
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f)
+                                    color = colorScheme.onBackground.copy(alpha = 0.7f)
                                 )
                             }
 
                             if (uiState.isLoading) {
                                 item {
                                     Box(
-                                        modifier = Modifier.fillMaxWidth().padding(32.dp),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(32.dp),
                                         contentAlignment = Alignment.Center
                                     ) {
                                         CircularProgressIndicator()
@@ -144,10 +158,12 @@ fun HomeScreen(
                             } else if (uiState.projects.isEmpty()) {
                                 item {
                                     Text(
-                                        text = "Não tens projetos ativos. Cria um para começar!",
+                                        text = stringResource(R.string.no_active_projects_create_to_start),
                                         style = MaterialTheme.typography.bodyLarge,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        modifier = Modifier.fillMaxWidth().padding(vertical = 48.dp),
+                                        color = colorScheme.onSurfaceVariant,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 48.dp),
                                         textAlign = TextAlign.Center
                                     )
                                 }
@@ -184,7 +200,27 @@ fun HomeScreen(
                             enter = scaleIn(animationSpec = tween(300)) + fadeIn(),
                             exit = scaleOut(animationSpec = tween(200)) + fadeOut()
                         ) {
+                            val rotation = remember { Animatable(0f) }
+
+                            LaunchedEffect(Unit) {
+                                while (true) {
+                                    delay(7560)
+
+                                    rotation.animateTo(-8f, tween(60))
+                                    rotation.animateTo(8f, tween(60))
+                                    rotation.animateTo(-8f, tween(60))
+                                    rotation.animateTo(8f, tween(60))
+                                    rotation.animateTo(0f, tween(80))
+                                }
+                            }
+
+                            val colorIcon = colorScheme.onTertiaryContainer
+                            val colorBackground = colorScheme.tertiaryContainer
+
                             ChallengeBadgeButton(
+                                modifier = Modifier.graphicsLayer {
+                                    rotationZ = rotation.value
+                                },
                                 icon = {
                                     Canvas(modifier = Modifier.size(28.dp)) {
                                         val size = size.width
@@ -193,22 +229,23 @@ fun HomeScreen(
                                         // Draw Grid Lines
                                         for (i in 1 until divisions) {
                                             drawLine(
-                                                color = Color(0xFF3F6B57),
-                                                start = androidx.compose.ui.geometry.Offset(i * step, 0f),
-                                                end = androidx.compose.ui.geometry.Offset(i * step, size),
+                                                color = colorIcon,
+                                                start = Offset(i * step, 0f),
+                                                end = Offset(i * step, size),
                                                 strokeWidth = 2.5f
                                             )
                                             drawLine(
-                                                color = Color(0xFF3F6B57),
-                                                start = androidx.compose.ui.geometry.Offset(0f, i * step),
-                                                end = androidx.compose.ui.geometry.Offset(size, i * step),
+                                                color = colorIcon,
+                                                start = Offset(0f, i * step),
+                                                end = Offset(size, i * step),
                                                 strokeWidth = 2.5f
                                             )
                                         }
                                     }
                                 },
-                                label = "10x10",
-                                badgeColor = Color(0xFFD0E7DD), // Light Sage Cream color
+                                label = stringResource(R.string.chalange_10x10),
+                                badgeColor = colorBackground,
+                                borderColor = colorIcon,
                                 onClick = { showSquareDialog = true }
                             )
                         }
@@ -219,19 +256,41 @@ fun HomeScreen(
                             enter = scaleIn(animationSpec = tween(300)) + fadeIn(),
                             exit = scaleOut(animationSpec = tween(200)) + fadeOut()
                         ) {
+                            val rotation = remember { Animatable(0f) }
+
+                            LaunchedEffect(Unit) {
+                                while (true) {
+                                    delay(2000)
+
+                                    rotation.animateTo( -8f,tween(60))
+                                    rotation.animateTo(targetValue = 8f, tween(60))
+                                    rotation.animateTo(targetValue = -8f, animationSpec = tween(60))
+                                    rotation.animateTo(targetValue = 8f, animationSpec = tween(60))
+                                    rotation.animateTo(targetValue = 0f, animationSpec = tween(100))
+                                }
+                            }
+
+                            val colorIcon = colorScheme.onSecondaryContainer
+                            val colorBackground = colorScheme.secondaryContainer
+
                             ChallengeBadgeButton(
+                                modifier = Modifier.graphicsLayer {
+                                    rotationZ = rotation.value
+                                },
                                 icon = {
                                     Icon(
-                                        painter = painterResource(id = R.drawable.ic_aidi),
-                                        contentDescription = "Daily Yarn Shake",
-                                        tint = Color(0xFFD86B5A), // Warm color
-                                        modifier = Modifier.size(28.dp)
+                                        painter = painterResource(id = R.drawable.ic_yarn),
+                                        contentDescription = stringResource(R.string.icon_description_daily_yarn_shake),
+                                        tint = colorIcon,
+                                        modifier = Modifier.size(30.dp)
                                     )
                                 },
-                                label = "Shake",
-                                badgeColor = Color(0xFFF9E7DF), // Warm tint
+                                label = stringResource(R.string.chalange_shake),
+                                badgeColor = colorBackground,
+                                borderColor = colorIcon,
                                 onClick = { showShakeDialog = true }
                             )
+
                         }
                     }
                 }
@@ -274,15 +333,25 @@ private fun HomeTopBar(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Left: App Logo/Title
-        Text(
-            text = stringResource(R.string.app_name),
-            style = MaterialTheme.typography.headlineLarge.copy(
-                fontFamily = androidx.compose.ui.text.font.FontFamily.Serif,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF3F6B57) // Deep Sage Logo color
+        Row(
+            verticalAlignment = Alignment.Bottom,
+            horizontalArrangement = Arrangement.spacedBy(2.dp)
+        ){
+            // Left: App Logo/Title
+            Icon(
+                painter = painterResource(id = R.drawable.ic_aidi),
+                contentDescription = stringResource(R.string.app_icon_description),
+                tint = colorScheme.primary,
+                modifier = Modifier.size(36.dp)
             )
-        )
+            Text(
+                text = stringResource(R.string.app_name),
+                style = MaterialTheme.typography.headlineSmall.copy(
+                    fontWeight = FontWeight.Bold,
+                    color = colorScheme.primary
+                )
+            )
+        }
 
         // Right: Coins + Profile
         Row(
@@ -293,8 +362,8 @@ private fun HomeTopBar(
             Surface(
                 onClick = onNavigateToStore,
                 shape = RoundedCornerShape(50),
-                color = MaterialTheme.colorScheme.surface,
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+                color = colorScheme.surface,
+                //border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -307,12 +376,12 @@ private fun HomeTopBar(
                         tint = Color.Unspecified,
                         modifier = Modifier.size(20.dp)
                     )
-                    Spacer(modifier = Modifier.width(2.dp))
+                    Spacer(modifier = Modifier.width(1.dp))
                     Text(
                         text = "$coinBalance",
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF3F6B57)
+                        color = colorScheme.secondary
                     )
                 }
             }
@@ -322,8 +391,8 @@ private fun HomeTopBar(
                 Surface(
                     onClick = onNavigateToProfile,
                     modifier = Modifier.size(40.dp),
-                    shape = androidx.compose.foundation.shape.CircleShape,
-                    color = MaterialTheme.colorScheme.surfaceVariant
+                    shape = CircleShape,
+                    color = colorScheme.surfaceVariant
                 ) {
                     ImagePlaceholder(
                         label = "P",
@@ -339,7 +408,7 @@ private fun HomeTopBar(
                     Icon(
                         imageVector = Icons.Default.Person,
                         contentDescription = "Profile",
-                        tint = Color(0xFF3F6B57),
+                        tint = colorScheme.primary,
                         modifier = Modifier.size(32.dp)
                     )
                 }
@@ -350,15 +419,21 @@ private fun HomeTopBar(
 
 @Composable
 private fun ProjectCrateCard(
-    project: com.malha.app.domain.model.Project,
+    project: Project,
     onOpenProject: (String) -> Unit
 ) {
-    val projectAccent = remember(project.colorHex) {
+    val defaultAccent = colorScheme.primary
+
+    val projectAccent = remember(project.colorHex, defaultAccent) {
         project.colorHex
-            ?.let { hex -> runCatching { Color(android.graphics.Color.parseColor(hex)) }.getOrNull() }
-            ?: Color(0xFF3F6B57)
+            ?.let { hex ->
+                runCatching {
+                    Color(android.graphics.Color.parseColor(hex))
+                }.getOrNull()
+            }
+            ?: defaultAccent
     }
-    val onAccent = if (projectAccent.luminance() < 0.38f) Color.White else Color(0xFF23352C)
+    val onAccent = if (projectAccent.luminance() < 0.38f) Color.White else colorScheme.primary
 
     Box(
         modifier = Modifier
@@ -381,7 +456,7 @@ private fun ProjectCrateCard(
                 .width(160.dp)
                 .height(84.dp),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
+                containerColor = colorScheme.surface
             ),
             shape = RoundedCornerShape(6.dp),
             border = BorderStroke(1.5.dp, projectAccent.copy(alpha = 0.72f)),
@@ -414,7 +489,7 @@ private fun ProjectCrateCard(
                         ),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = colorScheme.onSurface
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
@@ -442,9 +517,9 @@ private fun ProjectCrateCard(
                     .align(Alignment.TopEnd)
                     .offset(x = (-42).dp, y = 34.dp)
                     .size(28.dp),
-                shape = androidx.compose.foundation.shape.CircleShape,
+                shape = CircleShape,
                 color = projectAccent,
-                border = BorderStroke(2.dp, MaterialTheme.colorScheme.surface),
+                border = BorderStroke(2.dp, colorScheme.surface),
                 shadowElevation = 3.dp
             ) {
                 Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
@@ -465,32 +540,37 @@ private fun ChallengeBadgeButton(
     icon: @Composable () -> Unit,
     label: String,
     badgeColor: Color,
-    onClick: () -> Unit
+    borderColor: Color,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        Surface(
-            onClick = onClick,
-            modifier = Modifier.size(56.dp),
-            shape = androidx.compose.foundation.shape.CircleShape,
-            color = badgeColor,
-            border = BorderStroke(1.5.dp, Color(0xFF3F6B57).copy(alpha = 0.5f)),
-            shadowElevation = 4.dp
-        ) {
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier.fillMaxSize()
+        Box(modifier = modifier) {
+            Surface(
+                onClick = onClick,
+                modifier = Modifier.size(56.dp),
+                shape = CircleShape,
+                color = badgeColor,
+                border = BorderStroke(2.dp, borderColor), // todo remove?
+                shadowElevation = 4.dp
             ) {
-                icon()
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    icon()
+                }
             }
         }
+
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f)
+            color = colorScheme.onBackground.copy(alpha = 0.7f)
         )
     }
 }

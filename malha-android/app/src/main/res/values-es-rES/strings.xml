@@ -73,4 +73,5 @@
     <string name="dialog_step_note_title">Nota del paso</string>
     <string name="input_personal_note">Nota personal</string>
     <string name="action_save">Guardar</string>
+    <string name="chalange_10x10">10x10</string>
 </resources>

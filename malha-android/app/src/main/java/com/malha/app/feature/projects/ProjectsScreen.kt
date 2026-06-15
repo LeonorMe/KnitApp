@@ -41,14 +41,16 @@ fun ProjectsScreen(
     val context = LocalContext.current
     var showCreateDialog by remember { mutableStateOf(false) }
 
-    val tabs = listOf("Em curso", "Planeados", "Concluídos", "Importados")
+    val tabs = listOf(stringResource(R.string.project_on_going),
+        stringResource(R.string.project_planned), stringResource(R.string.project_concluded)
+    )
     var selectedTabIndex by remember { mutableStateOf(0) }
 
     Scaffold(
         topBar = {
             Column {
                 TopAppBar(
-                    title = { Text("Os Meus Projetos") },
+                    title = { Text("Os Meus Projetos") }, // todo
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.background
                     )
@@ -69,19 +71,20 @@ fun ProjectsScreen(
                 viewModel.clearError()
                 showCreateDialog = true
             }) {
-                Icon(Icons.Default.Add, contentDescription = "Novo Projeto")
+                Icon(Icons.Default.Add, contentDescription = "Novo Projeto") // todo
             }
         }
     ) { padding ->
         Surface(
-            modifier = Modifier.fillMaxSize().padding(padding),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding),
             color = MaterialTheme.colorScheme.background
         ) {
             val filteredProjects = when (selectedTabIndex) {
                 0 -> uiState.projects // "Em curso" mock
                 1 -> emptyList() // "Planeados" mock
-                2 -> emptyList() // "Concluídos" mock
-                else -> emptyList() // "Importados" mock
+                else -> emptyList() // "Concluídos" mock
             }
 
             AnimatedContent(
@@ -90,8 +93,8 @@ fun ProjectsScreen(
             ) { (isLoading, isEmpty) ->
                 when {
                     isLoading -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
-                        Text("Loading projects...")
-                    }
+                        Text(stringResource(R.string.loading_projects))
+                    } // todo string
                     isEmpty -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
                         Text("No projects in this category.", color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
@@ -103,7 +106,7 @@ fun ProjectsScreen(
                             val animatedProgress by animateFloatAsState(
                                 targetValue = project.progressPercent / 100f,
                                 animationSpec = tween(durationMillis = 700),
-                                label = "project-list-progress"
+                                label = "project-list-progress" // todo string
                             )
                             Card(
                                 modifier = Modifier
@@ -117,7 +120,7 @@ fun ProjectsScreen(
                                 ) {
                                     ImagePlaceholder(label = project.name, imageUri = project.imageUri)
                                     Column(modifier = Modifier.weight(1f)) {
-                                        Text(project.name, style = MaterialTheme.typography.titleMedium)
+                                        Text(project.name, style = MaterialTheme.typography.titleMedium) // todo string
                                         Text("Progresso: ${project.progressPercent}%", style = MaterialTheme.typography.bodyMedium)
                                         Spacer(modifier = Modifier.height(8.dp))
                                         LinearProgressIndicator(
@@ -126,7 +129,9 @@ fun ProjectsScreen(
                                         )
                                     }
                                     IconButton(onClick = { MalhaShare.shareProject(context, project) }) {
-                                        Icon(Icons.Default.Share, contentDescription = "Share project")
+                                        Icon(Icons.Default.Share, contentDescription = stringResource(
+                                            R.string.share_project
+                                        ))
                                     }
                                 }
                             }

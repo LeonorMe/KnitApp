@@ -7,7 +7,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.darkColorScheme
 import com.malha.app.core.preferences.AppTheme
 
-private val LightColors = lightColorScheme(
+/*private val LightColors = lightColorScheme(
     primary = MalhaGreenDark,
     onPrimary = MalhaSurface,
     primaryContainer = MalhaGreen,
@@ -23,9 +23,41 @@ private val LightColors = lightColorScheme(
     onSurface = MalhaTextPrimary,
     surfaceVariant = MalhaBlue,
     onSurfaceVariant = MalhaTextSecondary
+)*/
+
+private val LightColors = lightColorScheme(
+    primary = BlueGreen,
+    onPrimary = BrightSnow,
+    primaryContainer = LightTeal,
+    onPrimaryContainer = StormyTeal,
+
+    secondary = HarvestGold,
+    onSecondary = BrightSnow,
+    secondaryContainer = SoftGoldBackground,
+    onSecondaryContainer = OldGold,
+
+    tertiary = PacificBlue,
+    onTertiary = BrightSnow,
+    tertiaryContainer = SoftBlueBackground,
+    onTertiaryContainer = StormyTeal,
+
+    error = Raspberry,
+    onError = BrightSnow,
+
+    background = BrightSnow,
+    onBackground = InkBlack,
+
+    surface = BrightSnow,
+    onSurface = InkBlack,
+
+    surfaceVariant = SoftBlueBackground,
+    onSurfaceVariant = StormyTeal,
+
+    outline = BlueGreen.copy(alpha = 0.5f),
+    outlineVariant = BlueGreen.copy(alpha = 0.2f)
 )
 
-private val DarkColors = darkColorScheme(
+/*private val DarkColors = darkColorScheme(
     primary = MalhaGreenMedium,
     onPrimary = MalhaTextPrimary,
     primaryContainer = MalhaGreenDark,
@@ -40,7 +72,43 @@ private val DarkColors = darkColorScheme(
     surface = ColorTokens.DarkSurface,
     onSurface = MalhaBackground,
     surfaceVariant = ColorTokens.DarkSurfaceVariant,
-    onSurfaceVariant = MalhaTextSecondary
+    onSurfaceVariant = MalhaTextSecondary,
+    error = Raspberry
+)*/
+
+val DarkColors = darkColorScheme(
+    primary = PacificBlue,
+    onPrimary = InkBlack,
+
+    primaryContainer = StormyTeal,
+    onPrimaryContainer = BrightSnow,
+
+    secondary = HarvestGold,
+    onSecondary = InkBlack,
+
+    secondaryContainer = OldGold,
+    onSecondaryContainer = BrightSnow,
+
+    tertiary = BlueGreen,
+    onTertiary = BrightSnow,
+
+    tertiaryContainer = DarkSurfaceVariant,
+    onTertiaryContainer = PacificBlue,
+
+    error = Raspberry,
+    onError = BrightSnow,
+
+    background = InkBlack,
+    onBackground = BrightSnow,
+
+    surface = DarkSurface,
+    onSurface = BrightSnow,
+
+    surfaceVariant = DarkSurfaceVariant,
+    onSurfaceVariant = BrightSnow.copy(alpha = 0.75f),
+
+    outline = PacificBlue.copy(alpha = 0.5f),
+    outlineVariant = PacificBlue.copy(alpha = 0.25f)
 )
 
 @Composable

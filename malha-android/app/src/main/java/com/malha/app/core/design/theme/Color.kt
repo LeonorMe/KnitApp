@@ -27,3 +27,24 @@ val MalhaBackground = Color(0xFFFAFAFA)
 val MalhaSurface = Color(0xFFFFFFFF)
 val MalhaTextPrimary = Color(0xFF212121)
 val MalhaTextSecondary = Color(0xFF757575)
+
+// V3
+val BrightSnow = Color(0xFFFCFAFA)
+
+val PacificBlue = Color(0xFF2FAEC7)
+val BlueGreen = Color(0xFF2D9FBB)
+val StormyTeal = Color(0xFF1D747C)
+
+val HarvestGold = Color(0xFFD78F09)
+val OldGold = Color(0xFFA29F15)
+val OliveLeaf = Color(0xFF656839)
+
+val Raspberry = Color(0xFFDE3C4B)
+
+val InkBlack = Color(0xFF021B27)
+
+val SoftBlueBackground = Color(0xFFF3FAFC)
+val SoftGoldBackground = Color(0xFFFFF8EA)
+val LightTeal = Color(0xFFDDF2F4)
+val DarkSurface = Color(0xFF10232C)
+val DarkSurfaceVariant = Color(0xFF17323D)

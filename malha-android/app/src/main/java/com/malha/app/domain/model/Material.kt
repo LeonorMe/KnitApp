@@ -24,7 +24,7 @@ enum class MaterialType {
     Accessory,
     OtherAccessory;
 
-    val storageValue: String
+    val storageValue: String // todo string
         get() = when (this) {
             Yarn -> "yarn"
             Needle -> "needle"

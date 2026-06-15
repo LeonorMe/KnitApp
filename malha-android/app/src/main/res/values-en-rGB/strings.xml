@@ -118,4 +118,10 @@
     <string name="profile_level_confident">Confident</string>
     <string name="profile_level_advanced">Advanced</string>
     <string name="continue_project_reminder">Continue project reminder</string>
+    <string name="share_project">Share project</string>
+    <string name="loading_projects">Loading projects...</string>
+    <string name="chalange_10x10">10x10</string>
+    <string name="chalange_shake">Shake</string>
+    <string name="icon_description_daily_yarn_shake">Daily Yarn Shake</string>
+    <string name="app_icon_description">App icon</string>
 </resources>

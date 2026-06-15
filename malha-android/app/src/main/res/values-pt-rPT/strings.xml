@@ -95,4 +95,10 @@
     <string name="community">Comunidade</string>
     <string name="google_sign_in_was_cancelled">A autenticação Google foi cancelada.</string>
     <string name="profile_default_bio">...</string>
+    <string name="project_on_going">Em curso</string>
+    <string name="project_planned">Planeados</string>
+    <string name="project_concluded">Concluídos</string>
+    <string name="no_active_projects_create_to_start">Não tens projetos ativos. Cria um para começar!</string>
+    <string name="to_continue">A continuar</string>
+    <string name="chalange_10x10">10x10</string>
 </resources>
