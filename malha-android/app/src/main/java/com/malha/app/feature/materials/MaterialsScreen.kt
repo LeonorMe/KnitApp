@@ -10,7 +10,10 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -18,9 +21,13 @@ import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -29,6 +36,10 @@ import com.malha.app.core.share.MalhaShare
 import com.malha.app.domain.model.Material
 import com.malha.app.domain.model.MaterialType
 import com.malha.app.domain.model.Pattern
+import com.malha.app.R
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.width
+import androidx.compose.ui.text.font.FontWeight
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -39,40 +50,146 @@ fun MaterialsScreen(
     val uiState by viewModel.uiState.collectAsState()
     var showCreateDialog by remember { mutableStateOf(false) }
 
-    val tabs = listOf("Fios", "Agulhas", "Acessórios", "Patterns", "Lista de compras", "Loja")
+    data class MaterialTab(
+        val label: String,
+        val iconRes: Int
+    )
+
+    val tabs = listOf(
+        MaterialTab(stringResource(R.string.patterns), R.drawable.ic_pattern),
+        MaterialTab(stringResource(R.string.yarn), R.drawable.ic_yarn_ball),
+        MaterialTab(stringResource(R.string.needles), R.drawable.ic_needles),
+        MaterialTab(stringResource(R.string.useful_tools), R.drawable.ic_content_cut),
+        //MaterialTab(stringResource(R.string.wish_list), R.drawable.ic_materials), // TODO
+        //MaterialTab(stringResource(R.string.store), R.drawable.ic_project) // TODO
+    )
+
     var selectedTabIndex by remember { mutableStateOf(0) }
 
     Scaffold(
         topBar = {
             Column {
                 TopAppBar(
-                    title = { Text("A Minha Caixa") },
+                    title = {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.my_materials),
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold
+                            )
+
+                            Spacer(modifier = Modifier.weight(1f))
+
+                            IconButton(onClick = { /* navigate to wishlist todo */ }) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_shopping_bag),
+                                    contentDescription = stringResource(R.string.wish_list),
+                                    tint = colorScheme.onSecondaryContainer
+                                )
+                            }
+
+                            IconButton(onClick = { /* navigate to store todo */ }) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_storefront),
+                                    contentDescription = stringResource(R.string.store),
+                                    tint = colorScheme.secondary
+                                )
+                            }
+                            Spacer(modifier = Modifier.weight(0.6f))
+                        }
+                    },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.background
+                        containerColor =  colorScheme.background
                     )
                 )
-                TabRow(selectedTabIndex = selectedTabIndex) {
-                    tabs.forEachIndexed { index, title ->
-                        Tab(
-                            selected = selectedTabIndex == index,
-                            onClick = { selectedTabIndex = index },
-                            text = { Text(title) }
-                        )
+
+                LazyRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentPadding = PaddingValues(
+                        start = 16.dp,
+                        end = 16.dp,
+                        bottom = 12.dp
+                    ),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    itemsIndexed(tabs) { index, tab ->
+
+                        val selected = selectedTabIndex == index
+
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier
+                                .width(72.dp)
+                                .clickable {
+                                    selectedTabIndex = index
+                                }
+                        ) {
+
+                            Surface(
+                                modifier = Modifier.size(56.dp),
+                                shape = CircleShape,
+                                color = if (selected)
+                                    colorScheme.primaryContainer
+                                else
+                                    colorScheme.surfaceVariant,
+                                tonalElevation = if (selected) 4.dp else 0.dp
+                            ) {
+                                Box(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        painter = painterResource(id = tab.iconRes),
+                                        contentDescription = tab.label,
+                                        modifier = Modifier.size(28.dp),
+                                        tint = if (selected)
+                                            colorScheme.onPrimaryContainer
+                                        else
+                                            colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(4.dp))
+
+                            Text(
+                                text = tab.label,
+                                maxLines = 1,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = if (selected)
+                                    colorScheme.primary
+                                else
+                                    colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
             }
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = {
-                viewModel.clearError()
-                showCreateDialog = true
-            }) {
-                Icon(Icons.Default.Add, contentDescription = "Add material")
+            FloatingActionButton(
+                onClick = {
+                    viewModel.clearError()
+                    showCreateDialog = true
+                },
+                containerColor = colorScheme.onPrimaryContainer
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    tint = colorScheme.primaryContainer,
+                    contentDescription = stringResource(R.string.add_material),
+                    modifier = Modifier.size(32.dp)
+                )
             }
         }
     ) { padding ->
         Surface(
-            modifier = Modifier.fillMaxSize().padding(padding),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding),
             color = MaterialTheme.colorScheme.background
         ) {
             LazyColumn(
@@ -84,7 +201,7 @@ fun MaterialsScreen(
                         Text(
                             text = uiState.errorMessage.orEmpty(),
                             style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.error
+                            color = colorScheme.error
                         )
                     }
                 }
@@ -94,29 +211,29 @@ fun MaterialsScreen(
                         label = "materials-tab-content"
                     ) { tabIndex ->
                         val selectedType = when (tabIndex) {
-                            0 -> MaterialType.Yarn
-                            1 -> MaterialType.Needle
-                            2 -> MaterialType.Accessory
+                            1 -> MaterialType.Yarn
+                            2 -> MaterialType.Needle
+                            3 -> MaterialType.Tool
                             else -> null
                         }
 
-                        if (selectedType != null) {
+                        if (tabIndex == 0){
+                            PatternsCategoryCard(
+                                patterns = uiState.patterns,
+                                onNavigateToPattern = onNavigateToPattern
+                            )
+                        } else if (selectedType != null) {
                             MaterialCategoryCard(
                                 type = selectedType,
                                 materials = uiState.materials.filter { it.type == selectedType },
                                 isLoading = uiState.isLoading
                             )
-                        } else if (tabIndex == 3) {
-                            PatternsCategoryCard(
-                                patterns = uiState.patterns,
-                                onNavigateToPattern = onNavigateToPattern
-                            )
                         } else {
                             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = androidx.compose.ui.Alignment.Center) {
                                 Text(
-                                    text = "Coming soon: ${tabs[tabIndex]}",
+                                    text = stringResource(R.string.coming_soon, tabs[tabIndex]),
                                     style = MaterialTheme.typography.bodyLarge,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    color = colorScheme.onSurfaceVariant
                                 )
                             }
                         }
@@ -146,7 +263,7 @@ private fun MaterialCategoryCard(
 ) {
     Card(
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
+            containerColor = colorScheme.surfaceVariant
         ),
         modifier = Modifier
             .fillMaxWidth()
@@ -159,20 +276,20 @@ private fun MaterialCategoryCard(
             Text(
                 text = type.label,
                 style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onSurface
+                color = colorScheme.onSurface
             )
 
             if (isLoading) {
                 Text(
-                    text = "Loading...",
+                    text = stringResource(R.string.loading),
                     style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = colorScheme.onSurfaceVariant
                 )
             } else if (materials.isEmpty()) {
                 Text(
-                    text = "No ${type.label.lowercase()} yet.",
+                    text = stringResource(R.string.no_yet, type.label.lowercase()),
                     style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = colorScheme.onSurfaceVariant
                 )
             } else {
                 materials.forEach { material ->
@@ -200,16 +317,16 @@ private fun MaterialRow(material: Material) {
             Text(
                 text = material.name,
                 style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface
+                color = colorScheme.onSurface
             )
             Text(
                 text = "${material.quantity} ${material.unit}",
                 style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = colorScheme.onSurfaceVariant
             )
         }
         IconButton(onClick = { MalhaShare.shareMaterial(context, material) }) {
-            Icon(Icons.Default.Share, contentDescription = "Share material")
+            Icon(Icons.Default.Share, contentDescription = stringResource(R.string.share_material))
         }
     }
 }
@@ -234,11 +351,13 @@ private fun CreateMaterialDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("New material") },
+        title = { Text(stringResource(R.string.new_material)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Row(
-                    modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     MaterialType.entries.forEach { type ->
@@ -258,7 +377,7 @@ private fun CreateMaterialDialog(
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Box(modifier = Modifier.size(80.dp)) {
-                        ImagePlaceholder(label = "Photo", imageUri = imageUri?.toString())
+                        ImagePlaceholder(label = stringResource(R.string.photo), imageUri = imageUri?.toString())
                     }
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         OutlinedButton(
@@ -271,17 +390,17 @@ private fun CreateMaterialDialog(
                         ) {
                             Icon(Icons.Default.PhotoLibrary, contentDescription = null)
                             Spacer(Modifier.width(8.dp))
-                            Text("Gallery")
+                            Text(stringResource(R.string.gallery))
                         }
                         // Note: Camera launcher would need a File URI provider, skipping for now to keep it simple
                         // but adding a stub button for UI completeness
                         OutlinedButton(
-                            onClick = { /* Camera stub */ },
+                            onClick = { /* Camera stub */ }, // todo
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Icon(Icons.Default.AddAPhoto, contentDescription = null)
                             Spacer(Modifier.width(8.dp))
-                            Text("Camera")
+                            Text(stringResource(R.string.camera))
                         }
                     }
                 }
@@ -292,7 +411,7 @@ private fun CreateMaterialDialog(
                         name = it
                         localError = null
                     },
-                    label = { Text("Material name") },
+                    label = { Text(stringResource(R.string.material_name)) },
                     singleLine = true
                 )
                 OutlinedTextField(
@@ -301,14 +420,14 @@ private fun CreateMaterialDialog(
                         quantity = it
                         localError = null
                     },
-                    label = { Text("Quantity") },
+                    label = { Text(stringResource(R.string.quantity)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     singleLine = true
                 )
                 OutlinedTextField(
                     value = unit,
                     onValueChange = { unit = it },
-                    label = { Text("Unit") },
+                    label = { Text(stringResource(R.string.unit)) },
                     supportingText = {
                         if (localError != null) {
                             Text(localError.orEmpty())
@@ -320,12 +439,14 @@ private fun CreateMaterialDialog(
             }
         },
         confirmButton = {
+            val materialNameRequired = stringResource(R.string.material_name_is_required)
+            val quantityMustBeNumber = stringResource(R.string.quantity_must_be_a_number)
             Button(
                 enabled = !isCreating,
                 onClick = {
                     localError = when {
-                        name.isBlank() -> "Material name is required."
-                        quantity.replace(',', '.').toDoubleOrNull() == null -> "Quantity must be a number."
+                        name.isBlank() -> materialNameRequired
+                        quantity.replace(',', '.').toDoubleOrNull() == null -> quantityMustBeNumber
                         else -> null
                     }
                     if (localError == null) {
@@ -333,7 +454,7 @@ private fun CreateMaterialDialog(
                     }
                 }
             ) {
-                Text("Create")
+                Text(stringResource(R.string.create))
             }
         },
         dismissButton = {
@@ -341,7 +462,7 @@ private fun CreateMaterialDialog(
                 enabled = !isCreating,
                 onClick = onDismiss
             ) {
-                Text("Cancel")
+                Text(stringResource(R.string.cancel))
             }
         }
     )
@@ -349,10 +470,11 @@ private fun CreateMaterialDialog(
 
 private fun defaultUnitFor(type: MaterialType): String {
     return when (type) {
+        MaterialType.Pattern -> "patterns"
         MaterialType.Yarn -> "skeins"
         MaterialType.Needle -> "pairs"
         MaterialType.Hook -> "hooks"
-        MaterialType.Accessory -> "items"
+        MaterialType.Tool -> "items"
         else -> "units"
     }
 }
@@ -364,7 +486,7 @@ private fun PatternsCategoryCard(
 ) {
     Card(
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
+            containerColor = colorScheme.surfaceVariant
         ),
         modifier = Modifier
             .fillMaxWidth()
@@ -375,16 +497,16 @@ private fun PatternsCategoryCard(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                text = "Patterns",
+                text = stringResource(R.string.patterns),
                 style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onSurface
+                color = colorScheme.onSurface
             )
 
             if (patterns.isEmpty()) {
                 Text(
-                    text = "No patterns found.",
+                    text = stringResource(R.string.no_patterns_found),
                     style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = colorScheme.onSurfaceVariant
                 )
             } else {
                 patterns.forEach { pattern ->
@@ -401,7 +523,7 @@ private fun PatternRow(pattern: Pattern, onClick: () -> Unit) {
     Card(
         onClick = onClick,
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor = colorScheme.surface
         ),
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -418,17 +540,17 @@ private fun PatternRow(pattern: Pattern, onClick: () -> Unit) {
                 Text(
                     text = pattern.title,
                     style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = colorScheme.onSurface
                 )
                 Text(
                     text = "Designer: ${pattern.designer ?: "Unknown"} • ${pattern.craft.name.lowercase().capitalize()}",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = colorScheme.onSurfaceVariant
                 )
                 Text(
                     text = "${pattern.allSteps.size} steps",
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.primary
+                    color = colorScheme.primary
                 )
             }
         }

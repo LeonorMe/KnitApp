@@ -18,36 +18,40 @@ data class Material(
 )
 
 enum class MaterialType {
+    Pattern,
     Yarn,
     Needle,
-    Hook,
-    Accessory,
+    Hook, // todo remove
+    Tool,
     OtherAccessory;
 
     val storageValue: String // todo string
         get() = when (this) {
+            Pattern -> "pattern"
             Yarn -> "yarn"
             Needle -> "needle"
             Hook -> "hook"
-            Accessory -> "accessory"
+            Tool -> "tool"
             OtherAccessory -> "other_accessory"
         }
 
     val label: String
         get() = when (this) {
+            Pattern -> "Pattern" // todo translate
             Yarn -> "Yarn"
             Needle -> "Needles"
             Hook -> "Hooks"
-            Accessory -> "Accessories"
+            Tool -> "Tools"
             OtherAccessory -> "Other"
         }
 
     companion object {
         fun fromStorageValue(value: String): MaterialType {
             return when (value) {
+                "pattern" -> Pattern
                 "needle" -> Needle
                 "hook" -> Hook
-                "accessory" -> Accessory
+                "tool" -> Tool
                 "other_accessory" -> OtherAccessory
                 else -> Yarn
             }

@@ -101,4 +101,5 @@
     <string name="no_active_projects_create_to_start">Não tens projetos ativos. Cria um para começar!</string>
     <string name="to_continue">A continuar</string>
     <string name="chalange_10x10">10x10</string>
+    <string name="new_project">Novo Projeto</string>
 </resources>

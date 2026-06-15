@@ -87,10 +87,11 @@ class MaterialsViewModel(application: Application) : AndroidViewModel(applicatio
 
     private fun defaultUnitFor(type: MaterialType): String {
         return when (type) {
+            MaterialType.Pattern -> "patterns"
             MaterialType.Yarn -> "skeins"
             MaterialType.Needle -> "pairs"
             MaterialType.Hook -> "hooks"
-            MaterialType.Accessory -> "items"
+            MaterialType.Tool -> "items"
             MaterialType.OtherAccessory -> "units"
         }
     }

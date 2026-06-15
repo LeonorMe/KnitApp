@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.clickable
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -67,11 +68,19 @@ fun ProjectsScreen(
             }
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = {
+            FloatingActionButton(
+                onClick = {
                 viewModel.clearError()
                 showCreateDialog = true
-            }) {
-                Icon(Icons.Default.Add, contentDescription = "Novo Projeto") // todo
+                },
+                containerColor = colorScheme.onPrimaryContainer
+            ) {
+                Icon(
+                    Icons.Default.Add,
+                    tint = colorScheme.primaryContainer,
+                    contentDescription = stringResource(R.string.new_project),
+                    modifier = Modifier.size(32.dp)
+                )
             }
         }
     ) { padding ->
@@ -79,7 +88,7 @@ fun ProjectsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding),
-            color = MaterialTheme.colorScheme.background
+            color = colorScheme.background
         ) {
             val filteredProjects = when (selectedTabIndex) {
                 0 -> uiState.projects // "Em curso" mock
