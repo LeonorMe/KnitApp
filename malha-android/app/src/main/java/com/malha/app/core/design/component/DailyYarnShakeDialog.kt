@@ -20,10 +20,13 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.malha.app.R
 import com.malha.app.core.util.ShakeDetector
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -104,9 +107,11 @@ fun DailyYarnShakeDialog(
             Box(contentAlignment = Alignment.Center) {
                 IconButton(
                     onClick = onDismiss,
-                    modifier = Modifier.align(Alignment.TopEnd).padding(16.dp)
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(16.dp)
                 ) {
-                    Icon(Icons.Default.Close, contentDescription = "Close", tint = Color.White)
+                    Icon(Icons.Default.Close, contentDescription = stringResource(R.string.close), tint = Color.White)
                 }
 
                 Column(
@@ -115,18 +120,18 @@ fun DailyYarnShakeDialog(
                 ) {
                     when (state) {
                         ShakeState.READY -> {
-                            Text("Shake your phone to tangle the yarn!", style = MaterialTheme.typography.headlineSmall, color = Color.White)
+                            Text(stringResource(R.string.shake_your_phone_to_tangle_the_yarn), style = MaterialTheme.typography.headlineSmall, color = Color.White)
                             YarnShakePlayfield(
                                 progress = shakeProgress,
                                 rotation = 0f,
                                 isShaking = false
                             )
                             Button(onClick = { state = ShakeState.SHAKING; scope.launch { while(shakeProgress < 1f) { delay(100); shakeProgress += 0.03f } } }) {
-                                Text("Click if you can't shake")
+                                Text(stringResource(R.string.click_if_you_can_t_shake))
                             }
                         }
                         ShakeState.SHAKING -> {
-                            Text("Keep shaking!", style = MaterialTheme.typography.headlineMedium, color = Color.White, fontWeight = FontWeight.Bold)
+                            Text(stringResource(R.string.keep_shaking), style = MaterialTheme.typography.headlineMedium, color = Color.White, fontWeight = FontWeight.Bold)
                             YarnShakePlayfield(
                                 progress = shakeProgress,
                                 rotation = rotation,
@@ -134,18 +139,22 @@ fun DailyYarnShakeDialog(
                             )
                             LinearProgressIndicator(
                                 progress = { shakeProgress },
-                                modifier = Modifier.width(200.dp).height(8.dp),
+                                modifier = Modifier
+                                    .width(200.dp)
+                                    .height(8.dp),
                                 color = MaterialTheme.colorScheme.primary,
                                 trackColor = Color.White.copy(alpha = 0.3f)
                             )
                         }
                         ShakeState.CELEBRATING -> {
-                            Text("Yay! You untangled it!", style = MaterialTheme.typography.headlineMedium, color = Color.White)
+                            Text(stringResource(R.string.yay_you_untangled_it), style = MaterialTheme.typography.headlineMedium, color = Color.White)
                             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                Icon(Icons.Default.MonetizationOn, contentDescription = null, tint = Color.Yellow, modifier = Modifier.size(48.dp))
-                                Text("+$rewardAmount Coins", style = MaterialTheme.typography.displaySmall, color = Color.White, fontWeight = FontWeight.ExtraBold)
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_coin),
+                                    contentDescription = null, tint = Color.Yellow, modifier = Modifier.size(48.dp))
+                                Text(stringResource(R.string.coins, rewardAmount), style = MaterialTheme.typography.displaySmall, color = Color.White, fontWeight = FontWeight.ExtraBold)
                             }
-                            Text("Adding to your stash...", color = Color.White.copy(alpha = 0.7f))
+                            Text(stringResource(R.string.adding_to_your_stash), color = Color.White.copy(alpha = 0.7f))
                         }
                     }
                 }
@@ -165,22 +174,24 @@ private fun YarnShakePlayfield(
             .fillMaxWidth()
             .height(360.dp),
         contentAlignment = Alignment.Center
-    ) {
+    )
+    {
         val clampedProgress = progress.coerceIn(0f, 1f)
         val ballSize = 132.dp
         val horizontalTravel = (maxWidth - ballSize) * 0.42f
         val verticalTravel = (maxHeight - ballSize) * 0.36f
         val phase = clampedProgress * 2.8f * PI.toFloat()
         val xOffset = if (isShaking) {
-            horizontalTravel * cos(phase * 1.35f)
+            horizontalTravel * cos(phase * 1.35f).toFloat()
         } else {
             0.dp
         }
         val yOffset = if (isShaking) {
-            verticalTravel * sin(phase * 1.9f)
+            verticalTravel * sin(phase * 1.9f).toFloat()
         } else {
             0.dp
         }
+        val color = MaterialTheme.colorScheme.primary
 
         Canvas(modifier = Modifier.fillMaxSize()) {
             val yarnPath = Path()
@@ -201,9 +212,11 @@ private fun YarnShakePlayfield(
                 }
             }
 
+
+
             drawPath(
                 path = yarnPath,
-                color = Color(0xFFFF80AB).copy(alpha = 0.72f),
+                color = color.copy(alpha = 0.72f),
                 style = Stroke(
                     width = 10f,
                     cap = StrokeCap.Round,
@@ -239,22 +252,29 @@ private fun YarnBall(
             .rotate(rotation),
         contentAlignment = Alignment.Center
     ) {
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            drawCircle(
-                color = Color(0xFFE91E63),
+        //val color = MaterialTheme.colorScheme.primary
+        Icon(
+            painter = painterResource(R.drawable.ic_yarn_ball_color),
+            contentDescription = null,
+            tint = Color.Unspecified, //MaterialTheme.colorScheme.primary,
+            modifier = Modifier.fillMaxSize()
+        )
+        /*Canvas(modifier = Modifier.fillMaxSize()) {
+           drawCircle(
+                color = color,
                 radius = size.minDimension / 2
             )
             // Draw some "tangled" lines
             for (i in 0..10) {
                 drawArc(
-                    color = Color.White.copy(alpha = 0.5f),
+                    color = color,
                     startAngle = (i * 40).toFloat(),
                     sweepAngle = 100f,
                     useCenter = false,
                     style = Stroke(width = 4f)
                 )
             }
-        }
+        }*/
     }
 }
 

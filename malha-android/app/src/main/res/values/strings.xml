@@ -164,4 +164,11 @@
     <string name="no_projects_in_this_category">No projects in this category.</string>
     <string name="os_meus_projetos">Os Meus Projetos</string>
     <string name="project_name_is_required">Project name is required.</string>
+    <string name="close">Close</string>
+    <string name="shake_your_phone_to_tangle_the_yarn">Shake your phone to tangle the yarn!</string>
+    <string name="click_if_you_can_t_shake">Click if you can\'t shake</string>
+    <string name="keep_shaking">Keep shaking!</string>
+    <string name="coins">+%1$d Coins</string>
+    <string name="adding_to_your_stash">Adding to your stash...</string>
+    <string name="yay_you_untangled_it">Yay! You untangled it!</string>
 </resources>
