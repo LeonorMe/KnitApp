@@ -37,6 +37,7 @@ private val PROJECT_PALETTE = listOf(
     "#A1887F", // Warm Brown
     "#90A4AE", // Blue-Grey
     "#3F6B57", // Sage (brand colour)
+    // Color.Raspberry
 )
 
 @OptIn(ExperimentalMaterial3Api::class)

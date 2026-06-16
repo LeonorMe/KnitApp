@@ -160,4 +160,8 @@
     <string name="add_material">Add material</string>
     <string name="new_project">Novo Projeto</string>
     <string name="coming_soon">Coming soon: %1$s</string>
+    <string name="progress">Progresso: %1$d%%</string>
+    <string name="no_projects_in_this_category">No projects in this category.</string>
+    <string name="os_meus_projetos">Os Meus Projetos</string>
+    <string name="project_name_is_required">Project name is required.</string>
 </resources>

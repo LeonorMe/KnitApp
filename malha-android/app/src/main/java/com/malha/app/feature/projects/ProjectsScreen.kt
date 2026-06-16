@@ -4,31 +4,30 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.*
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.res.stringResource
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.malha.app.R
-import androidx.compose.material3.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Share
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.clickable
-import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.material3.CardDefaults
+import androidx.compose.runtime.mutableIntStateOf
+import com.malha.app.R
 import com.malha.app.core.design.component.ImagePlaceholder
 import com.malha.app.core.share.MalhaShare
 
@@ -45,15 +44,15 @@ fun ProjectsScreen(
     val tabs = listOf(stringResource(R.string.project_on_going),
         stringResource(R.string.project_planned), stringResource(R.string.project_concluded)
     )
-    var selectedTabIndex by remember { mutableStateOf(0) }
+    var selectedTabIndex by remember { mutableIntStateOf(0) }
 
     Scaffold(
         topBar = {
             Column {
                 TopAppBar(
-                    title = { Text("Os Meus Projetos") }, // todo
+                    title = { Text(stringResource(R.string.os_meus_projetos)) },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.background
+                        containerColor = colorScheme.background
                     )
                 )
                 TabRow(selectedTabIndex = selectedTabIndex) {
@@ -91,9 +90,17 @@ fun ProjectsScreen(
             color = colorScheme.background
         ) {
             val filteredProjects = when (selectedTabIndex) {
-                0 -> uiState.projects // "Em curso" mock
-                1 -> emptyList() // "Planeados" mock
-                else -> emptyList() // "Concluídos" mock
+                0 -> uiState.projects.filter {
+                    it.progressPercent in 1..99
+                } // Ongoing
+
+                1 -> uiState.projects.filter {
+                    it.progressPercent == 0
+                } // Planned
+
+                else -> uiState.projects.filter {
+                    it.progressPercent >= 100
+                } // Completed
             }
 
             AnimatedContent(
@@ -103,9 +110,9 @@ fun ProjectsScreen(
                 when {
                     isLoading -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
                         Text(stringResource(R.string.loading_projects))
-                    } // todo string
+                    }
                     isEmpty -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
-                        Text("No projects in this category.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(stringResource(R.string.no_projects_in_this_category), color = colorScheme.onSurfaceVariant)
                     }
                     else -> LazyColumn(
                         contentPadding = PaddingValues(16.dp),
@@ -117,11 +124,21 @@ fun ProjectsScreen(
                                 animationSpec = tween(durationMillis = 700),
                                 label = "project-list-progress" // todo string
                             )
+                            val projectDefaultColor = colorScheme.primary
+                            val projectColor = project.colorHex?.let { hex ->
+                                    runCatching {
+                                        Color(android.graphics.Color.parseColor(hex))
+                                    }.getOrNull()
+                                } ?: projectDefaultColor
+
                             Card(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .animateContentSize()
-                                    .clickable { onOpenProject(project.id) }
+                                    .clickable { onOpenProject(project.id) },
+                                colors = CardDefaults.cardColors(
+                                        containerColor = projectColor.copy(alpha = 0.15f)
+                                )
                             ) {
                                 Row(
                                     modifier = Modifier.padding(16.dp),
@@ -129,12 +146,18 @@ fun ProjectsScreen(
                                 ) {
                                     ImagePlaceholder(label = project.name, imageUri = project.imageUri)
                                     Column(modifier = Modifier.weight(1f)) {
-                                        Text(project.name, style = MaterialTheme.typography.titleMedium) // todo string
-                                        Text("Progresso: ${project.progressPercent}%", style = MaterialTheme.typography.bodyMedium)
+                                        Text(project.name, style = MaterialTheme.typography.titleMedium)
+                                        Text(
+                                            stringResource(
+                                                R.string.progress,
+                                                project.progressPercent
+                                            ), style = MaterialTheme.typography.bodyMedium)
                                         Spacer(modifier = Modifier.height(8.dp))
                                         LinearProgressIndicator(
                                             progress = { animatedProgress },
-                                            modifier = Modifier.fillMaxWidth()
+                                            modifier = Modifier.fillMaxWidth(),
+                                            color = projectColor,
+                                            trackColor = projectColor.copy(0.2f)
                                         )
                                     }
                                     IconButton(onClick = { MalhaShare.shareProject(context, project) }) {
@@ -193,11 +216,12 @@ private fun CreateProjectDialog(
             )
         },
         confirmButton = {
+            val projectNameRequeired = stringResource(R.string.project_name_is_required)
             Button(
                 enabled = !isCreating,
                 onClick = {
                     if (name.isBlank()) {
-                        localError = "Project name is required."
+                        localError = projectNameRequeired
                     } else {
                         onCreate(name)
                     }
