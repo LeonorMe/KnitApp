@@ -151,7 +151,10 @@ fun DailyYarnShakeDialog(
                             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 Icon(
                                     painter = painterResource(R.drawable.ic_coin),
-                                    contentDescription = null, tint = Color.Yellow, modifier = Modifier.size(48.dp))
+                                    tint = Color.Unspecified,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(48.dp)
+                                )
                                 Text(stringResource(R.string.coins, rewardAmount), style = MaterialTheme.typography.displaySmall, color = Color.White, fontWeight = FontWeight.ExtraBold)
                             }
                             Text(stringResource(R.string.adding_to_your_stash), color = Color.White.copy(alpha = 0.7f))
@@ -256,25 +259,9 @@ private fun YarnBall(
         Icon(
             painter = painterResource(R.drawable.ic_yarn_ball_color),
             contentDescription = null,
-            tint = Color.Unspecified, //MaterialTheme.colorScheme.primary,
+            tint = Color.Unspecified,
             modifier = Modifier.fillMaxSize()
         )
-        /*Canvas(modifier = Modifier.fillMaxSize()) {
-           drawCircle(
-                color = color,
-                radius = size.minDimension / 2
-            )
-            // Draw some "tangled" lines
-            for (i in 0..10) {
-                drawArc(
-                    color = color,
-                    startAngle = (i * 40).toFloat(),
-                    sweepAngle = 100f,
-                    useCenter = false,
-                    style = Stroke(width = 4f)
-                )
-            }
-        }*/
     }
 }
 
