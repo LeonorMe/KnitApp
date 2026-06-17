@@ -93,7 +93,10 @@ fun SettingsScreen(
     val profilePhotoPicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
         onResult = { uri ->
-            if (uri != null) viewModel.updateProfilePhoto(uri.toString())
+            if (uri != null) {
+                viewModel.setPendingProfilePhoto(uri.toString())
+                viewModel.updateProfilePhoto(uri)
+            }
         }
     )
     val googleSignInClient = remember(context) {
@@ -340,11 +343,6 @@ private fun DailyReminderSettings(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(stringResource(R.string.continue_project_reminder), style = MaterialTheme.typography.titleLarge)
-                    /*Text(
-                        "A nudge to continue one project, at a time you choose.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )*/
                 }
                 Switch(
                     checked = enabled,
@@ -458,7 +456,7 @@ private fun DailyReminderSettings(
                         },
                         dismissButton = {
                             TextButton(onClick = { showTimePicker = false }) {
-                                Text("Cancel")
+                                Text(stringResource(R.string.cancel))
                             }
                         },
                         text = {
@@ -509,7 +507,6 @@ private fun ProfileCard(
         ) {
             Column(
                 modifier = Modifier.fillMaxWidth(),
-                //horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     Icon(
@@ -528,20 +525,14 @@ private fun ProfileCard(
                 }
                 if (uiState.user != null && !uiState.user.isAnonymous) {
                     Row (horizontalArrangement = Arrangement.spacedBy(10.dp)){
-                        /*TextButton(onClick = onChangePhoto) {
-                            Text(stringResource(R.string.photo))
-                        }*/
                         OutlinedButton(
                             onClick = onEditProfile,
                             modifier = Modifier.weight(1f)
                         ) {
                             Icon(Icons.Default.Edit, contentDescription = null)
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text(stringResource(R.string.edit)) // todo
-                        }
-                        /*TextButton(onClick = onEditProfile) {
                             Text(stringResource(R.string.edit))
-                        }*/
+                        }
                     }
 
                 }
@@ -603,14 +594,6 @@ private fun ProfileCard(
                                     size = 72.dp
                                 )
                             }
-                            /*OutlinedButton(
-                                onClick = onChangePhoto,
-                                modifier = Modifier.weight(1f)
-                            ) {
-                                Icon(Icons.Default.PhotoLibrary, contentDescription = null)
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(stringResource(R.string.change_profile_photo))
-                            }*/
                         }
                         Text(
                             text = uiState.preferences.username ?: user.displayName ?: stringResource(

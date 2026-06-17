@@ -1,12 +1,9 @@
 package com.malha.app.core.design.component
 
-import android.graphics.BitmapFactory
-import android.net.Uri
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -14,16 +11,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.malha.app.R
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import coil.compose.AsyncImage
 
 @Composable
 fun ImagePlaceholder(
@@ -34,76 +27,44 @@ fun ImagePlaceholder(
 ) {
     val drawableRes = imageUri?.toDrawableRes()
 
-    if (drawableRes != null) {
-        Image(
-            painter = painterResource(drawableRes),
-            contentDescription = label,
-            contentScale = ContentScale.Crop,
-            modifier = modifier
-                .size(size)
-                .clip(MaterialTheme.shapes.medium)
-        )
-        return
-    }
-
-    if (imageUri != null && imageUri.isNotEmpty() && !imageUri.startsWith("drawable:")) {
-        val context = LocalContext.current
-        var imageBitmap by remember(imageUri) { mutableStateOf<ImageBitmap?>(null) }
-        var isLoading by remember(imageUri) { mutableStateOf(true) }
-
-        LaunchedEffect(imageUri) {
-            isLoading = true
-            withContext(Dispatchers.IO) {
-                try {
-                    context.contentResolver.openInputStream(Uri.parse(imageUri))?.use { inputStream ->
-                        val bitmap = BitmapFactory.decodeStream(inputStream)
-                        imageBitmap = bitmap?.asImageBitmap()
-                    }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                } finally {
-                    isLoading = false
-                }
-            }
-        }
-
-        if (imageBitmap != null) {
+    when {
+        drawableRes != null -> {
             Image(
-                bitmap = imageBitmap!!,
+                painter = painterResource(drawableRes),
                 contentDescription = label,
                 contentScale = ContentScale.Crop,
                 modifier = modifier
                     .size(size)
                     .clip(MaterialTheme.shapes.medium)
             )
-            return
-        } else if (isLoading) {
+        }
+
+        !imageUri.isNullOrBlank() -> {
+            AsyncImage(
+                model = imageUri,
+                contentDescription = label,
+                contentScale = ContentScale.Crop,
+                modifier = modifier
+                    .size(size)
+                    .clip(MaterialTheme.shapes.medium)
+            )
+        }
+
+        else -> {
             Surface(
                 modifier = modifier.size(size),
                 shape = MaterialTheme.shapes.medium,
-                color = MaterialTheme.colorScheme.surfaceVariant,
+                color = MaterialTheme.colorScheme.surface,
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
             ) {
                 Box(contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                    Text(
+                        text = label,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
-            return
-        }
-    }
-
-    Surface(
-        modifier = modifier.size(size),
-        shape = MaterialTheme.shapes.medium,
-        color = MaterialTheme.colorScheme.surface,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-    ) {
-        Box(contentAlignment = Alignment.Center) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
         }
     }
 }

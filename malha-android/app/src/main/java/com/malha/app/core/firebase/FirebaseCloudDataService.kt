@@ -7,10 +7,13 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
+import android.net.Uri
+import com.google.firebase.storage.FirebaseStorage
 
-class FirestoreCloudDataService(
+class FirebaseCloudDataService(
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
 ) : CloudDataService {
+
     override fun observeUserProfile(userId: String): Flow<Map<String, Any?>?> {
         return callbackFlow {
             val registration = firestore
@@ -69,6 +72,20 @@ class FirestoreCloudDataService(
             .document(userId)
             .set(profile, SetOptions.merge())
             .await()
+    }
+
+    private val storage = FirebaseStorage.getInstance()
+
+    override suspend fun uploadProfilePhoto(
+        userId: String,
+        localUri: Uri
+    ): String {
+        val ref = storage.reference
+            .child("profile_photos/$userId.jpg")
+
+        ref.putFile(localUri).await()
+
+        return ref.downloadUrl.await().toString()
     }
 
     override suspend fun upsertProject(

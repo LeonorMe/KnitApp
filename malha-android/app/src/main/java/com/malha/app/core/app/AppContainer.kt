@@ -10,7 +10,7 @@ import com.malha.app.core.database.seed.DatabaseSeeder
 import com.malha.app.core.firebase.AuthService
 import com.malha.app.core.firebase.CloudDataService
 import com.malha.app.core.firebase.FirebaseAuthService
-import com.malha.app.core.firebase.FirestoreCloudDataService
+import com.malha.app.core.firebase.FirebaseCloudDataService
 import com.malha.app.data.material.CloudBackedMaterialRepository
 import com.malha.app.data.material.MaterialRepository
 import com.malha.app.data.material.RoomMaterialRepository
@@ -27,7 +27,7 @@ class AppContainer(context: Context) {
     private val database = DatabaseProvider.getDatabase(context)
 
     val authService: AuthService = FirebaseAuthService()
-    val cloudDataService: CloudDataService = FirestoreCloudDataService()
+    val cloudDataService: CloudDataService = FirebaseCloudDataService()
 
     private val localProjectRepository: ProjectRepository = RoomProjectRepository(
         projectDao = database.projectDao(),

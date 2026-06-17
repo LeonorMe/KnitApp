@@ -2,6 +2,7 @@ package com.malha.app.core.firebase
 
 import com.malha.app.domain.model.MaterialType
 import kotlinx.coroutines.flow.Flow
+import android.net.Uri
 
 interface CloudDataService {
     fun observeUserProfile(userId: String): Flow<Map<String, Any?>?>
@@ -12,6 +13,10 @@ interface CloudDataService {
         bio: String?,
         profilePhotoUri: String?
     )
+    suspend fun uploadProfilePhoto(
+        userId: String,
+        localUri: Uri
+    ): String
     suspend fun upsertProject(
         userId: String,
         projectId: String,

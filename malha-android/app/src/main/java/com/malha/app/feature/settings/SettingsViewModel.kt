@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-
+import android.net.Uri
 import kotlinx.coroutines.flow.collectLatest
 
 class SettingsViewModel(application: Application) : AndroidViewModel(application) {
@@ -63,17 +63,30 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    fun updateProfilePhoto(profilePhotoUri: String?) {
+    fun updateProfilePhoto(localUri: Uri){
         viewModelScope.launch {
-            appContainer.preferencesRepository.updateProfilePhoto(profilePhotoUri)
-            uiState.value.user?.let { user ->
-                appContainer.cloudDataService.updateUserProfile(
+            val user = uiState.value.user ?: return@launch
+
+            val downloadUrl =
+                appContainer.cloudDataService.uploadProfilePhoto(
                     userId = user.id,
-                    username = uiState.value.preferences.username ?: user.displayName,
-                    bio = uiState.value.preferences.bio,
-                    profilePhotoUri = profilePhotoUri
+                    localUri = localUri
                 )
-            }
+
+            appContainer.preferencesRepository.updateProfilePhoto(downloadUrl)
+
+            appContainer.cloudDataService.updateUserProfile(
+                userId = user.id,
+                username = uiState.value.preferences.username ?: user.displayName,
+                bio = uiState.value.preferences.bio,
+                profilePhotoUri = downloadUrl
+            )
+        }
+    }
+
+    fun setPendingProfilePhoto(uri: String) {
+        _uiState.update {
+            it.copy(preferences = it.preferences.copy(profilePhotoUri = uri))
         }
     }
 

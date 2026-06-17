@@ -82,9 +82,8 @@ fun ProfileEditScreen(
                     .fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // todo add photo
                 if (uiState.user != null) {
-                    Row {
+                    Row (horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         Box(modifier = Modifier.size(72.dp)) {
                             ImagePlaceholder(
                                 label = uiState.preferences.username ?: uiState.user!!.displayName

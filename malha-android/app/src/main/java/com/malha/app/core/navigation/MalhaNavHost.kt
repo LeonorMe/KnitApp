@@ -36,7 +36,10 @@ fun MalhaNavHost(
     val profilePhotoPicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
         onResult = { uri ->
-            if (uri != null) viewModel.updateProfilePhoto(uri.toString())
+            if (uri != null) {
+                viewModel.setPendingProfilePhoto(uri.toString())
+                viewModel.updateProfilePhoto(uri)
+            }
         }
     )
     NavHost(

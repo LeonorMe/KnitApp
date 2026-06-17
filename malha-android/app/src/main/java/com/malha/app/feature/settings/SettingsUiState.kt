@@ -9,7 +9,8 @@ data class SettingsUiState(
     val isSigningIn: Boolean = false,
     val errorMessage: String? = null,
     val successMessage: String? = null,
-    val authMode: AuthMode? = null
+    val authMode: AuthMode? = null,
+    val pendingPhotoUri: String? = null
 ) {
     val isSignedIn: Boolean
         get() = user != null
