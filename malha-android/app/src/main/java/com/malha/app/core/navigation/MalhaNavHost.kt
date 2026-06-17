@@ -1,7 +1,11 @@
 package com.malha.app.core.navigation
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -18,6 +22,7 @@ import com.malha.app.feature.profile.ProfileEditScreen
 import com.malha.app.feature.projects.ProjectSettingsScreen
 import com.malha.app.feature.projects.ProjectsScreen
 import com.malha.app.feature.settings.SettingsScreen
+import com.malha.app.feature.settings.SettingsViewModel
 import com.malha.app.feature.social.CommunityFeedScreen
 import com.malha.app.feature.social.CreatePostScreen
 import com.malha.app.feature.social.ProfileScreen
@@ -25,8 +30,15 @@ import com.malha.app.feature.social.ProfileScreen
 @Composable
 fun MalhaNavHost(
     navController: NavHostController,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: SettingsViewModel = viewModel()
 ) {
+    val profilePhotoPicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+        onResult = { uri ->
+            if (uri != null) viewModel.updateProfilePhoto(uri.toString())
+        }
+    )
     NavHost(
         navController = navController,
         startDestination = MalhaDestination.Home.route,
@@ -105,7 +117,12 @@ fun MalhaNavHost(
 
         composable(MalhaDestination.ProfileEdit.route) {
             ProfileEditScreen(
-                onNavigateBack = { navController.popBackStack() }
+                onNavigateBack = { navController.popBackStack() },
+                onChangePhoto = {
+                    profilePhotoPicker.launch(
+                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                    )
+                }
             )
         }
 

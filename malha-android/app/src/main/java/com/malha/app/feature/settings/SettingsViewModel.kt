@@ -143,7 +143,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                         authMode = null,
                         errorMessage = null,
                         successMessage = when (mode) {
-                            AuthMode.CreateAccount -> "Google account connected. Your Malha profile is ready."
+                            AuthMode.CreateAccount -> "Google account connected. Your profile is ready."
                             AuthMode.Login -> "Signed in with Google."
                         }
                     )

@@ -26,6 +26,7 @@ import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.CloudDone
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material3.AlertDialog
@@ -77,7 +78,7 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val context = androidx.compose.ui.platform.LocalContext.current
+    val context = LocalContext.current
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { granted ->
@@ -118,7 +119,11 @@ fun SettingsScreen(
                 viewModel.signInWithGoogleToken(account.idToken)
             }.onFailure { error ->
                 val message = if (error is ApiException) {
-                    "Google Sign-In error (Status Code ${error.statusCode}): ${error.localizedMessage}"
+                    context.getString(
+                        R.string.google_sign_in_error_status_code,
+                        error.statusCode,
+                        error.localizedMessage
+                    )
                 } else {
                     error.message ?: context.getString(R.string.google_sign_in_was_cancelled)
                 }
@@ -149,14 +154,9 @@ fun SettingsScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
-                text = "Settings",
+                text = stringResource(R.string.settings),
                 style = MaterialTheme.typography.headlineLarge,
                 color = MaterialTheme.colorScheme.onBackground
-            )
-            Text(
-                text = "Profile, sync, language, units, and theme preferences.",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             AnimatedVisibility(visible = uiState.errorMessage != null) {
@@ -217,7 +217,7 @@ fun SettingsScreen(
                 )
             }
 
-            SettingsSection(title = "Project reminder") {
+            SettingsSection(title = stringResource(R.string.project_reminder)) {
                 DailyReminderSettings(
                     enabled = uiState.preferences.reminderEnabled,
                     regularity = uiState.preferences.reminderRegularity,
@@ -272,7 +272,7 @@ fun SettingsScreen(
                 )
             }
 
-            SettingsSection(title = "Accessibility") {
+            SettingsSection(title = stringResource(R.string.accessibility)) {
                 Text(
                     text = "Adjust text size for better readability.",
                     style = MaterialTheme.typography.bodyMedium,
@@ -361,12 +361,12 @@ private fun DailyReminderSettings(
                 ) {
                     OutlinedTextField(
                         value = when (regularity) {
-                            ReminderRegularity.DAILY -> "Daily"
-                            ReminderRegularity.WEEKLY -> "Weekly"
+                            ReminderRegularity.DAILY -> stringResource(R.string.daily)
+                            ReminderRegularity.WEEKLY -> stringResource(R.string.weekly)
                         },
                         onValueChange = {},
                         readOnly = true,
-                        label = { Text("Regularity") },
+                        label = { Text(stringResource(R.string.regularity)) },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
                         modifier = Modifier
                             .fillMaxWidth()
@@ -381,8 +381,8 @@ private fun DailyReminderSettings(
                                 text = {
                                     Text(
                                         when (reg) {
-                                            ReminderRegularity.DAILY -> "Daily"
-                                            ReminderRegularity.WEEKLY -> "Weekly"
+                                            ReminderRegularity.DAILY -> stringResource(R.string.daily)
+                                            ReminderRegularity.WEEKLY -> stringResource(R.string.weekly)
                                         }
                                     )
                                 },
@@ -473,7 +473,7 @@ private fun DailyReminderSettings(
                     verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
                 ) {
                     Text(
-                        "Time",
+                        stringResource(R.string.time),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurface
                     )
@@ -507,9 +507,9 @@ private fun ProfileCard(
             modifier = Modifier.padding(18.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Row(
+            Column(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                //horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     Icon(
@@ -519,21 +519,33 @@ private fun ProfileCard(
                         modifier = Modifier.size(28.dp)
                     )
                     Text(
-                        text = if (uiState.user == null || uiState.user.isAnonymous) "Malha account" else "Connected account",
+                        text = if (uiState.user == null || uiState.user.isAnonymous) stringResource(
+                            R.string.malha_account
+                        ) else stringResource(R.string.connected_account),
                         style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                 }
                 if (uiState.user != null && !uiState.user.isAnonymous) {
-                    Row {
-                        TextButton(onClick = onChangePhoto) {
-                            Text("Photo")
+                    Row (horizontalArrangement = Arrangement.spacedBy(10.dp)){
+                        /*TextButton(onClick = onChangePhoto) {
+                            Text(stringResource(R.string.photo))
+                        }*/
+                        OutlinedButton(
+                            onClick = onEditProfile,
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Icon(Icons.Default.Edit, contentDescription = null)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(stringResource(R.string.edit)) // todo
                         }
-                        TextButton(onClick = onEditProfile) {
-                            Text("Edit")
-                        }
+                        /*TextButton(onClick = onEditProfile) {
+                            Text(stringResource(R.string.edit))
+                        }*/
                     }
+
                 }
+
             }
 
             AnimatedContent(
@@ -543,7 +555,7 @@ private fun ProfileCard(
                 if (user == null || user.isAnonymous) {
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         Text(
-                            text = "Use Google to create or access your Malha account. Your profile is stored in Firebase Auth and Firestore.",
+                            text = stringResource(R.string.use_google_to_create_or_access_your_account),
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -584,22 +596,26 @@ private fun ProfileCard(
                         ) {
                             Box(modifier = Modifier.size(72.dp)) {
                                 ImagePlaceholder(
-                                    label = uiState.preferences.username ?: user.displayName ?: "User",
+                                    label = uiState.preferences.username ?: user.displayName ?: stringResource(
+                                        R.string.user
+                                    ),
                                     imageUri = uiState.preferences.profilePhotoUri ?: user.photoUrl,
                                     size = 72.dp
                                 )
                             }
-                            OutlinedButton(
+                            /*OutlinedButton(
                                 onClick = onChangePhoto,
                                 modifier = Modifier.weight(1f)
                             ) {
                                 Icon(Icons.Default.PhotoLibrary, contentDescription = null)
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Text("Change profile photo")
-                            }
+                                Text(stringResource(R.string.change_profile_photo))
+                            }*/
                         }
                         Text(
-                            text = uiState.preferences.username ?: user.displayName ?: "Signed in",
+                            text = uiState.preferences.username ?: user.displayName ?: stringResource(
+                                R.string.signed_in
+                            ),
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurface
                         )
@@ -621,7 +637,7 @@ private fun ProfileCard(
                                 .padding(top = 4.dp)
                         ) {
                             Text(
-                                text = "Firestore sync ready",
+                                text = stringResource(R.string.firestore_sync_ready),
                                 style = MaterialTheme.typography.labelLarge,
                                 color = MaterialTheme.colorScheme.primary
                             )
