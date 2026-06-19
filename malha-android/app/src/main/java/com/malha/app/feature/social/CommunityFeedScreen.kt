@@ -1,7 +1,5 @@
 package com.malha.app.feature.social
 
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -10,14 +8,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Comment
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -50,12 +45,6 @@ class CommunityViewModel(application: android.app.Application) : AndroidViewMode
             started = SharingStarted.WhileSubscribed(5_000),
             initialValue = emptyList()
         )
-
-    fun likePost(postId: String) {
-        viewModelScope.launch {
-            repository.toggleLikePost(postId)
-        }
-    }
 
     fun observeComments(postId: String): StateFlow<List<Comment>> {
         return repository.observeComments(postId)
@@ -172,8 +161,7 @@ fun CommunityFeedScreen(
             }
             items(filteredFeed, key = { it.id }) { post ->
                 PostCard(
-                    post = post, 
-                    onLike = { viewModel.likePost(post.id) },
+                    post = post,
                     onAddComment = { viewModel.addComment(post.id, it) },
                     observeComments = { viewModel.observeComments(post.id) },
                     onPatternClick = onNavigateToPattern,
@@ -186,19 +174,13 @@ fun CommunityFeedScreen(
 
 @Composable
 private fun PostCard(
-    post: Post, 
-    onLike: () -> Unit,
+    post: Post,
     onAddComment: (String) -> Unit,
     observeComments: () -> StateFlow<List<Comment>>,
     onPatternClick: (String) -> Unit,
     onAuthorClick: () -> Unit
 ) {
     val context = LocalContext.current
-    val heartScale by animateFloatAsState(
-        targetValue = if (post.isLiked) 1.25f else 1.0f,
-        animationSpec = spring(dampingRatio = 0.5f, stiffness = 300f),
-        label = "HeartScale"
-    )
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -288,16 +270,7 @@ private fun PostCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 var showComments by remember { mutableStateOf(false) }
-                
-                IconButton(onClick = onLike) {
-                    Icon(
-                        imageVector = if (post.isLiked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                        contentDescription = stringResource(R.string.community_like),
-                        tint = if (post.isLiked) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.scale(heartScale)
-                    )
-                }
-                
+
                 IconButton(onClick = { showComments = true }) {
                     Icon(
                         imageVector = Icons.Default.Comment,

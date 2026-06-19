@@ -21,8 +21,6 @@ data class Post(
     val description: String,
     val status: String = "ongoing", // ongoing, finished
     val createdAt: Long = System.currentTimeMillis(),
-    val likesCount: Int = 0,
-    val isLiked: Boolean = false
 )
 
 data class Comment(

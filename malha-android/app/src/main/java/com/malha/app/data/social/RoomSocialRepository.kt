@@ -1,5 +1,6 @@
 package com.malha.app.data.social
 
+import android.net.Uri
 import com.malha.app.core.database.dao.SocialDao
 import com.malha.app.core.database.entity.CommentEntity
 import com.malha.app.core.database.entity.PostEntity
@@ -20,8 +21,6 @@ class RoomSocialRepository(
     private val socialDao: SocialDao,
     private val authService: AuthService
 ) : SocialRepository {
-
-    private val likedPostIds = mutableSetOf<String>()
 
     private val currentUserId: String
         get() = authService.currentUser?.id ?: "default-user"
@@ -83,41 +82,75 @@ class RoomSocialRepository(
 
     override fun observeFeed(): Flow<List<Post>> {
         return socialDao.observeFeed().map { posts ->
-            posts.map { it.toPostDomain(isLiked = likedPostIds.contains(it.post.id)) }
+            posts.map { it.toPostDomain() }
         }
     }
 
     override fun observeUserPosts(userId: String): Flow<List<Post>> {
         return socialDao.observeUserPosts(userId).map { posts ->
-            posts.map { it.toPostDomain(isLiked = likedPostIds.contains(it.post.id)) }
+            posts.map { it.toPostDomain() }
         }
     }
 
-    override suspend fun createPost(patternId: String?, imageUri: String, description: String, status: String) {
-        val post = PostEntity(
-            id = UUID.randomUUID().toString(),
+    override suspend fun upsertLocalPost(
+        postId: String,
+        userId: String,
+        patternId: String?,
+        imageUri: String,
+        description: String,
+        status: String,
+        createdAt: Long
+    ) {
+        socialDao.insertPost(
+            PostEntity(
+                id = postId,
+                userId = userId,
+                patternId = patternId,
+                imageUri = imageUri,
+                description = description,
+                status = status,
+                createdAt = createdAt,
+                updatedAt = System.currentTimeMillis()
+            )
+        )
+    }
+
+    override suspend fun upsertLocalUserStub(
+        userId: String,
+        name: String,
+        profilePicUri: String?
+    ) {
+        // Only insert if missing — don't clobber an existing richer profile.
+        val existing = socialDao.getUser(userId)
+        if (existing == null) {
+            socialDao.insertUser(
+                UserEntity(
+                    id = userId,
+                    name = name,
+                    bio = null,
+                    profilePicUri = profilePicUri,
+                    coins = 0,
+                    updatedAt = System.currentTimeMillis()
+                )
+            )
+        }
+    }
+
+    override suspend fun createPost(
+        patternId: String?,
+        imageUri: String,
+        description: String,
+        status: String
+    ) {
+        upsertLocalPost(
+            postId = UUID.randomUUID().toString(),
             userId = currentUserId,
             patternId = patternId,
             imageUri = imageUri,
             description = description,
             status = status,
-            createdAt = System.currentTimeMillis(),
-            updatedAt = System.currentTimeMillis()
+            createdAt = System.currentTimeMillis()
         )
-        socialDao.insertPost(post)
-    }
-
-    override suspend fun toggleLikePost(postId: String) {
-        val post = socialDao.getPost(postId) ?: return
-        if (likedPostIds.contains(postId)) {
-            likedPostIds.remove(postId)
-            val newLikes = maxOf(0, post.likesCount - 1)
-            socialDao.updatePostLikes(postId, newLikes)
-        } else {
-            likedPostIds.add(postId)
-            val newLikes = post.likesCount + 1
-            socialDao.updatePostLikes(postId, newLikes)
-        }
     }
 
     override fun observeComments(postId: String): Flow<List<Comment>> {

@@ -15,10 +15,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.malha.app.R
 import com.malha.app.core.app.appContainer
 import com.malha.app.core.design.component.ImagePlaceholder
 import com.malha.app.domain.model.Pattern
@@ -32,7 +34,12 @@ class CreatePostViewModel(application: android.app.Application) : AndroidViewMod
         .observePatterns()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    fun createPost(patternId: String?, imageUri: String, description: String, status: String, onComplete: () -> Unit) {
+    fun createPost(
+        patternId: String?,
+        imageUri: String,
+        description: String,
+        status: String,
+        onComplete: () -> Unit) {
         viewModelScope.launch {
             appContainer.socialRepository.createPost(patternId, imageUri, description, status)
             onComplete()
@@ -61,9 +68,9 @@ fun CreatePostScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("New Post") },
+                title = { Text(stringResource(R.string.new_post)) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, contentDescription = "Back") }
+                    IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back)) }
                 },
                 actions = {
                     IconButton(
@@ -75,7 +82,7 @@ fun CreatePostScreen(
                             }
                         }
                     ) {
-                        Icon(Icons.Default.Check, contentDescription = "Share")
+                        Icon(Icons.Default.Check, contentDescription = stringResource(R.string.share))
                     }
                 }
             )
@@ -91,16 +98,18 @@ fun CreatePostScreen(
         ) {
             // Photo Selection
             Card(
-                modifier = Modifier.fillMaxWidth().height(250.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(250.dp),
                 onClick = { photoPickerLauncher.launch("image/*") }
             ) {
                 Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                    if (imageUri != null) {
-                        ImagePlaceholder(label = "Photo", imageUri = imageUri!!.toString())
+                    if (imageUri != null) { // todo
+                        ImagePlaceholder(label = stringResource(R.string.photo), imageUri = imageUri!!.toString())
                     } else {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Icon(Icons.Default.PhotoLibrary, contentDescription = null, modifier = Modifier.size(48.dp))
-                            Text("Select a photo of your work")
+                            Text(stringResource(R.string.select_a_photo_of_your_work))
                         }
                     }
                 }
@@ -110,13 +119,13 @@ fun CreatePostScreen(
             OutlinedTextField(
                 value = description,
                 onValueChange = { description = it },
-                label = { Text("Description") },
+                label = { Text(stringResource(R.string.description)) },
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 3
             )
 
             // Pattern Link
-            Text("Link a Pattern (Optional)", style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.link_a_pattern_optional), style = MaterialTheme.typography.titleMedium)
             ScrollableRow {
                 patterns.forEach { pattern ->
                     FilterChip(
@@ -133,12 +142,12 @@ fun CreatePostScreen(
                 FilterChip(
                     selected = status == "ongoing",
                     onClick = { status = "ongoing" },
-                    label = { Text("Ongoing") }
+                    label = { Text(stringResource(R.string.ongoing)) }
                 )
                 FilterChip(
                     selected = status == "finished",
                     onClick = { status = "finished" },
-                    label = { Text("Finished") }
+                    label = { Text(stringResource(R.string.finished)) }
                 )
             }
         }
@@ -148,7 +157,9 @@ fun CreatePostScreen(
 @Composable
 private fun ScrollableRow(content: @Composable () -> Unit) {
     Row(
-        modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+        modifier = Modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState()),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         content()

@@ -8,4 +8,6 @@ interface PatternRepository {
     fun observePattern(patternId: String): Flow<Pattern?>
     suspend fun getFirstPatternId(): String?
     suspend fun createManualPattern(title: String, instructions: List<String>)
+
+    suspend fun getPattern(patternId: String): Pattern?
 }

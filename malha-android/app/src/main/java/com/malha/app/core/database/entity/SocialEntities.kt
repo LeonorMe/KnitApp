@@ -26,7 +26,6 @@ data class PostEntity(
     val imageUri: String,
     val description: String,
     val status: String,
-    val likesCount: Int = 0,
     val createdAt: Long,
     val updatedAt: Long
 )

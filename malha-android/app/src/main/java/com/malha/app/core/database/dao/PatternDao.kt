@@ -36,6 +36,13 @@ interface PatternDao {
     @Query("SELECT id FROM patterns ORDER BY title ASC LIMIT 1")
     suspend fun getFirstPatternId(): String?
 
+    @Query("SELECT * FROM patterns WHERE id = :id LIMIT 1")
+    suspend fun getPatternById(id: String): PatternEntity?
+
+    @Transaction
+    @Query("SELECT * FROM patterns WHERE id = :id LIMIT 1")
+    suspend fun getPatternWithStepsById(id: String): PatternWithSteps?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertPatterns(patterns: List<PatternEntity>)
 

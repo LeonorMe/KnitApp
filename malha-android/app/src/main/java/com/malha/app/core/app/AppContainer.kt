@@ -1,7 +1,9 @@
 package com.malha.app.core.app
 
 import android.content.Context
+import androidx.lifecycle.AndroidViewModel
 import com.malha.app.BuildConfig
+import com.malha.app.MalhaApplication
 import com.malha.app.core.ai.AidiAssistantService
 import com.malha.app.core.ai.CloudAidiAssistantService
 import com.malha.app.core.ai.LocalAidiAssistantService
@@ -20,8 +22,12 @@ import com.malha.app.data.project.CloudBackedProjectRepository
 import com.malha.app.data.project.ProjectRepository
 import com.malha.app.data.project.RoomProjectRepository
 import com.malha.app.core.preferences.PreferencesRepository
+import com.malha.app.data.social.CloudBackedSocialRepository
 import com.malha.app.data.social.RoomSocialRepository
 import com.malha.app.data.social.SocialRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.Dispatchers
 
 class AppContainer(context: Context) {
     private val database = DatabaseProvider.getDatabase(context)
@@ -62,10 +68,6 @@ class AppContainer(context: Context) {
     }
 
     val preferencesRepository = PreferencesRepository(context)
-    val socialRepository: SocialRepository = RoomSocialRepository(
-        socialDao = database.socialDao(),
-        authService = authService
-    )
 
     val databaseSeeder = DatabaseSeeder(
         patternDao = database.patternDao(),
@@ -73,10 +75,27 @@ class AppContainer(context: Context) {
         materialDao = database.materialDao(),
         socialDao = database.socialDao()
     )
+
+    private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    private val localSocialRepository: SocialRepository =
+        RoomSocialRepository(
+            socialDao = database.socialDao(),
+            authService = authService
+        )
+
+    val socialRepository: SocialRepository =
+        CloudBackedSocialRepository(
+            local = localSocialRepository,
+            authService = authService,
+            cloudDataService = cloudDataService,
+            patternRepository = patternRepository,
+            syncScope = applicationScope
+        )
 }
 
-val android.content.Context.appContainer: AppContainer
-    get() = (applicationContext as com.malha.app.MalhaApplication).appContainer
+val Context.appContainer: AppContainer
+    get() = (applicationContext as MalhaApplication).appContainer
 
-val androidx.lifecycle.AndroidViewModel.appContainer: AppContainer
-    get() = (getApplication<com.malha.app.MalhaApplication>()).appContainer
+val AndroidViewModel.appContainer: AppContainer
+    get() = (getApplication<MalhaApplication>()).appContainer

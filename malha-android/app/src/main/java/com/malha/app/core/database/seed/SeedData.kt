@@ -559,7 +559,6 @@ object SeedData {
             imageUri = "drawable:malha_asset_project",
             description = "Just casted on the new Simple Everyday Beanie! The instructions are super clean and easy to follow. 🧶✨",
             status = "ongoing",
-            likesCount = 12,
             createdAt = now - 3600000 * 2, // 2 hours ago
             updatedAt = now
         ),
@@ -570,7 +569,6 @@ object SeedData {
             imageUri = "drawable:malha_asset_yarn",
             description = "Finished the Starter Garter Scarf! The length is perfect and the wool feels warm.",
             status = "finished",
-            likesCount = 28,
             createdAt = now - 3600000 * 12, // 12 hours ago
             updatedAt = now
         )

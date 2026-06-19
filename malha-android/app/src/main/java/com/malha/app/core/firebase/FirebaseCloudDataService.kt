@@ -8,7 +8,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import android.net.Uri
+import com.google.firebase.firestore.Query
 import com.google.firebase.storage.FirebaseStorage
+import com.malha.app.domain.model.Post
 
 class FirebaseCloudDataService(
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
@@ -161,4 +163,82 @@ class FirebaseCloudDataService(
             .set(material, SetOptions.merge())
             .await()
     }
+
+    override suspend fun createPost(
+        userId: String,
+        userName: String,
+        userProfilePic: String?,
+        postId: String,
+        patternId: String?,
+        patternName: String?,
+        localImageUri: String,
+        description: String,
+        status: String,
+        createdAt: Long
+    ): String {
+        val imageUrl = uploadPostPhoto(
+            postId = postId,
+            localUri = Uri.parse(localImageUri)
+        )
+
+        val post = mapOf(
+            "id" to postId,
+            "userId" to userId,
+            "userName" to userName,
+            "userProfilePic" to userProfilePic,
+            "patternId" to patternId,
+            "patternName" to patternName,
+            "imageUrl" to imageUrl,
+            "description" to description,
+            "status" to status,
+            "createdAt" to createdAt,
+            "updatedAt" to System.currentTimeMillis()
+        )
+
+        firestore.collection(CloudCollections.POSTS)
+            .document(postId)
+            .set(post)
+            .await()
+
+        return imageUrl
+    }
+
+    private suspend fun uploadPostPhoto(
+        postId: String,
+        localUri: Uri          // ✅ real Uri
+    ): String {
+        val ref = storage.reference.child("post_photos/$postId.jpg")
+        ref.putFile(localUri).await()
+        return ref.downloadUrl.await().toString()
+    }
+
+    override fun observePosts(): Flow<List<Post>> = callbackFlow {
+        val registration = firestore
+            .collection(CloudCollections.POSTS)
+            .orderBy("createdAt", Query.Direction.DESCENDING)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) { close(error); return@addSnapshotListener }
+                val posts = snapshot?.documents.orEmpty().mapNotNull { doc ->
+                    runCatching {
+                        Post(
+                            id             = doc.getString("id") ?: doc.id,
+                            userId         = doc.getString("userId").orEmpty(),
+                            userName       = doc.getString("userName").orEmpty(),
+                            userProfilePic = doc.getString("userProfilePic"),
+                            patternId      = doc.getString("patternId"),
+                            patternName    = doc.getString("patternName"),
+                            imageUri       = doc.getString("imageUrl").orEmpty(),
+                            description    = doc.getString("description").orEmpty(),
+                            status         = doc.getString("status") ?: "ongoing",
+                            createdAt      = doc.getLong("createdAt") ?: 0L
+                        )
+                    }.getOrNull()
+                }
+                trySend(posts)
+            }
+        awaitClose { registration.remove() }
+    }
+    // Change uploadPostPhoto to take a Uri (consistent with uploadProfilePhoto)
+
 }
+

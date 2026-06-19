@@ -27,6 +27,57 @@ class RoomPatternRepository(
         return patternDao.getFirstPatternId()
     }
 
+    fun PatternEntity.toDomainShallow(): Pattern = Pattern(
+        id = id,
+        title = title,
+        designer = designer,
+        year = year,
+        craft = craft,
+        difficulty = difficulty,
+        gauge = if (gaugeWidth != null && gaugeHeight != null) {
+            Gauge(
+                widthStitches = gaugeWidth,
+                heightRows = gaugeHeight,
+                measurementCm = gaugeUnit
+                    ?.filter { it.isDigit() }
+                    ?.toIntOrNull()
+                    ?: 10
+            )
+        } else null,
+        sourceType = sourceType,
+        originalText = originalText,
+        verificationStatus = verificationStatus,
+        aiConfidence = aiConfidence,
+        isPremium = isPremium,
+        availableSizes = availableSizes
+            ?.split(",")
+            ?.map { it.trim() }
+            ?.filter { it.isNotEmpty() }
+            ?: emptyList(),
+        selectedSize = selectedSize,
+        sections = emptyList() // No steps loaded
+    )
+
+    fun Pattern.toEntity(): PatternEntity = PatternEntity(
+        id = id,
+        title = title,
+        designer = designer,
+        year = year,
+        craft = craft,
+        difficulty = difficulty,
+        gaugeWidth = gauge?.widthStitches,
+        gaugeHeight = gauge?.heightRows,
+        gaugeUnit = gauge?.measurementCm?.let { "${it}cm" },
+        sourceType = sourceType,
+        originalText = originalText,
+        verificationStatus = verificationStatus,
+        aiConfidence = aiConfidence,
+        isPremium = isPremium,
+        availableSizes = availableSizes.takeIf { it.isNotEmpty() }?.joinToString(","),
+        selectedSize = selectedSize,
+        updatedAt = System.currentTimeMillis()
+    )
+
     override suspend fun createManualPattern(title: String, instructions: List<String>) {
         val now = System.currentTimeMillis()
         val patternId = UUID.randomUUID().toString()
@@ -86,4 +137,7 @@ class RoomPatternRepository(
             }
         )
     }
+
+    override suspend fun getPattern(patternId: String): Pattern? =
+        patternDao.getPatternWithStepsById(patternId)?.toDomain()
 }

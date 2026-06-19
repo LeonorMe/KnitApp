@@ -3,6 +3,8 @@ package com.malha.app.core.firebase
 import com.malha.app.domain.model.MaterialType
 import kotlinx.coroutines.flow.Flow
 import android.net.Uri
+import com.malha.app.domain.model.Post
+import java.util.UUID
 
 interface CloudDataService {
     fun observeUserProfile(userId: String): Flow<Map<String, Any?>?>
@@ -36,4 +38,20 @@ interface CloudDataService {
         unit: String,
         imageUri: String?
     )
+
+    // todo new connect posts to firestore
+    suspend fun createPost(
+        userId: String,
+        userName: String,
+        userProfilePic: String?,
+        postId: String,
+        patternId: String?,
+        patternName: String?,
+        localImageUri: String,
+        description: String,
+        status: String,
+        createdAt: Long
+    ): String
+
+    fun observePosts(): Flow<List<Post>>
 }
