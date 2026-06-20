@@ -10,6 +10,9 @@ data class UserPreferencesEntity(
     val unitSystem: String,
     val knittingNotation: String,
     val crochetTerminology: String,
-    val themeMode: String
+    val themeMode: String,
+    val profilePhotoUri: String?,
+    val username: String?,
+    val bio: String?,
 )
 

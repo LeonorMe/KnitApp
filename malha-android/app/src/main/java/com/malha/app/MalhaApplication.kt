@@ -11,6 +11,7 @@ class MalhaApplication : Application() {
     lateinit var appContainer: AppContainer
         private set
 
+    // only used to lauch databaseSeeder
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     override fun onCreate() {

@@ -7,7 +7,7 @@ data class User(
     val name: String,
     val bio: String? = null,
     val profilePicUri: String? = null,
-    val coins: Int = 0
+    val coins: Int
 )
 
 data class Post(

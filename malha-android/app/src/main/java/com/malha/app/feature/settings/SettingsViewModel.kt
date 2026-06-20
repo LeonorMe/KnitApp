@@ -52,14 +52,11 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     fun updateProfile(username: String, bio: String) {
         viewModelScope.launch { 
             appContainer.preferencesRepository.updateProfile(username, bio)
-            uiState.value.user?.let { user ->
-                appContainer.cloudDataService.updateUserProfile(
-                    userId = user.id,
-                    username = username,
-                    bio = bio,
-                    profilePhotoUri = uiState.value.preferences.profilePhotoUri
-                )
-            }
+            appContainer.socialRepository.updateProfile(
+                name = username,
+                bio = bio,
+                profilePicUri = uiState.value.preferences.profilePhotoUri
+            )
         }
     }
 
@@ -75,11 +72,11 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
             appContainer.preferencesRepository.updateProfilePhoto(downloadUrl)
 
-            appContainer.cloudDataService.updateUserProfile(
-                userId = user.id,
-                username = uiState.value.preferences.username ?: user.displayName,
-                bio = uiState.value.preferences.bio,
-                profilePhotoUri = downloadUrl
+            val prefs = uiState.value.preferences
+            appContainer.socialRepository.updateProfile(
+                name = prefs.username.toString() , // TODO doesn't get a new value??
+                bio = prefs.bio,
+                profilePicUri = downloadUrl
             )
         }
     }

@@ -13,12 +13,16 @@ interface CloudDataService {
         userId: String,
         username: String?,
         bio: String?,
-        profilePhotoUri: String?
+        profilePhotoUri: String?,
+        coins: Int
     )
     suspend fun uploadProfilePhoto(
         userId: String,
         localUri: Uri
     ): String
+
+    suspend fun updateUserCoins(userId: String, delta: Int)
+
     suspend fun upsertProject(
         userId: String,
         projectId: String,
@@ -39,7 +43,6 @@ interface CloudDataService {
         imageUri: String?
     )
 
-    // todo new connect posts to firestore
     suspend fun createPost(
         userId: String,
         userName: String,

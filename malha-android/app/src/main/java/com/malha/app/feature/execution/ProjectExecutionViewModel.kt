@@ -18,6 +18,8 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+//import com.malha.app.core.gamification.GamificationService.calculateCoins
+import com.malha.app.core.util.SocialDefaults.COINS_PER_PROJECT
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ProjectExecutionViewModel(
@@ -101,7 +103,12 @@ class ProjectExecutionViewModel(
             updateStep(nextIndex, state.totalSteps)
             // Award coins on final step
             if (isLastStep) {
-                runCatching { appContainer.socialRepository.addCoins(50) }
+                runCatching {
+                    appContainer.socialRepository
+                        .addCoins(
+                            COINS_PER_PROJECT
+                            //calculateCoins(project) // TODO
+                        ) }
             }
         }
     }

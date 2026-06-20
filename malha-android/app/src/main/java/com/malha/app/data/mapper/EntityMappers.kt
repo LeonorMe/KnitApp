@@ -133,6 +133,7 @@ fun UserEntity.toUserDomain(): User {
         bio = bio,
         profilePicUri = profilePicUri,
         coins = coins
+        // TODO coins = (snapshot.getLong("coins") ?: 0L).toInt()
     )
 }
 

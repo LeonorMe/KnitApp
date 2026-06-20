@@ -8,8 +8,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import android.net.Uri
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.Query
 import com.google.firebase.storage.FirebaseStorage
+import com.malha.app.core.util.SocialDefaults.INITIAL_COINS
 import com.malha.app.domain.model.Post
 
 class FirebaseCloudDataService(
@@ -53,6 +55,11 @@ class FirebaseCloudDataService(
             profile["profilePhotoUri"] = user.photoUrl
         }
 
+        // Seed coins only if missing — don't clobber existing balance
+        if (doc == null || !doc.contains("coins")) {
+            profile["coins"] = INITIAL_COINS.toLong()
+        }
+
         docRef.set(profile, SetOptions.merge()).await()
     }
 
@@ -60,14 +67,16 @@ class FirebaseCloudDataService(
         userId: String,
         username: String?,
         bio: String?,
-        profilePhotoUri: String?
+        profilePhotoUri: String?,
+        coins: Int
     ) {
         val profile = mutableMapOf<String, Any?>(
-            "updatedAt" to System.currentTimeMillis()
+            "updatedAt" to System.currentTimeMillis(),
+            "displayName" to username,
+            "bio" to bio,
+            "profilePhotoUri" to profilePhotoUri,
+            "coins" to coins
         )
-        profile["displayName"] = username
-        profile["bio"] = bio
-        profile["profilePhotoUri"] = profilePhotoUri
 
         firestore
             .collection(CloudCollections.USERS)
@@ -88,6 +97,18 @@ class FirebaseCloudDataService(
         ref.putFile(localUri).await()
 
         return ref.downloadUrl.await().toString()
+    }
+
+    override suspend fun updateUserCoins(userId: String, delta: Int) {
+        firestore.collection(CloudCollections.USERS).document(userId)
+            .set(
+                mapOf(
+                    "coins" to FieldValue.increment(delta.toLong()),
+                    "updatedAt" to System.currentTimeMillis()
+                ),
+                SetOptions.merge()
+            )
+            .await()
     }
 
     override suspend fun upsertProject(

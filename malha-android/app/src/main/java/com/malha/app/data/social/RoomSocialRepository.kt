@@ -6,6 +6,7 @@ import com.malha.app.core.database.entity.CommentEntity
 import com.malha.app.core.database.entity.PostEntity
 import com.malha.app.core.database.entity.UserEntity
 import com.malha.app.core.firebase.AuthService
+import com.malha.app.core.util.SocialDefaults.INITIAL_COINS
 import com.malha.app.data.mapper.toPostDomain
 import com.malha.app.data.mapper.toUserDomain
 import com.malha.app.domain.model.Comment
@@ -15,6 +16,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import java.util.UUID
+
+// TODO do not seed RoomSocialRepository
 
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class RoomSocialRepository(
@@ -34,7 +37,7 @@ class RoomSocialRepository(
                     name = authUser?.displayName ?: "New Crafter",
                     bio = "Exploring the world of knitting.",
                     profilePicUri = authUser?.photoUrl,
-                    coins = 100
+                    coins = INITIAL_COINS
                 )
             }
         }
@@ -57,7 +60,7 @@ class RoomSocialRepository(
                 name = authUser?.displayName ?: "New Crafter",
                 bio = "Exploring the world of knitting.",
                 profilePicUri = authUser?.photoUrl,
-                coins = 100,
+                coins = INITIAL_COINS,
                 updatedAt = System.currentTimeMillis()
             )
             socialDao.insertUser(newUser)
@@ -75,6 +78,19 @@ class RoomSocialRepository(
                 bio = bio,
                 profilePicUri = profilePicUri ?: current.profilePicUri,
                 coins = current.coins,
+                updatedAt = System.currentTimeMillis()
+            )
+        )
+    }
+
+    override suspend fun cacheUser(user: User) {
+        socialDao.insertUser(
+            UserEntity(
+                id = user.id,
+                name = user.name,
+                bio = user.bio,
+                profilePicUri = user.profilePicUri,
+                coins = user.coins,
                 updatedAt = System.currentTimeMillis()
             )
         )
@@ -129,7 +145,7 @@ class RoomSocialRepository(
                     name = name,
                     bio = null,
                     profilePicUri = profilePicUri,
-                    coins = 0,
+                    coins = INITIAL_COINS,
                     updatedAt = System.currentTimeMillis()
                 )
             )

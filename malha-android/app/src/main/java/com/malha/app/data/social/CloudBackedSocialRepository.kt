@@ -7,14 +7,25 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import java.util.UUID
+import com.malha.app.core.util.SocialDefaults.INITIAL_COINS
+import com.malha.app.core.util.SocialDefaults.DEFAULT_DISPLAY_NAME
+import com.malha.app.domain.model.User
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class CloudBackedSocialRepository(
     private val local: SocialRepository,
     private val authService: AuthService,
     private val cloudDataService: CloudDataService,
     private val patternRepository: PatternRepository,
-    syncScope: CoroutineScope
+    private val syncScope: CoroutineScope
 ) : SocialRepository by local {
+
+    private var syncJob: Job? = null
 
     init {
         // Continuous Firestore → Room sync
@@ -40,6 +51,7 @@ class CloudBackedSocialRepository(
                 }
             }
             .launchIn(syncScope)
+        startUserSync()
     }
 
     override suspend fun createPost(
@@ -99,6 +111,82 @@ class CloudBackedSocialRepository(
                 description = description,
                 status = status,
                 createdAt = createdAt
+            )
+        }
+    }
+
+    /**
+     * Observes the current authenticated user and keeps Room in sync
+     * with their Firestore profile. Restarts automatically on sign-in/out.
+     */
+    private fun startUserSync() {
+        syncJob?.cancel()
+        syncJob = syncScope.launch {
+            authService.authState
+                .flatMapLatest { authUser ->
+                    val userId = authUser?.id
+                    if (userId != null) {
+                        cloudDataService.observeUserProfile(userId)
+                    } else {
+                        kotlinx.coroutines.flow.flowOf(null)
+                    }
+                }
+                .collectLatest { data ->
+                    if (data != null) {
+                        val user = data.toUserDomain()
+                        if (user != null) {
+                            local.cacheUser(user)
+                        }
+                    }
+                }
+        }
+    }
+
+    /**
+     * Maps a Firestore document snapshot (Map<String, Any?>) to the User domain model.
+     * Returns null if the document doesn't have a valid id.
+     */
+    private fun Map<String, Any?>.toUserDomain(): User? {
+        val id = this["id"] as? String ?: return null
+        return User(
+            id = id,
+            name = (this["displayName"] as? String) ?: DEFAULT_DISPLAY_NAME,
+            bio = this["bio"] as? String,
+            profilePicUri = this["profilePhotoUri"] as? String,
+            // Firestore stores integers as Long
+            coins = (this["coins"] as? Long)?.toInt() ?: INITIAL_COINS
+        )
+    }
+
+    // ---- Write paths override the delegated ones ----
+
+    override suspend fun addCoins(amount: Int) {
+        val userId = authService.currentUser?.id ?: return
+        // Optimistic local update
+        local.addCoins(amount)
+        // Cloud write — listener will reconcile if amounts diverge
+        runCatching {
+            cloudDataService.updateUserCoins(userId, amount)
+        }
+    }
+
+    override suspend fun updateProfile(
+        name: String,
+        bio: String?,
+        profilePicUri: String?
+    ) {
+        val userId = authService.currentUser?.id ?: return
+        val current = local.getCurrentUser()
+        // Optimistic local
+        local.updateProfile(name, bio, profilePicUri)
+        // Cloud
+        runCatching {
+            cloudDataService.updateUserProfile(
+                userId = userId,
+                username = name,
+                bio = bio,
+                profilePhotoUri = profilePicUri,
+                coins = current?.coins ?: INITIAL_COINS
             )
         }
     }

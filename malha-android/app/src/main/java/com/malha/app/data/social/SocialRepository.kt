@@ -10,6 +10,7 @@ interface SocialRepository {
     fun observeUser(userId: String): Flow<User?>
     suspend fun getCurrentUser(): User?
     suspend fun updateProfile(name: String, bio: String?, profilePicUri: String?)
+    suspend fun cacheUser(user: User)
 
     fun observeFeed(): Flow<List<Post>>
     fun observeUserPosts(userId: String): Flow<List<Post>>

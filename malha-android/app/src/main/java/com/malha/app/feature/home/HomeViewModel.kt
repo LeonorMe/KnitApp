@@ -5,6 +5,7 @@ import android.text.format.DateUtils
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.malha.app.core.app.appContainer
+import com.malha.app.core.util.SocialDefaults.INITIAL_COINS
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -25,7 +26,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                 .trim()
                 .substringBefore(" "),
             profilePhotoUri = prefs.profilePhotoUri ?: currentUser?.profilePicUri,
-            coinBalance = currentUser?.coins ?: 0
+            coinBalance = currentUser?.coins ?: INITIAL_COINS
         )
     }
     .stateIn(
