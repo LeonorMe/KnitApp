@@ -2,6 +2,7 @@ package com.malha.app.data.social
 
 import com.malha.app.core.firebase.AuthService
 import com.malha.app.core.firebase.CloudDataService
+import com.malha.app.core.util.SocialDefaults.DEFAULT_BIO
 import com.malha.app.data.pattern.PatternRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
@@ -151,7 +152,7 @@ class CloudBackedSocialRepository(
         return User(
             id = id,
             name = (this["displayName"] as? String) ?: DEFAULT_DISPLAY_NAME,
-            bio = this["bio"] as? String,
+            bio = (this["bio"] as? String) ?: DEFAULT_BIO,
             profilePicUri = this["profilePhotoUri"] as? String,
             // Firestore stores integers as Long
             coins = (this["coins"] as? Long)?.toInt() ?: INITIAL_COINS

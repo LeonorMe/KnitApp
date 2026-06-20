@@ -13,6 +13,7 @@ import com.google.firebase.firestore.Query
 import com.google.firebase.storage.FirebaseStorage
 import com.malha.app.core.util.SocialDefaults.INITIAL_COINS
 import com.malha.app.domain.model.Post
+import androidx.core.net.toUri
 
 class FirebaseCloudDataService(
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
@@ -199,7 +200,7 @@ class FirebaseCloudDataService(
     ): String {
         val imageUrl = uploadPostPhoto(
             postId = postId,
-            localUri = Uri.parse(localImageUri)
+            localUri = localImageUri.toUri()
         )
 
         val post = mapOf(

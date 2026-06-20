@@ -4,7 +4,6 @@ import com.malha.app.domain.model.MaterialType
 import kotlinx.coroutines.flow.Flow
 import android.net.Uri
 import com.malha.app.domain.model.Post
-import java.util.UUID
 
 interface CloudDataService {
     fun observeUserProfile(userId: String): Flow<Map<String, Any?>?>

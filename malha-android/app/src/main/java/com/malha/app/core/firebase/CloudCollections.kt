@@ -10,7 +10,6 @@ object CloudCollections {
     const val VARIANTS = "variants"
     const val REVIEWS = "reviews"
     const val AI_REQUESTS = "aiRequests"
-    // todo new
     const val POSTS = "posts"
     const val COMMENTS = "comments"
 }

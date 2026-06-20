@@ -1,6 +1,5 @@
 package com.malha.app.data.social
 
-import android.net.Uri
 import com.malha.app.core.database.dao.SocialDao
 import com.malha.app.core.database.entity.CommentEntity
 import com.malha.app.core.database.entity.PostEntity
@@ -49,7 +48,7 @@ class RoomSocialRepository(
         }
     }
 
-    override suspend fun getCurrentUser(): User? {
+    override suspend fun getCurrentUser(): User {
         val userId = currentUserId
         var user = socialDao.getUser(userId)?.toUserDomain()
         if (user == null) {
