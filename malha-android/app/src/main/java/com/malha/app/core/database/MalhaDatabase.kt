@@ -23,7 +23,7 @@ import com.malha.app.core.database.entity.*
         PostEntity::class,
         CommentEntity::class
     ],
-    version = 8,
+    version = 9,
     exportSchema = false
 )
 @TypeConverters(RoomConverters::class)
