@@ -2,33 +2,6 @@ package com.malha.app.core.design.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Original Colors
-val Cream = Color(0xFFF6EFE4)
-val Sage = Color(0xFF3F6B57)
-val SageDark = Color(0xFF294A3B)
-val Clay = Color(0xFFD9B99B)
-val Indigo = Color(0xFF6E5A8D)
-val Lavender = Color(0xFFB9A7D1)
-val Ink = Color(0xFF25231F)
-val WarmGray = Color(0xFF6D675F)
-val SageLight = Color(0xFF76A58F)
-val InkDark = Color(0xFF1A1916)
-val ClayDark = Color(0xFF8C6D4F)
-
-// Malha Premium Palette
-val MalhaGreen = Color(0xFFE8F5E9)
-val MalhaGreenMedium = Color(0xFFA5D6A7)
-val MalhaGreenDark = Color(0xFF2E7D32)
-val MalhaBlue = Color(0xFFE3F2FD)
-val MalhaBlueMedium = Color(0xFF90CAF9)
-val MalhaBlueDark = Color(0xFF1D717C) // Aidi's primary dark blue
-val MalhaAidiBlue = Color(0xFF39ECF5) // Aidi's bright blue
-val MalhaBackground = Color(0xFFFAFAFA)
-val MalhaSurface = Color(0xFFFFFFFF)
-val MalhaTextPrimary = Color(0xFF212121)
-val MalhaTextSecondary = Color(0xFF757575)
-
-// V3
 val BrightSnow = Color(0xFFFCFAFA)
 
 val PacificBlue = Color(0xFF2FAEC7)
@@ -48,3 +21,36 @@ val SoftGoldBackground = Color(0xFFFFF8EA)
 val LightTeal = Color(0xFFDDF2F4)
 val DarkSurface = Color(0xFF10232C)
 val DarkSurfaceVariant = Color(0xFF17323D)
+
+// ---------- Warm Theme ----------
+// Surfaces — sepia paper feel, dimmed for night comfort
+val WarmBackground       = Color(0xFFEFE3CE)  // base "paper"
+val WarmSurface          = Color(0xFFF4EAD6)  // slightly lighter than background
+val WarmSurfaceContainer = Color(0xFFE6D6B8)  // raised surfaces (cards, nav)
+val WarmSurfaceVariant   = Color(0xFFDCC8A6)  // subtle separators, chips
+
+// Text / icons
+val WarmInk              = Color(0xFF3A2A18)  // primary text — deep warm brown
+val WarmInkMuted         = Color(0xFF6B5740)  // secondary text
+
+// Brand — teal shifted to copper / amber family
+val WarmPrimary           = Color(0xFFB87333)  // copper (replaces PacificBlue)
+val WarmPrimaryContainer  = Color(0xFFF1D9B5)  // soft amber wash
+val WarmOnPrimary         = Color(0xFFFBF6EE)
+val WarmOnPrimaryContainer = Color(0xFF5A3A14)
+
+// Secondary — keep gold but deepen it for warmth
+val WarmSecondary           = Color(0xFFB57814)  // deeper HarvestGold
+val WarmSecondaryContainer  = Color(0xFFF3E3BC)
+val WarmOnSecondary         = Color(0xFFFBF6EE)
+val WarmOnSecondaryContainer = Color(0xFF4A3208)
+
+// Tertiary — olive/moss, complements amber palette
+val WarmTertiary            = Color(0xFF8A6A2F)
+val WarmTertiaryContainer   = Color(0xFFE8D8B0)
+val WarmOnTertiary          = Color(0xFFFBF6EE)
+val WarmOnTertiaryContainer = Color(0xFF3E2D0A)
+
+// Error — desaturated raspberry to fit warm palette
+val WarmError   = Color(0xFFB54A3A)
+val WarmOnError = Color(0xFFFBF6EE)

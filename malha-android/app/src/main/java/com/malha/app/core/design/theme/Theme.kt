@@ -7,24 +7,6 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.darkColorScheme
 import com.malha.app.core.preferences.AppTheme
 
-/*private val LightColors = lightColorScheme(
-    primary = MalhaGreenDark,
-    onPrimary = MalhaSurface,
-    primaryContainer = MalhaGreen,
-    onPrimaryContainer = MalhaGreenDark,
-    secondary = MalhaBlueDark,
-    onSecondary = MalhaSurface,
-    secondaryContainer = MalhaBlue,
-    onSecondaryContainer = MalhaBlueDark,
-    tertiary = MalhaAidiBlue,
-    background = MalhaBackground,
-    onBackground = MalhaTextPrimary,
-    surface = MalhaSurface,
-    onSurface = MalhaTextPrimary,
-    surfaceVariant = MalhaBlue,
-    onSurfaceVariant = MalhaTextSecondary
-)*/
-
 private val LightColors = lightColorScheme(
     primary = BlueGreen,
     onPrimary = BrightSnow,
@@ -50,6 +32,8 @@ private val LightColors = lightColorScheme(
     surface = BrightSnow,
     onSurface = InkBlack,
 
+    surfaceContainer = SoftBlueBackground,
+
     surfaceVariant = SoftBlueBackground,
     onSurfaceVariant = StormyTeal,
 
@@ -57,26 +41,7 @@ private val LightColors = lightColorScheme(
     outlineVariant = BlueGreen.copy(alpha = 0.2f)
 )
 
-/*private val DarkColors = darkColorScheme(
-    primary = MalhaGreenMedium,
-    onPrimary = MalhaTextPrimary,
-    primaryContainer = MalhaGreenDark,
-    onPrimaryContainer = MalhaGreen,
-    secondary = MalhaBlueMedium,
-    onSecondary = MalhaTextPrimary,
-    secondaryContainer = MalhaBlueDark,
-    onSecondaryContainer = MalhaBlue,
-    tertiary = MalhaAidiBlue,
-    background = ColorTokens.DarkBackground,
-    onBackground = MalhaBackground,
-    surface = ColorTokens.DarkSurface,
-    onSurface = MalhaBackground,
-    surfaceVariant = ColorTokens.DarkSurfaceVariant,
-    onSurfaceVariant = MalhaTextSecondary,
-    error = Raspberry
-)*/
-
-val DarkColors = darkColorScheme(
+private val DarkColors = darkColorScheme(
     primary = PacificBlue,
     onPrimary = InkBlack,
 
@@ -104,11 +69,47 @@ val DarkColors = darkColorScheme(
     surface = DarkSurface,
     onSurface = BrightSnow,
 
+    surfaceContainer = DarkSurface,
+
     surfaceVariant = DarkSurfaceVariant,
     onSurfaceVariant = BrightSnow.copy(alpha = 0.75f),
 
     outline = PacificBlue.copy(alpha = 0.5f),
     outlineVariant = PacificBlue.copy(alpha = 0.25f)
+)
+
+private val WarmColors = lightColorScheme(
+    primary = WarmPrimary,
+    onPrimary = WarmOnPrimary,
+    primaryContainer = WarmPrimaryContainer,
+    onPrimaryContainer = WarmOnPrimaryContainer,
+
+    secondary = WarmSecondary,
+    onSecondary = WarmOnSecondary,
+    secondaryContainer = WarmSecondaryContainer,
+    onSecondaryContainer = WarmOnSecondaryContainer,
+
+    tertiary = WarmTertiary,
+    onTertiary = WarmOnTertiary,
+    tertiaryContainer = WarmTertiaryContainer,
+    onTertiaryContainer = WarmOnTertiaryContainer,
+
+    error = WarmError,
+    onError = WarmOnError,
+
+    background = WarmBackground,
+    onBackground = WarmInk,
+
+    surface = WarmSurface,
+    onSurface = WarmInk,
+
+    surfaceContainer = WarmSurfaceContainer,
+
+    surfaceVariant = WarmSurfaceVariant,
+    onSurfaceVariant = WarmInkMuted,
+
+    outline = WarmPrimary.copy(alpha = 0.5f),
+    outlineVariant = WarmPrimary.copy(alpha = 0.2f)
 )
 
 @Composable
@@ -122,7 +123,7 @@ fun MalhaTheme(
         AppTheme.LIGHT -> LightColors
         AppTheme.DARK -> DarkColors
         AppTheme.SYSTEM -> if (darkTheme) DarkColors else LightColors
-        AppTheme.WARM -> LightColors.copy(background = ColorTokens.WarmBackground)
+        AppTheme.WARM -> WarmColors
     }
 
     MaterialTheme(
@@ -130,11 +131,4 @@ fun MalhaTheme(
         typography = getMalhaTypography(textSizeMultiplier),
         content = content
     )
-}
-
-private object ColorTokens {
-    val DarkBackground = androidx.compose.ui.graphics.Color(0xFF121212)
-    val DarkSurface = androidx.compose.ui.graphics.Color(0xFF1E1E1E)
-    val DarkSurfaceVariant = androidx.compose.ui.graphics.Color(0xFF2C2C2C)
-    val WarmBackground = androidx.compose.ui.graphics.Color(0xFFFFF9F0)
 }
