@@ -10,6 +10,7 @@ interface ProjectRepository {
     fun observeStepProgress(projectId: String, patternStepId: String): Flow<ProjectStepProgress?>
     suspend fun createProject(name: String, patternId: String?): String
     suspend fun archiveProject(projectId: String)
+    //suspend fun completeProject(projectId: String)
     suspend fun updateProgress(projectId: String, stepIndex: Int, progressPercent: Int)
     suspend fun updateProjectColor(projectId: String, colorHex: String?)
     suspend fun saveStepProgress(

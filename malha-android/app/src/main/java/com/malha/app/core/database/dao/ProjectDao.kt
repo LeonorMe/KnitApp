@@ -27,6 +27,18 @@ interface ProjectDao {
     @Query("UPDATE projects SET status = 'archived', updatedAt = :updatedAt WHERE id = :projectId")
     suspend fun archiveProject(projectId: String, updatedAt: Long): Int
 
+   /* @Query(
+        """
+        UPDATE projects
+        SET status = 'completed',
+            progressPercent = 100,
+            completedAt = :completedAt,
+            updatedAt = :completedAt
+        WHERE id = :projectId
+        """
+    )
+    suspend fun completeProject(projectId: String, completedAt: Long): Int
+*/
     @Query(
         """
         UPDATE projects

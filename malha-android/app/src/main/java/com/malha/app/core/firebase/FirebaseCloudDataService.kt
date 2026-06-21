@@ -1,5 +1,6 @@
 package com.malha.app.core.firebase
 
+import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.malha.app.domain.model.MaterialType
@@ -14,6 +15,8 @@ import com.google.firebase.storage.FirebaseStorage
 import com.malha.app.core.util.SocialDefaults.INITIAL_COINS
 import com.malha.app.domain.model.Post
 import androidx.core.net.toUri
+
+private const val TAG = "FirebaseCloudData"
 
 class FirebaseCloudDataService(
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
@@ -239,7 +242,11 @@ class FirebaseCloudDataService(
             .collection(CloudCollections.POSTS)
             .orderBy("createdAt", Query.Direction.DESCENDING)
             .addSnapshotListener { snapshot, error ->
-                if (error != null) { close(error); return@addSnapshotListener }
+                if (error != null) {
+                    Log.e(TAG, "observePosts failed: ${error.message}")
+                    trySend(emptyList())
+                    return@addSnapshotListener
+                }
                 val posts = snapshot?.documents.orEmpty().mapNotNull { doc ->
                     runCatching {
                         Post(
@@ -267,7 +274,11 @@ class FirebaseCloudDataService(
             .document(userId)
             .collection(CloudCollections.PROJECTS)
             .addSnapshotListener { snapshot, error ->
-                if (error != null) { close(error); return@addSnapshotListener }
+                if (error != null) {
+                    Log.e(TAG, "observeProjects failed: ${error.message}")
+                    trySend(emptyList())
+                    return@addSnapshotListener
+                }
                 trySend(snapshot?.documents.orEmpty().mapNotNull { it.data })
             }
         awaitClose { registration.remove() }
@@ -279,7 +290,11 @@ class FirebaseCloudDataService(
             .document(userId)
             .collection(CloudCollections.MATERIALS)
             .addSnapshotListener { snapshot, error ->
-                if (error != null) { close(error); return@addSnapshotListener }
+                if (error != null) {
+                    Log.e(TAG, "observeMaterials failed: ${error.message}")
+                    trySend(emptyList())
+                    return@addSnapshotListener
+                }
                 trySend(snapshot?.documents.orEmpty().mapNotNull { it.data })
             }
         awaitClose { registration.remove() }
@@ -289,7 +304,11 @@ class FirebaseCloudDataService(
         val registration = firestore
             .collection(CloudCollections.PATTERNS)
             .addSnapshotListener { snapshot, error ->
-                if (error != null) { close(error); return@addSnapshotListener }
+                if (error != null) {
+                    Log.e(TAG, "observePatterns failed: ${error.message}")
+                    trySend(emptyList())
+                    return@addSnapshotListener
+                }
                 trySend(snapshot?.documents.orEmpty().mapNotNull { it.data })
             }
         awaitClose { registration.remove() }
@@ -299,7 +318,11 @@ class FirebaseCloudDataService(
         val registration = firestore
             .collection(CloudCollections.PATTERN_STEPS)
             .addSnapshotListener { snapshot, error ->
-                if (error != null) { close(error); return@addSnapshotListener }
+                if (error != null) {
+                    Log.e(TAG, "observePatternSteps failed: ${error.message}")
+                    trySend(emptyList())
+                    return@addSnapshotListener
+                }
                 trySend(snapshot?.documents.orEmpty().mapNotNull { it.data })
             }
         awaitClose { registration.remove() }
@@ -391,7 +414,11 @@ class FirebaseCloudDataService(
             .document(userId)
             .collection(CloudCollections.PROJECT_MATERIALS)
             .addSnapshotListener { snapshot, error ->
-                if (error != null) { close(error); return@addSnapshotListener }
+                if (error != null) {
+                    Log.e(TAG, "observeProjectMaterials failed: ${error.message}")
+                    trySend(emptyList())
+                    return@addSnapshotListener
+                }
                 trySend(snapshot?.documents.orEmpty().mapNotNull { it.data })
             }
         awaitClose { registration.remove() }
@@ -426,7 +453,11 @@ class FirebaseCloudDataService(
             .collection(CloudCollections.VARIANTS)
             .whereEqualTo("patternId", patternId)
             .addSnapshotListener { snapshot, error ->
-                if (error != null) { close(error); return@addSnapshotListener }
+                if (error != null) {
+                    Log.e(TAG, "observeVariants failed: ${error.message}")
+                    trySend(emptyList())
+                    return@addSnapshotListener
+                }
                 trySend(snapshot?.documents.orEmpty().mapNotNull { it.data })
             }
         awaitClose { registration.remove() }
@@ -456,7 +487,11 @@ class FirebaseCloudDataService(
             .collection(CloudCollections.REVIEWS)
             .whereEqualTo("patternId", patternId)
             .addSnapshotListener { snapshot, error ->
-                if (error != null) { close(error); return@addSnapshotListener }
+                if (error != null) {
+                    Log.e(TAG, "observeReviews failed: ${error.message}")
+                    trySend(emptyList())
+                    return@addSnapshotListener
+                }
                 trySend(snapshot?.documents.orEmpty().mapNotNull { it.data })
             }
         awaitClose { registration.remove() }
@@ -487,7 +522,11 @@ class FirebaseCloudDataService(
             .collection(CloudCollections.AI_REQUESTS)
             .whereEqualTo("userId", userId)
             .addSnapshotListener { snapshot, error ->
-                if (error != null) { close(error); return@addSnapshotListener }
+                if (error != null) {
+                    Log.e(TAG, "observeAIRequests failed: ${error.message}")
+                    trySend(emptyList())
+                    return@addSnapshotListener
+                }
                 trySend(snapshot?.documents.orEmpty().mapNotNull { it.data })
             }
         awaitClose { registration.remove() }
@@ -518,7 +557,11 @@ class FirebaseCloudDataService(
             .collection(CloudCollections.COMMENTS)
             .whereEqualTo("postId", postId)
             .addSnapshotListener { snapshot, error ->
-                if (error != null) { close(error); return@addSnapshotListener }
+                if (error != null) {
+                    Log.e(TAG, "observeComments failed: ${error.message}")
+                    trySend(emptyList())
+                    return@addSnapshotListener
+                }
                 trySend(snapshot?.documents.orEmpty().mapNotNull { it.data })
             }
         awaitClose { registration.remove() }
