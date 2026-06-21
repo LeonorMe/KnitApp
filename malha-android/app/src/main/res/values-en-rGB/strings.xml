@@ -188,4 +188,5 @@
     <string name="action_back_to_settings">Back to Settings</string>
     <string name="toggle_theme">Toggle Theme</string>
     <string name="action_project_settings">Project settings</string>
+    <string name="project_created">Project created</string>
 </resources>

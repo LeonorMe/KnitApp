@@ -11,7 +11,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -20,11 +19,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.malha.app.R
+import androidx.core.graphics.toColorInt
 
 private val PROJECT_PALETTE = listOf(
+    // TODO
     "#FF8A65", // Terracotta
     "#FFB74D", // Orange/Gold
     "#FFD54F", // Amber
@@ -37,7 +41,7 @@ private val PROJECT_PALETTE = listOf(
     "#A1887F", // Warm Brown
     "#90A4AE", // Blue-Grey
     "#3F6B57", // Sage (brand colour)
-    // Color.Raspberry
+    //Color.Raspberry
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -57,10 +61,10 @@ fun ProjectSettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Configurar Projeto") },
+                title = { Text(stringResource(com.malha.app.R.string.configure_project)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Voltar")
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.go_back))
                     }
                 },
                 actions = {
@@ -69,11 +73,17 @@ fun ProjectSettingsScreen(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_coin),
+                            contentDescription = stringResource(R.string.coins),
+                            //modifier = Modifier.size(20.dp),
+                            tint = Color.Unspecified
+                        )
                         Text(
-                            text = "🪙 ${uiState.coins}",
+                            text = uiState.coins.toString(),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
+                            color = MaterialTheme.colorScheme.secondary
                         )
                     }
                 },
@@ -85,7 +95,9 @@ fun ProjectSettingsScreen(
     ) { padding ->
         if (uiState.isLoading) {
             Box(
-                modifier = Modifier.fillMaxSize().padding(padding),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
                 contentAlignment = Alignment.Center
             ) {
                 CircularProgressIndicator()
@@ -112,7 +124,7 @@ fun ProjectSettingsScreen(
                 if (uiState.availableSizes.isNotEmpty()) {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Text(
-                            text = "Tamanho do Projeto",
+                            text = stringResource(R.string.project_size),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold
                         )
@@ -132,7 +144,7 @@ fun ProjectSettingsScreen(
                 // Color Picker
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(
-                        text = "Cor do Projeto",
+                        text = stringResource(R.string.project_color),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
@@ -145,7 +157,7 @@ fun ProjectSettingsScreen(
                     ) {
                         PROJECT_PALETTE.forEach { hex ->
                             val swatchColor = remember(hex) {
-                                runCatching { Color(android.graphics.Color.parseColor(hex)) }.getOrElse { Color.Gray }
+                                runCatching { Color(hex.toColorInt()) }.getOrElse { Color.Gray }
                             }
                             val isSelected = hex.equals(uiState.colorHex, ignoreCase = true)
                             Surface(
@@ -164,7 +176,7 @@ fun ProjectSettingsScreen(
                                     if (isSelected) {
                                         Icon(
                                             imageVector = Icons.Default.Check,
-                                            contentDescription = "Selecionado",
+                                            contentDescription = stringResource(R.string.selected),
                                             tint = if (swatchColor.luminance() < 0.35f) Color.White else Color.Black,
                                             modifier = Modifier.size(22.dp)
                                         )
@@ -202,7 +214,9 @@ fun ProjectSettingsScreen(
                             readOnly = true,
                             label = { Text("Selecionar do meu inventário") },
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = yarnExpanded) },
-                            modifier = Modifier.menuAnchor().fillMaxWidth()
+                            modifier = Modifier
+                                .menuAnchor()
+                                .fillMaxWidth()
                         )
                         if (uiState.yarns.isNotEmpty()) {
                             ExposedDropdownMenu(
@@ -288,7 +302,9 @@ fun ProjectSettingsScreen(
                             readOnly = true,
                             label = { Text("Selecionar do meu inventário") },
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = needleExpanded) },
-                            modifier = Modifier.menuAnchor().fillMaxWidth()
+                            modifier = Modifier
+                                .menuAnchor()
+                                .fillMaxWidth()
                         )
                         if (uiState.needles.isNotEmpty()) {
                             ExposedDropdownMenu(
@@ -367,7 +383,9 @@ fun ProjectSettingsScreen(
                             onStartProject(pid)
                         }
                     },
-                    modifier = Modifier.fillMaxWidth().height(50.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp)
                 ) {
                     Text("Começar Projeto", style = MaterialTheme.typography.titleMedium)
                 }

@@ -172,7 +172,8 @@ fun MalhaNavHost(
             )
         }
 
-        composable(
+        // todo delete these duplicates
+        /*composable(
             route = MalhaDestination.ProjectExecution.route,
             deepLinks = listOf(
                 navDeepLink {
@@ -191,10 +192,9 @@ fun MalhaNavHost(
                     navController.navigate(MalhaDestination.projectSettingsRoute(pid))
                 }
             )
-        }
+        }*/
 
-        composable(
-            route = MalhaDestination.ProjectSettings.route,
+       /*composable(route = MalhaDestination.ProjectSettings.route,
             arguments = listOf(
                 navArgument("projectId") { type = NavType.StringType }
             )
@@ -207,7 +207,7 @@ fun MalhaNavHost(
                 },
                 onBack = { navController.popBackStack() }
             )
-        }
+        }*/
 
         composable(
             route = MalhaDestination.PatternDetail.route,

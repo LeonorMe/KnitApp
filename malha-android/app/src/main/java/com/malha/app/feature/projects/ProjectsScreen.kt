@@ -26,6 +26,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.material3.CardDefaults
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableIntStateOf
 import com.malha.app.R
 import com.malha.app.core.design.component.ImagePlaceholder
@@ -43,6 +44,10 @@ fun ProjectsScreen(
     val context = LocalContext.current
     var showCreateDialog by remember { mutableStateOf(false) }
 
+    // NEW: Snackbar host for feedback
+    val snackbarHostState = remember { SnackbarHostState() }
+    val createdMessage = stringResource(R.string.project_created) // add to strings.xml
+
     val tabs = listOf(
         stringResource(R.string.project_on_going),
         stringResource(R.string.project_planned),
@@ -50,7 +55,25 @@ fun ProjectsScreen(
     )
     var selectedTabIndex by remember { mutableIntStateOf(0) }
 
+    // NEW: react to creation — navigate to settings, show snackbar, consume event
+    LaunchedEffect(uiState.createdProjectId) {
+        val projectId = uiState.createdProjectId ?: return@LaunchedEffect
+        // Optional feedback (won't be seen if navigation happens immediately,
+        // but useful if you decide to stay on the list)
+        snackbarHostState.showSnackbar(createdMessage)
+        onOpenProjectSettings(projectId)
+        viewModel.consumeCreatedProjectId()
+    }
+
+    // NEW: surface errors via snackbar too
+    LaunchedEffect(uiState.errorMessage) {
+        val msg = uiState.errorMessage ?: return@LaunchedEffect
+        snackbarHostState.showSnackbar(msg)
+        viewModel.clearError()
+    }
+
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) }, // NEW
         topBar = {
             Column {
                 TopAppBar(
@@ -149,7 +172,7 @@ fun ProjectsScreen(
                                         } else {
                                             onOpenProjectExecution(project.id)
                                         }
-                                               },
+                                    },
                                 colors = CardDefaults.cardColors(
                                         containerColor = projectColor.copy(alpha = 0.15f)
                                 )

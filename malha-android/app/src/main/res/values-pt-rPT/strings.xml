@@ -104,4 +104,9 @@
     <string name="new_project">Novo Projeto</string>
     <string name="progress">Progresso: %1$d%%</string>
     <string name="os_meus_projetos">Os Meus Projetos</string>
+    <string name="configure_project">Configurar Projeto</string>
+    <string name="project_size">Tamanho do Projeto</string>
+    <string name="project_color">Cor do Projeto</string>
+    <string name="selected">Selecionado</string>
+    <string name="go_back">Voltar</string>
 </resources>

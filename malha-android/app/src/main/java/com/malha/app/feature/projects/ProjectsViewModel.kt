@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -23,7 +22,8 @@ class ProjectsViewModel(application: Application) : AndroidViewModel(application
                 isLoading = false,
                 projects = projects,
                 isCreating = creation.isCreating,
-                errorMessage = creation.errorMessage
+                errorMessage = creation.errorMessage,
+                createdProjectId = creation.createdProjectId
             )
         }
         .stateIn(
@@ -49,17 +49,30 @@ class ProjectsViewModel(application: Application) : AndroidViewModel(application
             creationState.update { it.copy(isCreating = true, errorMessage = null) }
             runCatching {
                 val patternId = appContainer.patternRepository.getFirstPatternId()
+
                 appContainer.projectRepository.createProject(
                     name = trimmedName,
                     patternId = patternId
                 )
+            }.onSuccess { created ->
+                creationState.update {
+                    it.copy(
+                        isCreating = false,
+                        createdProjectId = created
+                    )
+                }
             }.onFailure { error ->
                 creationState.update {
-                    it.copy(errorMessage = error.message ?: "Could not create project.")
+                    it.copy(
+                        isCreating = false,
+                        errorMessage = error.message ?: "Could not create project.")
                 }
             }
-            creationState.update { it.copy(isCreating = false) }
         }
+    }
+
+    fun consumeCreatedProjectId() {
+        creationState.update { it.copy(createdProjectId = null) }
     }
 
     fun clearError() {
@@ -69,5 +82,6 @@ class ProjectsViewModel(application: Application) : AndroidViewModel(application
 
 private data class ProjectsCreationState(
     val isCreating: Boolean = false,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val createdProjectId: String? = null
 )
