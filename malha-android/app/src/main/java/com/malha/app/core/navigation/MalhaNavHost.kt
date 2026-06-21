@@ -172,43 +172,6 @@ fun MalhaNavHost(
             )
         }
 
-        // todo delete these duplicates
-        /*composable(
-            route = MalhaDestination.ProjectExecution.route,
-            deepLinks = listOf(
-                navDeepLink {
-                    uriPattern = "https://malha.app/project-template/{projectId}"
-                }
-            ),
-            arguments = listOf(
-                navArgument("projectId") { type = NavType.StringType }
-            )
-        ) { entry ->
-            val projectId = entry.arguments?.getString("projectId").orEmpty()
-            ProjectExecutionScreen(
-                projectId = projectId,
-                onBack = { navController.popBackStack() },
-                onOpenSettings = { pid ->
-                    navController.navigate(MalhaDestination.projectSettingsRoute(pid))
-                }
-            )
-        }*/
-
-       /*composable(route = MalhaDestination.ProjectSettings.route,
-            arguments = listOf(
-                navArgument("projectId") { type = NavType.StringType }
-            )
-        ) { entry ->
-            val projectId = entry.arguments?.getString("projectId").orEmpty()
-            ProjectSettingsScreen(
-                projectId = projectId,
-                onStartProject = { pid ->
-                    navController.navigate(MalhaDestination.projectExecutionRoute(pid))
-                },
-                onBack = { navController.popBackStack() }
-            )
-        }*/
-
         composable(
             route = MalhaDestination.PatternDetail.route,
             deepLinks = listOf(

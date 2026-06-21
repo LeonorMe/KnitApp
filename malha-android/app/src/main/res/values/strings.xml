@@ -208,4 +208,11 @@
     <string name="project_color">Cor do Projeto</string>
     <string name="selected">Selecionado</string>
     <string name="go_back">Voltar</string>
+    <string name="buy">Comprar</string>
+    <string name="necessarie_needles">Agulhas Necessárias</string>
+    <string name="recomended_yarn_missing">Fio recomendado em falta!</string>
+    <string name="no_yarn_size">sem espessura</string>
+    <string name="recomended">" ⭐ Recomendado"</string>
+    <string name="select_from_my_materials">Selecionar do meu inventário</string>
+    <string name="start_project">Começar Projeto</string>
 </resources>

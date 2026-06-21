@@ -228,7 +228,9 @@ fun ProjectSettingsScreen(
                                     DropdownMenuItem(
                                         text = {
                                             Text(
-                                                text = "${yarn.name} (${yarn.weightCategory ?: "sem espessura"})${if (isRecommended) " ⭐ Recomendado" else ""}"
+                                                text = "${yarn.name} (${yarn.weightCategory ?: stringResource(
+                                                    R.string.no_yarn_size
+                                                )})${if (isRecommended) stringResource(R.string.recomended) else ""}"
                                             )
                                         },
                                         onClick = {
@@ -252,16 +254,16 @@ fun ProjectSettingsScreen(
                                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Icon(Icons.Default.ShoppingCart, contentDescription = "Loja")
+                                Icon(Icons.Default.ShoppingCart, contentDescription = stringResource(R.string.store))
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
-                                        text = "Fio recomendado em falta!",
+                                        text = stringResource(R.string.recomended_yarn_missing),
                                         style = MaterialTheme.typography.titleSmall,
                                         fontWeight = FontWeight.Bold,
                                         color = MaterialTheme.colorScheme.onErrorContainer
                                     )
                                     Text(
-                                        text = "Comprar Fio Medium Acrylic na loja por 15 moedas.",
+                                        text = "Comprar Fio Medium Acrylic na loja por 15 moedas.", // TODO
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onErrorContainer
                                     )
@@ -270,7 +272,7 @@ fun ProjectSettingsScreen(
                                     onClick = { showBuyYarnDialog = true },
                                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
                                 ) {
-                                    Text("Comprar")
+                                    Text(stringResource(R.string.buy))
                                 }
                             }
                         }
@@ -280,12 +282,12 @@ fun ProjectSettingsScreen(
                 // Materials Matcher - NEEDLES
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(
-                        text = "Agulhas Necessárias",
+                        text = stringResource(R.string.necessarie_needles),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "Requerido pelo modelo: Tamanho 4.0mm",
+                        text = "Requerido pelo modelo: Tamanho 4.0mm", // todo
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -300,7 +302,7 @@ fun ProjectSettingsScreen(
                             value = selectedNeedle?.let { "${it.name} (${it.sizeMm}mm)" } ?: "Nenhuma agulha disponível",
                             onValueChange = {},
                             readOnly = true,
-                            label = { Text("Selecionar do meu inventário") },
+                            label = { Text(stringResource(R.string.select_from_my_materials)) },
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = needleExpanded) },
                             modifier = Modifier
                                 .menuAnchor()
@@ -343,7 +345,7 @@ fun ProjectSettingsScreen(
                                 Icon(Icons.Default.ShoppingCart, contentDescription = "Loja")
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
-                                        text = "Agulhas recomendadas em falta!",
+                                        text = "Agulhas recomendadas em falta!", // todo
                                         style = MaterialTheme.typography.titleSmall,
                                         fontWeight = FontWeight.Bold,
                                         color = MaterialTheme.colorScheme.onErrorContainer
@@ -358,7 +360,7 @@ fun ProjectSettingsScreen(
                                     onClick = { showBuyNeedleDialog = true },
                                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
                                 ) {
-                                    Text("Comprar")
+                                    Text(stringResource(R.string.buy))
                                 }
                             }
                         }
@@ -376,7 +378,7 @@ fun ProjectSettingsScreen(
                     )
                 }
 
-                // Start button
+                // Start button todo
                 Button(
                     onClick = {
                         viewModel.saveSettings { pid ->
@@ -387,7 +389,7 @@ fun ProjectSettingsScreen(
                         .fillMaxWidth()
                         .height(50.dp)
                 ) {
-                    Text("Começar Projeto", style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(R.string.start_project), style = MaterialTheme.typography.titleMedium)
                 }
             }
         }
