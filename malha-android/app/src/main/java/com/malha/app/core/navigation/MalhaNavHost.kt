@@ -60,17 +60,60 @@ fun MalhaNavHost(
 
         composable(MalhaDestination.Projects.route) {
             ProjectsScreen(
-                onOpenProject = { projectId ->
+                onOpenProjectExecution = { projectId ->
                     navController.navigate(MalhaDestination.projectExecutionRoute(projectId))
+                },
+                onOpenProjectSettings = { projectId ->
+                    navController.navigate(MalhaDestination.projectSettingsRoute(projectId))
                 }
             )
         }
 
         composable(MalhaDestination.Patterns.route) {
-            PatternsScreen(
-                onOpenPattern = { patternId ->
-                    navController.navigate(MalhaDestination.patternDetailRoute(patternId))
+            HomeScreen(
+                onOpenProject = { projectId ->
+                    // Home shortcut keeps "jump into execution" semantics
+                    navController.navigate(MalhaDestination.projectExecutionRoute(projectId))
+                },
+                onNavigateToProfile = {
+                    navController.navigate(MalhaDestination.Settings.route)
                 }
+            )
+        }
+
+        composable(
+            route = MalhaDestination.ProjectExecution.route,
+            deepLinks = listOf(
+                navDeepLink { uriPattern = "https://malha.app/project-template/{projectId}" }
+            ),
+            arguments = listOf(navArgument("projectId") { type = NavType.StringType })
+        ) { entry ->
+            val projectId = entry.arguments?.getString("projectId").orEmpty()
+            ProjectExecutionScreen(
+                projectId = projectId,
+                onBack = { navController.popBackStack() },
+                onOpenSettings = { pid ->
+                    navController.navigate(MalhaDestination.projectSettingsRoute(pid))
+                }
+            )
+        }
+
+        composable(
+            route = MalhaDestination.ProjectSettings.route,
+            arguments = listOf(navArgument("projectId") { type = NavType.StringType })
+        ) { entry ->
+            val projectId = entry.arguments?.getString("projectId").orEmpty()
+            ProjectSettingsScreen(
+                projectId = projectId,
+                onStartProject = { pid ->
+                    // Replace Settings on the stack with Execution.
+                    // After "Começar Projeto", pressing back must NOT return to the form.
+                    navController.navigate(MalhaDestination.projectExecutionRoute(pid)) {
+                        popUpTo(MalhaDestination.ProjectSettings.route) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                },
+                onBack = { navController.popBackStack() }
             )
         }
 
@@ -143,7 +186,10 @@ fun MalhaNavHost(
             val projectId = entry.arguments?.getString("projectId").orEmpty()
             ProjectExecutionScreen(
                 projectId = projectId,
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                onOpenSettings = { pid ->
+                    navController.navigate(MalhaDestination.projectSettingsRoute(pid))
+                }
             )
         }
 

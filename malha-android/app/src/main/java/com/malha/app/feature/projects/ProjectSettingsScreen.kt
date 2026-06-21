@@ -417,7 +417,7 @@ fun ProjectSettingsScreen(
             },
             dismissButton = {
                 TextButton(onClick = { showBuyNeedleDialog = false }) {
-                    Text("Cancelar")
+                    Text("Cancelar") // todo string
                 }
             }
         )

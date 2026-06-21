@@ -30,19 +30,23 @@ import androidx.compose.runtime.mutableIntStateOf
 import com.malha.app.R
 import com.malha.app.core.design.component.ImagePlaceholder
 import com.malha.app.core.share.MalhaShare
+import androidx.core.graphics.toColorInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProjectsScreen(
-    onOpenProject: (String) -> Unit,
+    onOpenProjectExecution: (String) -> Unit,
+    onOpenProjectSettings: (String) -> Unit,
     viewModel: ProjectsViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
     var showCreateDialog by remember { mutableStateOf(false) }
 
-    val tabs = listOf(stringResource(R.string.project_on_going),
-        stringResource(R.string.project_planned), stringResource(R.string.project_concluded)
+    val tabs = listOf(
+        stringResource(R.string.project_on_going),
+        stringResource(R.string.project_planned),
+        stringResource(R.string.project_concluded)
     )
     var selectedTabIndex by remember { mutableIntStateOf(0) }
 
@@ -127,7 +131,7 @@ fun ProjectsScreen(
                             val projectDefaultColor = colorScheme.primary
                             val projectColor = project.colorHex?.let { hex ->
                                     runCatching {
-                                        Color(android.graphics.Color.parseColor(hex))
+                                        Color(hex.toColorInt())
                                     }.getOrNull()
                                 } ?: projectDefaultColor
 
@@ -135,7 +139,17 @@ fun ProjectsScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .animateContentSize()
-                                    .clickable { onOpenProject(project.id) },
+                                    .clickable {
+                                        // Intent-based routing:
+                                        // Planned projects (0% progress) or done open in settings
+                                        // so the user can finish configuring them.
+                                        // Anything in progress opens in execution.
+                                        if (project.progressPercent == 0 || project.progressPercent == 100) {
+                                            onOpenProjectSettings(project.id)
+                                        } else {
+                                            onOpenProjectExecution(project.id)
+                                        }
+                                               },
                                 colors = CardDefaults.cardColors(
                                         containerColor = projectColor.copy(alpha = 0.15f)
                                 )

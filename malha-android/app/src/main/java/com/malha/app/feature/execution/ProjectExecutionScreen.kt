@@ -44,7 +44,8 @@ enum class ExecutionTheme { DARK, LIGHT, WARM }
 @Composable
 fun ProjectExecutionScreen(
     projectId: String,
-    onBack: (() -> Unit)? = null,
+    onBack: () -> Unit, //(() -> Unit)? = null,
+    onOpenSettings: (String) -> Unit,
     viewModel: ProjectExecutionViewModel = viewModel(
         factory = ProjectExecutionViewModel.factory(projectId)
     )
@@ -113,17 +114,14 @@ fun ProjectExecutionScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                // Back to settings
-                if (onBack != null) {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            Icons.Default.Settings,
-                            contentDescription = "Back to Settings",
-                            tint = onBgColor
-                        )
-                    }
-                } else {
-                    Spacer(Modifier.size(48.dp))
+                // Leading: actual back navigation
+                IconButton(onClick = onBack) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowBack,
+                        //Icons.Default.Settings,
+                        contentDescription = stringResource(R.string.action_back_to_settings),
+                        tint = onBgColor
+                    )
                 }
 
                 Text(
@@ -135,8 +133,17 @@ fun ProjectExecutionScreen(
                     textAlign = TextAlign.Center
                 )
 
-                // Utility icons row
+                // Trailing: utility icons + settings gear
                 Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    // Settings gear → go to ProjectSettingsScreen for THIS project
+                    IconButton(onClick = { onOpenSettings(projectId) }) {
+                        Icon(
+                            Icons.Default.Settings,
+                            contentDescription = stringResource(R.string.action_project_settings),
+                            tint = onBgColor
+                        )
+                    }
+
                     // Theme quick toggle
                     val themeIcon = when (executionTheme) {
                         ExecutionTheme.DARK -> Icons.Default.DarkMode
@@ -150,7 +157,7 @@ fun ProjectExecutionScreen(
                             ExecutionTheme.WARM -> ExecutionTheme.DARK
                         }
                     }) {
-                        Icon(themeIcon, contentDescription = "Toggle Theme", tint = onBgColor)
+                        Icon(themeIcon, contentDescription = stringResource(R.string.toggle_theme), tint = onBgColor)
                     }
 
                     // Keep screen on toggle
@@ -267,7 +274,7 @@ fun ProjectExecutionScreen(
         CongratsDialog(
             projectName = project?.name ?: "Your Project",
             onDismiss = { showCongratsDialog = false },
-            onNavigateBack = { onBack?.invoke() }
+            onNavigateBack = onBack
         )
     }
 }

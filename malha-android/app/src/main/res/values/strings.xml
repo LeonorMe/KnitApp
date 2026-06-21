@@ -199,4 +199,7 @@
     <string name="ongoing">Ongoing</string>
     <string name="finished">Finished</string>
     <string name="link_a_pattern_optional">Link a Pattern (Optional)</string>
+    <string name="action_back_to_settings">Back to Settings</string>
+    <string name="toggle_theme">Toggle Theme</string>
+    <string name="action_project_settings">Project settings</string>
 </resources>
