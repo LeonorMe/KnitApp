@@ -437,52 +437,64 @@ private fun ProjectCrateCard(
 
     Box(
         modifier = Modifier
-            .size(260.dp) // todo
+            .size(280.dp)
             .clickable { onOpenProject(project.id) },
-        contentAlignment = Alignment.TopCenter,
     ) {
-        // Crate Vector background decoration
+        // Crate background
         Icon(
             painter = painterResource(id = R.drawable.ic_project_home),
             contentDescription = null,
             tint = projectAccent,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.size(260.dp) //.fillMaxSize()
         )
 
-        // Project detail front card, positioned inside the crate opening
-        Card(
-            modifier = Modifier
-                .padding(top = 120.dp) // todo
-                .width(160.dp)
-                .height(108.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = colorScheme.surface
-            ),
-            //shape = RoundedCornerShape(6.dp),
-            //border = BorderStroke(1.5.dp, projectAccent.copy(alpha = 0.72f)),
-            //elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        // Stack content vertically inside the crate
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(2.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                // todo Project Thumbnail
-                ImagePlaceholder(
-                    label = project.name.take(1).uppercase(),
-                    imageUri = project.imageUri,
-                    size = 108.dp,
-                    modifier = Modifier.clip(RoundedCornerShape(4.dp))
-                )
+            Spacer(Modifier.height(120.dp))  // align with crate opening
 
-                // Project Details
-                Column(
-                    verticalArrangement = Arrangement.Center,
-                    modifier = Modifier.weight(1f)
+            // Thumbnail card
+            Card(
+                modifier = Modifier.size(width = 160.dp, height = 108.dp),
+                colors = CardDefaults.cardColors(containerColor = colorScheme.surface)
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.weight(1f),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    /*Text(
+                    // image thumbnail + progress %
+                    ImagePlaceholder(
+                        label = project.name.take(1).uppercase(),
+                        imageUri = project.imageUri,
+                        size = 108.dp,
+                        modifier = Modifier.clip(RoundedCornerShape(4.dp))
+                    )
+
+                        Text(
+                            text = "${project.progressPercent}%",
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.Bold,
+                            color = projectAccent
+                        )
+
+                }
+            }
+
+            Spacer(Modifier.height(12.dp))
+
+            // Name card
+            Card(
+                modifier = Modifier.size(width = 180.dp, height = 36.dp),
+                colors = CardDefaults.cardColors(containerColor = colorScheme.surface)
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    //contentAlignment = Alignment.Center
+                ) {
+                    Text(
                         text = project.name,
                         style = MaterialTheme.typography.bodyMedium.copy(
                             fontWeight = FontWeight.Bold
@@ -491,80 +503,8 @@ private fun ProjectCrateCard(
                         overflow = TextOverflow.Ellipsis,
                         color = colorScheme.onSurface
                     )
-                    Spacer(modifier = Modifier.height(2.dp))
-                     */
-                    Text(
-                        text = "${project.progressPercent}%",
-                        style = MaterialTheme.typography.bodySmall,
-                        fontWeight = FontWeight.Bold,
-                        color = projectAccent
-                    )
-                    /*Spacer(modifier = Modifier.height(4.dp))
-                    LinearProgressIndicator(
-                        progress = { project.progressPercent / 100f },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(4.dp)
-                            .clip(RoundedCornerShape(2.dp)),
-                        color = projectAccent,
-                        trackColor = projectAccent.copy(alpha = 0.2f)
-                    ) */
                 }
             }
-        }
-
-        Card(
-            modifier = Modifier
-                .padding(top = 240.dp)
-                .height(32.dp)
-                .width(160.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = colorScheme.surface
-            )
-        ) {
-            Text(
-                modifier = Modifier
-                    .padding(horizontal = 12.dp),
-                text = project.name,
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    fontWeight = FontWeight.Bold
-                ),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                color = colorScheme.onSurface
-            )
-            /*Column(
-                verticalArrangement = Arrangement.Center,
-                modifier = Modifier.weight(1f)
-            ) {
-                *//*Text(
-                    text = project.name,
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        fontWeight = FontWeight.Bold
-                    ),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    color = colorScheme.onSurface
-                )
-                Spacer(modifier = Modifier.height(2.dp))
-                 *//*
-                Text(
-                    text = "${project.progressPercent}%",
-                    style = MaterialTheme.typography.bodySmall,
-                    fontWeight = FontWeight.Bold,
-                    color = projectAccent
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                LinearProgressIndicator(
-                    progress = { project.progressPercent / 100f },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(4.dp)
-                        .clip(RoundedCornerShape(2.dp)),
-                    color = projectAccent,
-                    trackColor = projectAccent.copy(alpha = 0.2f)
-                )
-            }*/
         }
 
         if (project.colorHex != null) {
