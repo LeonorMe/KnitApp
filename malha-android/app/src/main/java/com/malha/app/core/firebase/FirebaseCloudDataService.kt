@@ -260,7 +260,285 @@ class FirebaseCloudDataService(
             }
         awaitClose { registration.remove() }
     }
-    // Change uploadPostPhoto to take a Uri (consistent with uploadProfilePhoto)
 
+    override fun observeProjects(userId: String): Flow<List<Map<String, Any?>>> = callbackFlow {
+        val registration = firestore
+            .collection(CloudCollections.USERS)
+            .document(userId)
+            .collection(CloudCollections.PROJECTS)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) { close(error); return@addSnapshotListener }
+                trySend(snapshot?.documents.orEmpty().mapNotNull { it.data })
+            }
+        awaitClose { registration.remove() }
+    }
+
+    override fun observeMaterials(userId: String): Flow<List<Map<String, Any?>>> = callbackFlow {
+        val registration = firestore
+            .collection(CloudCollections.USERS)
+            .document(userId)
+            .collection(CloudCollections.MATERIALS)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) { close(error); return@addSnapshotListener }
+                trySend(snapshot?.documents.orEmpty().mapNotNull { it.data })
+            }
+        awaitClose { registration.remove() }
+    }
+
+    override fun observePatterns(): Flow<List<Map<String, Any?>>> = callbackFlow {
+        val registration = firestore
+            .collection(CloudCollections.PATTERNS)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) { close(error); return@addSnapshotListener }
+                trySend(snapshot?.documents.orEmpty().mapNotNull { it.data })
+            }
+        awaitClose { registration.remove() }
+    }
+
+    override fun observePatternSteps(): Flow<List<Map<String, Any?>>> = callbackFlow {
+        val registration = firestore
+            .collection(CloudCollections.PATTERN_STEPS)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) { close(error); return@addSnapshotListener }
+                trySend(snapshot?.documents.orEmpty().mapNotNull { it.data })
+            }
+        awaitClose { registration.remove() }
+    }
+
+    override suspend fun upsertPattern(
+        patternId: String,
+        title: String,
+        designer: String?,
+        year: Int?,
+        craft: String,
+        difficulty: String,
+        gaugeWidth: Int?,
+        gaugeHeight: Int?,
+        gaugeUnit: String?,
+        sourceType: String,
+        originalText: String?,
+        verificationStatus: String,
+        aiConfidence: Double,
+        isPremium: Boolean,
+        availableSizes: String?,
+        selectedSize: String?,
+        updatedAt: Long
+    ) {
+        val pattern = mapOf(
+            "id" to patternId,
+            "title" to title,
+            "designer" to designer,
+            "year" to year,
+            "craft" to craft,
+            "difficulty" to difficulty,
+            "gaugeWidth" to gaugeWidth,
+            "gaugeHeight" to gaugeHeight,
+            "gaugeUnit" to gaugeUnit,
+            "sourceType" to sourceType,
+            "originalText" to originalText,
+            "verificationStatus" to verificationStatus,
+            "aiConfidence" to aiConfidence,
+            "isPremium" to isPremium,
+            "availableSizes" to availableSizes,
+            "selectedSize" to selectedSize,
+            "updatedAt" to updatedAt
+        )
+        firestore.collection(CloudCollections.PATTERNS).document(patternId).set(pattern, SetOptions.merge()).await()
+    }
+
+    override suspend fun upsertPatternStep(
+        stepId: String,
+        patternId: String,
+        sectionId: String,
+        orderIndex: Int,
+        stepType: String,
+        instruction: String,
+        rowNumber: Int?,
+        stitchCount: Int?,
+        confidence: Double,
+        repeatCount: Int?,
+        everyNRows: Int?,
+        startRow: Int?,
+        endRow: Int?,
+        condition: String?,
+        stitchPatternId: String?,
+        updatedAt: Long
+    ) {
+        val step = mapOf(
+            "id" to stepId,
+            "patternId" to patternId,
+            "sectionId" to sectionId,
+            "orderIndex" to orderIndex,
+            "stepType" to stepType,
+            "instruction" to instruction,
+            "rowNumber" to rowNumber,
+            "stitchCount" to stitchCount,
+            "confidence" to confidence,
+            "repeatCount" to repeatCount,
+            "everyNRows" to everyNRows,
+            "startRow" to startRow,
+            "endRow" to endRow,
+            "condition" to condition,
+            "stitchPatternId" to stitchPatternId,
+            "updatedAt" to updatedAt
+        )
+        firestore.collection(CloudCollections.PATTERN_STEPS).document(stepId).set(step, SetOptions.merge()).await()
+    }
+
+    override fun observeProjectMaterials(userId: String): Flow<List<Map<String, Any?>>> = callbackFlow {
+        val registration = firestore
+            .collection(CloudCollections.USERS)
+            .document(userId)
+            .collection(CloudCollections.PROJECT_MATERIALS)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) { close(error); return@addSnapshotListener }
+                trySend(snapshot?.documents.orEmpty().mapNotNull { it.data })
+            }
+        awaitClose { registration.remove() }
+    }
+
+    override suspend fun upsertProjectMaterial(
+        userId: String,
+        id: String,
+        projectId: String,
+        materialId: String,
+        plannedQuantity: Double?,
+        usedQuantity: Double?
+    ) {
+        val pm = mapOf(
+            "id" to id,
+            "projectId" to projectId,
+            "materialId" to materialId,
+            "plannedQuantity" to plannedQuantity,
+            "usedQuantity" to usedQuantity,
+            "updatedAt" to System.currentTimeMillis()
+        )
+        firestore.collection(CloudCollections.USERS)
+            .document(userId)
+            .collection(CloudCollections.PROJECT_MATERIALS)
+            .document(id)
+            .set(pm, SetOptions.merge())
+            .await()
+    }
+
+    override fun observeVariants(patternId: String): Flow<List<Map<String, Any?>>> = callbackFlow {
+        val registration = firestore
+            .collection(CloudCollections.VARIANTS)
+            .whereEqualTo("patternId", patternId)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) { close(error); return@addSnapshotListener }
+                trySend(snapshot?.documents.orEmpty().mapNotNull { it.data })
+            }
+        awaitClose { registration.remove() }
+    }
+
+    override suspend fun upsertVariant(
+        variantId: String,
+        patternId: String,
+        userId: String,
+        name: String,
+        notes: String?,
+        updatedAt: Long
+    ) {
+        val variant = mapOf(
+            "id" to variantId,
+            "patternId" to patternId,
+            "userId" to userId,
+            "name" to name,
+            "notes" to notes,
+            "updatedAt" to updatedAt
+        )
+        firestore.collection(CloudCollections.VARIANTS).document(variantId).set(variant, SetOptions.merge()).await()
+    }
+
+    override fun observeReviews(patternId: String): Flow<List<Map<String, Any?>>> = callbackFlow {
+        val registration = firestore
+            .collection(CloudCollections.REVIEWS)
+            .whereEqualTo("patternId", patternId)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) { close(error); return@addSnapshotListener }
+                trySend(snapshot?.documents.orEmpty().mapNotNull { it.data })
+            }
+        awaitClose { registration.remove() }
+    }
+
+    override suspend fun upsertReview(
+        reviewId: String,
+        patternId: String,
+        userId: String,
+        rating: Int,
+        text: String,
+        createdAt: Long
+    ) {
+        val review = mapOf(
+            "id" to reviewId,
+            "patternId" to patternId,
+            "userId" to userId,
+            "rating" to rating,
+            "text" to text,
+            "createdAt" to createdAt,
+            "updatedAt" to System.currentTimeMillis()
+        )
+        firestore.collection(CloudCollections.REVIEWS).document(reviewId).set(review, SetOptions.merge()).await()
+    }
+
+    override fun observeAIRequests(userId: String): Flow<List<Map<String, Any?>>> = callbackFlow {
+        val registration = firestore
+            .collection(CloudCollections.AI_REQUESTS)
+            .whereEqualTo("userId", userId)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) { close(error); return@addSnapshotListener }
+                trySend(snapshot?.documents.orEmpty().mapNotNull { it.data })
+            }
+        awaitClose { registration.remove() }
+    }
+
+    override suspend fun upsertAIRequest(
+        requestId: String,
+        userId: String,
+        prompt: String,
+        response: String?,
+        status: String,
+        createdAt: Long
+    ) {
+        val request = mapOf(
+            "id" to requestId,
+            "userId" to userId,
+            "prompt" to prompt,
+            "response" to response,
+            "status" to status,
+            "createdAt" to createdAt,
+            "updatedAt" to System.currentTimeMillis()
+        )
+        firestore.collection(CloudCollections.AI_REQUESTS).document(requestId).set(request, SetOptions.merge()).await()
+    }
+
+    override fun observeComments(postId: String): Flow<List<Map<String, Any?>>> = callbackFlow {
+        val registration = firestore
+            .collection(CloudCollections.COMMENTS)
+            .whereEqualTo("postId", postId)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) { close(error); return@addSnapshotListener }
+                trySend(snapshot?.documents.orEmpty().mapNotNull { it.data })
+            }
+        awaitClose { registration.remove() }
+    }
+
+    override suspend fun upsertComment(
+        commentId: String,
+        postId: String,
+        userId: String,
+        content: String,
+        createdAt: Long
+    ) {
+        val comment = mapOf(
+            "id" to commentId,
+            "postId" to postId,
+            "userId" to userId,
+            "content" to content,
+            "createdAt" to createdAt,
+            "updatedAt" to System.currentTimeMillis()
+        )
+        firestore.collection(CloudCollections.COMMENTS).document(commentId).set(comment, SetOptions.merge()).await()
+    }
 }
-

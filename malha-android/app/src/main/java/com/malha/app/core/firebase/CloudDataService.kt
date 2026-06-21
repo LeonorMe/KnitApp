@@ -56,4 +56,103 @@ interface CloudDataService {
     ): String
 
     fun observePosts(): Flow<List<Post>>
+
+    // Projects & Materials sync
+    fun observeProjects(userId: String): Flow<List<Map<String, Any?>>>
+    fun observeMaterials(userId: String): Flow<List<Map<String, Any?>>>
+
+    // Patterns & Steps sync
+    fun observePatterns(): Flow<List<Map<String, Any?>>>
+    fun observePatternSteps(): Flow<List<Map<String, Any?>>>
+    suspend fun upsertPattern(
+        patternId: String,
+        title: String,
+        designer: String?,
+        year: Int?,
+        craft: String,
+        difficulty: String,
+        gaugeWidth: Int?,
+        gaugeHeight: Int?,
+        gaugeUnit: String?,
+        sourceType: String,
+        originalText: String?,
+        verificationStatus: String,
+        aiConfidence: Double,
+        isPremium: Boolean,
+        availableSizes: String?,
+        selectedSize: String?,
+        updatedAt: Long
+    )
+    suspend fun upsertPatternStep(
+        stepId: String,
+        patternId: String,
+        sectionId: String,
+        orderIndex: Int,
+        stepType: String,
+        instruction: String,
+        rowNumber: Int?,
+        stitchCount: Int?,
+        confidence: Double,
+        repeatCount: Int?,
+        everyNRows: Int?,
+        startRow: Int?,
+        endRow: Int?,
+        condition: String?,
+        stitchPatternId: String?,
+        updatedAt: Long
+    )
+
+    // Project Materials
+    fun observeProjectMaterials(userId: String): Flow<List<Map<String, Any?>>>
+    suspend fun upsertProjectMaterial(
+        userId: String,
+        id: String,
+        projectId: String,
+        materialId: String,
+        plannedQuantity: Double?,
+        usedQuantity: Double?
+    )
+
+    // Variants
+    fun observeVariants(patternId: String): Flow<List<Map<String, Any?>>>
+    suspend fun upsertVariant(
+        variantId: String,
+        patternId: String,
+        userId: String,
+        name: String,
+        notes: String?,
+        updatedAt: Long
+    )
+
+    // Reviews
+    fun observeReviews(patternId: String): Flow<List<Map<String, Any?>>>
+    suspend fun upsertReview(
+        reviewId: String,
+        patternId: String,
+        userId: String,
+        rating: Int,
+        text: String,
+        createdAt: Long
+    )
+
+    // AI Requests
+    fun observeAIRequests(userId: String): Flow<List<Map<String, Any?>>>
+    suspend fun upsertAIRequest(
+        requestId: String,
+        userId: String,
+        prompt: String,
+        response: String?,
+        status: String,
+        createdAt: Long
+    )
+
+    // Comments
+    fun observeComments(postId: String): Flow<List<Map<String, Any?>>>
+    suspend fun upsertComment(
+        commentId: String,
+        postId: String,
+        userId: String,
+        content: String,
+        createdAt: Long
+    )
 }

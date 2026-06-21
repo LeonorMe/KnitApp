@@ -21,9 +21,12 @@ import com.malha.app.core.database.entity.*
         StitchPatternEntity::class,
         UserEntity::class,
         PostEntity::class,
-        CommentEntity::class
+        CommentEntity::class,
+        VariantEntity::class,
+        ReviewEntity::class,
+        AIRequestEntity::class
     ],
-    version = 9,
+    version = 10,
     exportSchema = false
 )
 @TypeConverters(RoomConverters::class)
@@ -33,6 +36,9 @@ abstract class MalhaDatabase : RoomDatabase() {
     abstract fun materialDao(): MaterialDao
     abstract fun projectStepProgressDao(): ProjectStepProgressDao
     abstract fun socialDao(): SocialDao
+    abstract fun variantDao(): VariantDao
+    abstract fun reviewDao(): ReviewDao
+    abstract fun aiRequestDao(): AIRequestDao
 
     companion object {
         val MIGRATION_6_7 = object : Migration(6, 7) {

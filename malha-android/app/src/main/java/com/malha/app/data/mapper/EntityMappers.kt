@@ -152,3 +152,12 @@ fun PostWithDetails.toPostDomain(): Post {
     )
 }
 
+fun VariantEntity.toDomain(): Variant = Variant(id, patternId, userId, name, notes, updatedAt)
+fun Variant.toEntity(): VariantEntity = VariantEntity(id, patternId, userId, name, notes, updatedAt)
+
+fun ReviewEntity.toDomain(): Review = Review(id, patternId, userId, rating, text, createdAt)
+fun Review.toEntity(): ReviewEntity = ReviewEntity(id, patternId, userId, rating, text, createdAt)
+
+fun AIRequestEntity.toDomain(): AIRequest = AIRequest(id, userId, prompt, response, status, createdAt)
+fun AIRequest.toEntity(): AIRequestEntity = AIRequestEntity(id, userId, prompt, response, status, createdAt)
+

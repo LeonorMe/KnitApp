@@ -25,6 +25,16 @@ import com.malha.app.core.preferences.PreferencesRepository
 import com.malha.app.data.social.CloudBackedSocialRepository
 import com.malha.app.data.social.RoomSocialRepository
 import com.malha.app.data.social.SocialRepository
+import com.malha.app.data.pattern.CloudBackedPatternRepository
+import com.malha.app.data.variant.VariantRepository
+import com.malha.app.data.variant.RoomVariantRepository
+import com.malha.app.data.variant.CloudBackedVariantRepository
+import com.malha.app.data.review.ReviewRepository
+import com.malha.app.data.review.RoomReviewRepository
+import com.malha.app.data.review.CloudBackedReviewRepository
+import com.malha.app.data.airequest.AIRequestRepository
+import com.malha.app.data.airequest.RoomAIRequestRepository
+import com.malha.app.data.airequest.CloudBackedAIRequestRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.Dispatchers
@@ -35,23 +45,60 @@ class AppContainer(context: Context) {
     val authService: AuthService = FirebaseAuthService()
     val cloudDataService: CloudDataService = FirebaseCloudDataService()
 
+    private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
     private val localProjectRepository: ProjectRepository = RoomProjectRepository(
         projectDao = database.projectDao(),
         projectStepProgressDao = database.projectStepProgressDao()
     )
     val projectRepository: ProjectRepository = CloudBackedProjectRepository(
         local = localProjectRepository,
+        projectDao = database.projectDao(),
         authService = authService,
-        cloudDataService = cloudDataService
+        cloudDataService = cloudDataService,
+        syncScope = applicationScope
     )
 
-    val patternRepository: PatternRepository = RoomPatternRepository(database.patternDao())
+    private val localPatternRepository: PatternRepository = RoomPatternRepository(database.patternDao())
+    val patternRepository: PatternRepository = CloudBackedPatternRepository(
+        local = localPatternRepository,
+        patternDao = database.patternDao(),
+        authService = authService,
+        cloudDataService = cloudDataService,
+        syncScope = applicationScope
+    )
 
     private val localMaterialRepository: MaterialRepository = RoomMaterialRepository(database.materialDao())
     val materialRepository: MaterialRepository = CloudBackedMaterialRepository(
         local = localMaterialRepository,
+        materialDao = database.materialDao(),
         authService = authService,
-        cloudDataService = cloudDataService
+        cloudDataService = cloudDataService,
+        syncScope = applicationScope
+    )
+
+    private val localVariantRepository: VariantRepository = RoomVariantRepository(database.variantDao())
+    val variantRepository: VariantRepository = CloudBackedVariantRepository(
+        local = localVariantRepository,
+        authService = authService,
+        cloudDataService = cloudDataService,
+        syncScope = applicationScope
+    )
+
+    private val localReviewRepository: ReviewRepository = RoomReviewRepository(database.reviewDao())
+    val reviewRepository: ReviewRepository = CloudBackedReviewRepository(
+        local = localReviewRepository,
+        authService = authService,
+        cloudDataService = cloudDataService,
+        syncScope = applicationScope
+    )
+
+    private val localAIRequestRepository: AIRequestRepository = RoomAIRequestRepository(database.aiRequestDao())
+    val aiRequestRepository: AIRequestRepository = CloudBackedAIRequestRepository(
+        local = localAIRequestRepository,
+        authService = authService,
+        cloudDataService = cloudDataService,
+        syncScope = applicationScope
     )
 
     /**
@@ -80,8 +127,6 @@ class AppContainer(context: Context) {
         socialDao = database.socialDao()
     )
 
-    private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-
     private val localSocialRepository: SocialRepository =
         RoomSocialRepository(
             socialDao = database.socialDao(),
@@ -91,6 +136,7 @@ class AppContainer(context: Context) {
     val socialRepository: SocialRepository =
         CloudBackedSocialRepository(
             local = localSocialRepository,
+            socialDao = database.socialDao(),
             authService = authService,
             cloudDataService = cloudDataService,
             patternRepository = patternRepository,
