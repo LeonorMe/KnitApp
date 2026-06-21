@@ -39,6 +39,14 @@ import com.malha.app.core.ai.AidiSender
 fun AidiScreen(viewModel: AidiViewModel = viewModel()) {
     val uiState by viewModel.uiState.collectAsState()
     var draft by remember { mutableStateOf("") }
+    val listState = androidx.compose.foundation.lazy.rememberLazyListState()
+
+    val totalItems = uiState.messages.size + if (uiState.isThinking) 1 else 0
+    androidx.compose.runtime.LaunchedEffect(totalItems) {
+        if (totalItems > 0) {
+            listState.animateScrollToItem(totalItems - 1)
+        }
+    }
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -84,6 +92,7 @@ fun AidiScreen(viewModel: AidiViewModel = viewModel()) {
             }
 
             LazyColumn(
+                state = listState,
                 modifier = Modifier.weight(1f),
                 contentPadding = PaddingValues(vertical = 4.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -97,7 +106,7 @@ fun AidiScreen(viewModel: AidiViewModel = viewModel()) {
                             message = AidiMessage(
                                 id = "thinking",
                                 sender = AidiSender.Aidi,
-                                text = "Aidi is thinking..."
+                                text = stringResource(R.string.aidi_is_thinking)
                             )
                         )
                     }
@@ -111,7 +120,7 @@ fun AidiScreen(viewModel: AidiViewModel = viewModel()) {
                 OutlinedTextField(
                     value = draft,
                     onValueChange = { draft = it },
-                    label = { Text("Ask Aidi") },
+                    label = { Text(stringResource(R.string.ask_aidi)) },
                     minLines = 1,
                     maxLines = 3,
                     modifier = Modifier.weight(1f)
@@ -123,7 +132,7 @@ fun AidiScreen(viewModel: AidiViewModel = viewModel()) {
                         draft = ""
                     }
                 ) {
-                    Text("Send")
+                    Text(stringResource(R.string.send))
                 }
             }
         }

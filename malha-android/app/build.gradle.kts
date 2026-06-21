@@ -25,13 +25,13 @@ android {
         versionCode = 1
         versionName = "0.1.0"
 
-        // Inject the Anthropic API key; empty string if not set so CloudAidiAssistantService
-        // falls back to the local engine automatically.
-        buildConfigField(
-            "String",
-            "ANTHROPIC_API_KEY",
-            "\"${localProps.getProperty("anthropic.api.key", "")}\""
-        )
+        val geminiApiKey = localProps.getProperty("GEMINI_API_KEY", "")
+        val temperature = localProps.getProperty("TEMPERATURE")?.toFloatOrNull() ?: 0.4f
+        val maxTokens = localProps.getProperty("MAX_TOKENS")?.toIntOrNull() ?: 800
+
+        buildConfigField("String", "GEMINI_API_KEY", "\"$geminiApiKey\"")
+        buildConfigField("Float", "GEMINI_TEMPERATURE", "${temperature}f")
+        buildConfigField("int", "GEMINI_MAX_TOKENS", "$maxTokens")
     }
 
     buildFeatures {

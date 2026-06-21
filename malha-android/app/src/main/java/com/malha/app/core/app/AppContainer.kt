@@ -5,7 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import com.malha.app.BuildConfig
 import com.malha.app.MalhaApplication
 import com.malha.app.core.ai.AidiAssistantService
-import com.malha.app.core.ai.CloudAidiAssistantService
+import com.malha.app.core.ai.GeminiAidiAssistantService
 import com.malha.app.core.ai.LocalAidiAssistantService
 import com.malha.app.core.database.DatabaseProvider
 import com.malha.app.core.database.seed.DatabaseSeeder
@@ -59,9 +59,13 @@ class AppContainer(context: Context) {
      * otherwise falls back to the local rule-based engine so the app works offline.
      */
     val aidiAssistantService: AidiAssistantService = run {
-        val apiKey = try { BuildConfig.ANTHROPIC_API_KEY } catch (_: Throwable) { "" }
+        val apiKey = try { BuildConfig.GEMINI_API_KEY } catch (_: Throwable) { "" }
         if (apiKey.isNotBlank()) {
-            CloudAidiAssistantService(apiKey = apiKey)
+            GeminiAidiAssistantService(
+                apiKey = apiKey,
+                temperature = try { BuildConfig.GEMINI_TEMPERATURE } catch (_: Throwable) { 0.4f },
+                maxTokens = try { BuildConfig.GEMINI_MAX_TOKENS } catch (_: Throwable) { 800 }
+            )
         } else {
             LocalAidiAssistantService()
         }

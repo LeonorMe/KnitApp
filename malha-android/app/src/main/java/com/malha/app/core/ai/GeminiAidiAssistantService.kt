@@ -7,23 +7,24 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 /**
- * Aidi assistant service backed by the Anthropic Messages API.
+ * Aidi assistant service backed by the Google Gemini API.
  *
- * The API key must be stored in local.properties as `anthropic.api.key`
+ * The API key must be stored in local.properties as `GEMINI_API_KEY`
  * and injected at build time via BuildConfig (see app/build.gradle.kts).
  *
  * Falls back gracefully to [LocalAidiAssistantService] if no key is present
  * or if the network request fails, so the app always remains usable offline.
  */
-class CloudAidiAssistantService(
+class GeminiAidiAssistantService(
     private val apiKey: String,
+    private val temperature: Float = 0.4f,
+    private val maxTokens: Int = 800,
     private val fallback: AidiAssistantService = LocalAidiAssistantService()
 ) : AidiAssistantService {
 
     companion object {
-        private const val API_URL = "https://api.anthropic.com/v1/messages"
-        private const val MODEL = "claude-sonnet-4-6"
-        private const val MAX_TOKENS = 512
+        private const val MODEL = "gemini-3.5-flash"
+        private const val API_URL = "https://generativelanguage.googleapis.com/v1beta/models/$MODEL:generateContent"
 
         private val SYSTEM_PROMPT = """
             You are Aidi, a calm and knowledgeable knitting and crochet assistant inside the Malha app.
@@ -41,27 +42,41 @@ class CloudAidiAssistantService(
     }
 
     override suspend fun generateReply(prompt: String): String = withContext(Dispatchers.IO) {
-        if (apiKey.isBlank()) return@withContext fallback.generateReply(prompt)
+        if (apiKey.isBlank()) {
+            android.util.Log.w("GeminiService", "Gemini API key is blank! Falling back to offline assistant.")
+            return@withContext fallback.generateReply(prompt)
+        }
 
         runCatching {
+            // Build Gemini request body
             val requestBody = JSONObject().apply {
-                put("model", MODEL)
-                put("max_tokens", MAX_TOKENS)
-                put("system", SYSTEM_PROMPT)
-                put("messages", JSONArray().apply {
+                put("contents", JSONArray().apply {
                     put(JSONObject().apply {
                         put("role", "user")
-                        put("content", prompt)
+                        put("parts", JSONArray().apply {
+                            put(JSONObject().apply {
+                                put("text", prompt)
+                            })
+                        })
                     })
+                })
+                put("systemInstruction", JSONObject().apply {
+                    put("parts", JSONArray().apply {
+                        put(JSONObject().apply {
+                            put("text", SYSTEM_PROMPT)
+                        })
+                    })
+                })
+                put("generationConfig", JSONObject().apply {
+                    put("temperature", temperature)
+                    put("maxOutputTokens", maxTokens)
                 })
             }.toString()
 
-            val url = java.net.URL(API_URL)
+            val url = java.net.URL("$API_URL?key=$apiKey")
             val connection = (url.openConnection() as java.net.HttpURLConnection).apply {
                 requestMethod = "POST"
                 setRequestProperty("Content-Type", "application/json")
-                setRequestProperty("x-api-key", apiKey)
-                setRequestProperty("anthropic-version", "2023-06-01")
                 doOutput = true
                 connectTimeout = 15_000
                 readTimeout = 30_000
@@ -78,23 +93,35 @@ class CloudAidiAssistantService(
             connection.disconnect()
 
             if (responseCode != 200) {
+                android.util.Log.e("GeminiService", "HTTP error $responseCode: $responseText")
                 return@runCatching fallback.generateReply(prompt)
             }
 
+            // Parse Gemini response
             val json = JSONObject(responseText)
-            val content = json.getJSONArray("content")
-            if (content.length() == 0) return@runCatching fallback.generateReply(prompt)
-
-            content.getJSONObject(0).getString("text").trim()
-        }.getOrElse {
-            // Network unavailable or parse error — silent fallback keeps app functional offline
+            val candidates = json.optJSONArray("candidates")
+            if (candidates == null || candidates.length() == 0) {
+                android.util.Log.e("GeminiService", "No candidates found in response: $responseText")
+                return@runCatching fallback.generateReply(prompt)
+            }
+            val content = candidates.getJSONObject(0).optJSONObject("content")
+            if (content == null) {
+                android.util.Log.e("GeminiService", "No content found in first candidate: $responseText")
+                return@runCatching fallback.generateReply(prompt)
+            }
+            val parts = content.optJSONArray("parts")
+            if (parts == null || parts.length() == 0) {
+                android.util.Log.e("GeminiService", "No parts found in candidate content: $responseText")
+                return@runCatching fallback.generateReply(prompt)
+            }
+            parts.getJSONObject(0).getString("text").trim()
+        }.getOrElse { throwable ->
+            android.util.Log.e("GeminiService", "Exception in generateReply", throwable)
             fallback.generateReply(prompt)
         }
     }
 
     override suspend fun parsePattern(text: String): Pattern {
-        // Pattern parsing is compute-intensive; delegate to local parser for now.
-        // A future version could send the full text to the API for structured extraction.
         return fallback.parsePattern(text)
     }
 }

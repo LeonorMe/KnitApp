@@ -8,7 +8,7 @@
     <string name="nav_patterns">Patterns</string>
     <string name="nav_materials">Materials</string>
     <string name="nav_aidi" translatable="false">MyWool</string>
-    <string name="nav_community">Community</string>
+    <string name="nav_community">Social</string>
     <string name="nav_profile">Profile</string>
     <string name="nav_settings">Settings</string>
 
@@ -215,4 +215,7 @@
     <string name="recomended">" ⭐ Recomendado"</string>
     <string name="select_from_my_materials">Selecionar do meu inventário</string>
     <string name="start_project">Começar Projeto</string>
+    <string name="ask_aidi">Ask Aidi</string>
+    <string name="send">Send</string>
+    <string name="aidi_is_thinking">Aidi is thinking...</string>
 </resources>

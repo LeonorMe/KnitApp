@@ -189,4 +189,7 @@
     <string name="toggle_theme">Toggle Theme</string>
     <string name="action_project_settings">Project settings</string>
     <string name="project_created">Project created</string>
+    <string name="ask_aidi">Ask Aidi</string>
+    <string name="send">Send</string>
+    <string name="aidi_is_thinking">Aidi is thinking...</string>
 </resources>
