@@ -118,7 +118,7 @@ fun HomeScreen(
                             profilePhotoUri = uiState.profilePhotoUri,
                             coinBalance = uiState.coinBalance,
                             onNavigateToProfile = onNavigateToProfile,
-                            onNavigateToStore = onNavigateToProfile // TODO: Navigate to store
+                            onNavigateToStore = onNavigateToProfile // TODO Navigate to store
                         )
 
                         Spacer(modifier = Modifier.height(8.dp))
@@ -126,7 +126,7 @@ fun HomeScreen(
                         LazyColumn(
                             modifier = Modifier.fillMaxSize(),
                             contentPadding = PaddingValues(bottom = 32.dp),
-                            verticalArrangement = Arrangement.spacedBy(24.dp)
+                            verticalArrangement = Arrangement.spacedBy(32.dp)
                         ) {
                             item {
                                 Text(
@@ -135,13 +135,13 @@ fun HomeScreen(
                                     fontWeight = FontWeight.Bold,
                                     color = colorScheme.onBackground.copy(alpha = 0.9f)
                                 )
-                                Spacer(modifier = Modifier.height(12.dp))
+                                /*Spacer(modifier = Modifier.height(12.dp))
                                 Text(
                                     text = stringResource(R.string.to_continue),
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold,
                                     color = colorScheme.onBackground.copy(alpha = 0.7f)
-                                )
+                                )*/
                             }
 
                             if (uiState.isLoading) {
@@ -428,7 +428,7 @@ private fun ProjectCrateCard(
         project.colorHex
             ?.let { hex ->
                 runCatching {
-                    Color(android.graphics.Color.parseColor(hex))
+                    Color(hex.toColorInt())
                 }.getOrNull()
             }
             ?: defaultAccent
@@ -437,13 +437,13 @@ private fun ProjectCrateCard(
 
     Box(
         modifier = Modifier
-            .size(240.dp)
+            .size(260.dp) // todo
             .clickable { onOpenProject(project.id) },
-        contentAlignment = Alignment.TopCenter
+        contentAlignment = Alignment.TopCenter,
     ) {
         // Crate Vector background decoration
         Icon(
-            painter = painterResource(id = R.drawable.ic_materials),
+            painter = painterResource(id = R.drawable.ic_project_home),
             contentDescription = null,
             tint = projectAccent,
             modifier = Modifier.fillMaxSize()
@@ -452,28 +452,28 @@ private fun ProjectCrateCard(
         // Project detail front card, positioned inside the crate opening
         Card(
             modifier = Modifier
-                .padding(top = 114.dp)
+                .padding(top = 120.dp) // todo
                 .width(160.dp)
-                .height(84.dp),
+                .height(108.dp),
             colors = CardDefaults.cardColors(
                 containerColor = colorScheme.surface
             ),
-            shape = RoundedCornerShape(6.dp),
-            border = BorderStroke(1.5.dp, projectAccent.copy(alpha = 0.72f)),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            //shape = RoundedCornerShape(6.dp),
+            //border = BorderStroke(1.5.dp, projectAccent.copy(alpha = 0.72f)),
+            //elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(8.dp),
+                    .padding(2.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // Project Thumbnail
+                // todo Project Thumbnail
                 ImagePlaceholder(
                     label = project.name.take(1).uppercase(),
                     imageUri = project.imageUri,
-                    size = 48.dp,
+                    size = 108.dp,
                     modifier = Modifier.clip(RoundedCornerShape(4.dp))
                 )
 
@@ -482,7 +482,7 @@ private fun ProjectCrateCard(
                     verticalArrangement = Arrangement.Center,
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text(
+                    /*Text(
                         text = project.name,
                         style = MaterialTheme.typography.bodyMedium.copy(
                             fontWeight = FontWeight.Bold
@@ -492,13 +492,14 @@ private fun ProjectCrateCard(
                         color = colorScheme.onSurface
                     )
                     Spacer(modifier = Modifier.height(2.dp))
+                     */
                     Text(
                         text = "${project.progressPercent}%",
                         style = MaterialTheme.typography.bodySmall,
                         fontWeight = FontWeight.Bold,
                         color = projectAccent
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
+                    /*Spacer(modifier = Modifier.height(4.dp))
                     LinearProgressIndicator(
                         progress = { project.progressPercent / 100f },
                         modifier = Modifier
@@ -507,10 +508,65 @@ private fun ProjectCrateCard(
                             .clip(RoundedCornerShape(2.dp)),
                         color = projectAccent,
                         trackColor = projectAccent.copy(alpha = 0.2f)
-                    )
+                    ) */
                 }
             }
         }
+
+        Card(
+            modifier = Modifier
+                .padding(top = 240.dp)
+                .height(32.dp)
+                .width(160.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = colorScheme.surface
+            )
+        ) {
+            Text(
+                modifier = Modifier
+                    .padding(horizontal = 12.dp),
+                text = project.name,
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    fontWeight = FontWeight.Bold
+                ),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                color = colorScheme.onSurface
+            )
+            /*Column(
+                verticalArrangement = Arrangement.Center,
+                modifier = Modifier.weight(1f)
+            ) {
+                *//*Text(
+                    text = project.name,
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontWeight = FontWeight.Bold
+                    ),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    color = colorScheme.onSurface
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                 *//*
+                Text(
+                    text = "${project.progressPercent}%",
+                    style = MaterialTheme.typography.bodySmall,
+                    fontWeight = FontWeight.Bold,
+                    color = projectAccent
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                LinearProgressIndicator(
+                    progress = { project.progressPercent / 100f },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(4.dp)
+                        .clip(RoundedCornerShape(2.dp)),
+                    color = projectAccent,
+                    trackColor = projectAccent.copy(alpha = 0.2f)
+                )
+            }*/
+        }
+
         if (project.colorHex != null) {
             Surface(
                 modifier = Modifier
