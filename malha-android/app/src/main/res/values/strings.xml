@@ -218,4 +218,7 @@
     <string name="ask_aidi">Ask Aidi</string>
     <string name="send">Send</string>
     <string name="aidi_is_thinking">Aidi is thinking...</string>
+    <string name="cd_attach_file">Attach file</string>
+    <string name="cd_send_message">Send message</string>
+    <string name="cd_aidi_avatar">Aidi assistant</string>
 </resources>
