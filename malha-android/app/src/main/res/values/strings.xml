@@ -299,4 +299,19 @@
     <string name="delete_material_dialog_title">Delete Material?</string>
     <string name="delete_material_dialog_message">Are you sure you want to delete \"%1$s\" from your inventory?</string>
     <string name="save_action">Save</string>
+    <string name="execution_counter_label">Counter</string>
+    <string name="execution_target_label">/ %1$d %2$s</string>
+    <string name="execution_increment_label">+%1$d</string>
+    <string name="execution_undo_step">Undo previous step</string>
+    <string name="execution_step_history">Pattern Roadmap</string>
+    <string name="execution_measurement_done">Done Measuring</string>
+    <string name="execution_binary_done">Done / Next</string>
+    <string name="technique_default_description">Instructions and technique details for %1$s.</string>
+    <string name="technique_aliases_label">Common Aliases &amp; Abbreviations</string>
+    <string name="action_got_it">Got it</string>
+    <string name="pattern_edit_dialog_title">Pattern in Use</string>
+    <string name="pattern_edit_dialog_message">This pattern is currently used by active projects. How would you like to save your changes?</string>
+    <string name="pattern_edit_copy">Create a copy for this context</string>
+    <string name="pattern_edit_update">Update source pattern</string>
+    <string name="pattern_edit_cancel">Cancel</string>
 </resources>

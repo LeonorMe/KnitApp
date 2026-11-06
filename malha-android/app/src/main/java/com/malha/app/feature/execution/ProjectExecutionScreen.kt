@@ -10,14 +10,16 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.Undo
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -25,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -37,13 +40,16 @@ import com.malha.app.R
 import com.malha.app.core.design.component.AidiCompanion
 import com.malha.app.core.design.component.ImagePlaceholder
 import com.malha.app.core.design.component.KNOWN_STITCHES
-import com.malha.app.core.design.component.StitchDetailDialog
-import com.malha.app.core.util.ImageStorageHelper
 import com.malha.app.core.design.component.StitchLinkText
+import com.malha.app.core.design.component.TechniqueHelpBottomSheet
+import com.malha.app.core.util.ImageStorageHelper
+import com.malha.app.domain.pattern.CountUnit
+import com.malha.app.domain.pattern.InstructionNodeType
 
 // ------ Theme enum for quick toggle ------
 enum class ExecutionTheme { DARK, LIGHT, WARM }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProjectExecutionScreen(
     projectId: String,
@@ -58,9 +64,7 @@ fun ProjectExecutionScreen(
     var showNoteDialog by remember { mutableStateOf(false) }
     var selectedStitch by remember { mutableStateOf<String?>(null) }
     var showCongratsDialog by remember { mutableStateOf(false) }
-    var rowCounter by remember { mutableStateOf(0) }
-
-
+    var showRoadmapSheet by remember { mutableStateOf(false) }
 
     // Quick theme toggle
     var executionTheme by remember { mutableStateOf(ExecutionTheme.DARK) }
@@ -104,22 +108,9 @@ fun ProjectExecutionScreen(
         if (allDone) showCongratsDialog = true
     }
 
-    // Calculate target stitches count and whether row counter matches or reaches it
-    val targetStitchCount = remember(uiState.currentStep?.stitchCountData) {
-        uiState.currentStep?.stitchCountData?.toIntOrNull()
-    }
-    val isTargetReached = targetStitchCount != null && targetStitchCount > 0 && rowCounter >= targetStitchCount
-
-    // Synchronize row counter with step target when step changes
-    LaunchedEffect(uiState.currentStep?.id) {
-        val step = uiState.currentStep
-        val extractedRow = step?.rowNumber ?: run {
-            val text = step?.instructionData.orEmpty()
-            val regex = Regex("""(?:Row|Rnd|Carreira)\s*(\d+)""", RegexOption.IGNORE_CASE)
-            regex.find(text)?.groupValues?.getOrNull(1)?.toIntOrNull() ?: 0
-        }
-        rowCounter = extractedRow
-    }
+    // Target count and whether counter reaches it
+    val targetStitchCount = uiState.targetCount
+    val isTargetReached = targetStitchCount != null && targetStitchCount > 0 && uiState.currentCount >= targetStitchCount
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -152,7 +143,7 @@ fun ProjectExecutionScreen(
 
                 Spacer(modifier = Modifier.width(6.dp))
 
-                // Project name & size subtitle – takes remaining horizontal space without squeezing
+                // Project name & size subtitle
                 Column(
                     modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.Center
@@ -178,7 +169,7 @@ fun ProjectExecutionScreen(
 
                 Spacer(modifier = Modifier.width(4.dp))
 
-                // Trailing: essential quick actions (Theme, Keep Awake, Settings)
+                // Quick theme toggle
                 val themeIcon = when (executionTheme) {
                     ExecutionTheme.DARK -> Icons.Default.DarkMode
                     ExecutionTheme.LIGHT -> Icons.Default.LightMode
@@ -202,6 +193,7 @@ fun ProjectExecutionScreen(
                     )
                 }
 
+                // Keep screen on
                 IconButton(
                     onClick = { keepScreenOn = !keepScreenOn },
                     modifier = Modifier.size(36.dp)
@@ -214,6 +206,20 @@ fun ProjectExecutionScreen(
                     )
                 }
 
+                // Pattern Roadmap List
+                IconButton(
+                    onClick = { showRoadmapSheet = true },
+                    modifier = Modifier.size(36.dp)
+                ) {
+                    Icon(
+                        Icons.Default.FormatListNumbered,
+                        contentDescription = stringResource(R.string.execution_step_history),
+                        tint = onBgColor,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+
+                // Settings
                 IconButton(
                     onClick = { onOpenSettings(projectId) },
                     modifier = Modifier.size(36.dp)
@@ -262,9 +268,17 @@ fun ProjectExecutionScreen(
                             uiState = uiState,
                             onBgColor = onBgColor,
                             theme = executionTheme,
-                            isTargetReached = isTargetReached
-                        ) { selectedStitch = it }
-                        RowCounterCard(counter = rowCounter, onBgColor = onBgColor, theme = executionTheme) { rowCounter = it }
+                            isTargetReached = isTargetReached,
+                            onStitchClick = { selectedStitch = it }
+                        )
+                        InstructionCounterCard(
+                            uiState = uiState,
+                            onBgColor = onBgColor,
+                            theme = executionTheme,
+                            onIncrement = { viewModel.incrementCounter() },
+                            onDecrement = { viewModel.decrementCounter() },
+                            onSetIncrement = { viewModel.setIncrement(it) }
+                        )
                         NavigationControls(
                             uiState = uiState,
                             viewModel = viewModel,
@@ -275,7 +289,7 @@ fun ProjectExecutionScreen(
                     }
                     Column(
                         modifier = Modifier
-                            .weight(0.8f)
+                            .weight(1f)
                             .verticalScroll(rememberScrollState()),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
@@ -295,9 +309,17 @@ fun ProjectExecutionScreen(
                         uiState = uiState,
                         onBgColor = onBgColor,
                         theme = executionTheme,
-                        isTargetReached = isTargetReached
-                    ) { selectedStitch = it }
-                    RowCounterCard(counter = rowCounter, onBgColor = onBgColor, theme = executionTheme) { rowCounter = it }
+                        isTargetReached = isTargetReached,
+                        onStitchClick = { selectedStitch = it }
+                    )
+                    InstructionCounterCard(
+                        uiState = uiState,
+                        onBgColor = onBgColor,
+                        theme = executionTheme,
+                        onIncrement = { viewModel.incrementCounter() },
+                        onDecrement = { viewModel.decrementCounter() },
+                        onSetIncrement = { viewModel.setIncrement(it) }
+                    )
                     NoteCard(uiState, theme = executionTheme) { showNoteDialog = true }
                     NavigationControls(
                         uiState = uiState,
@@ -311,10 +333,10 @@ fun ProjectExecutionScreen(
         }
     }
 
-    // Dialogs
+    // Dialogs & Sheets
     if (showNoteDialog) {
         StepNoteDialog(
-            currentNote = uiState.currentStepProgress?.note.orEmpty(),
+            currentNote = uiState.currentNote.orEmpty(),
             onDismiss = { showNoteDialog = false },
             onSave = { note ->
                 viewModel.saveNote(note)
@@ -324,10 +346,96 @@ fun ProjectExecutionScreen(
     }
 
     if (selectedStitch != null) {
-        StitchDetailDialog(
-            stitchName = selectedStitch!!,
+        TechniqueHelpBottomSheet(
+            techniqueId = selectedStitch!!,
             onDismiss = { selectedStitch = null }
         )
+    }
+
+    if (showRoadmapSheet && uiState.instructions.isNotEmpty()) {
+        ModalBottomSheet(
+            onDismissRequest = { showRoadmapSheet = false }
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 12.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.execution_step_history),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(bottom = 12.dp)
+                )
+
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 450.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    itemsIndexed(uiState.instructions) { index, inst ->
+                        val isDone = uiState.progressList.any { it.instructionSnapshotId == inst.id && it.isCompleted }
+                        val isCurrent = (uiState.project?.currentStepIndex ?: 0) == index
+
+                        Surface(
+                            shape = RoundedCornerShape(12.dp),
+                            color = when {
+                                isCurrent -> MaterialTheme.colorScheme.primaryContainer
+                                isDone -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+                                else -> MaterialTheme.colorScheme.surface
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    viewModel.jumpToStep(index)
+                                    showRoadmapSheet = false
+                                }
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .padding(14.dp)
+                                    .fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                Text(
+                                    text = "${index + 1}",
+                                    style = MaterialTheme.typography.labelLarge,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (isCurrent) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface
+                                )
+
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = inst.displayText,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontWeight = if (isCurrent) FontWeight.Bold else FontWeight.Normal,
+                                        color = if (isCurrent) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface
+                                    )
+                                    Text(
+                                        text = inst.sectionTitle,
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.outline
+                                    )
+                                }
+
+                                if (isDone) {
+                                    Icon(
+                                        Icons.Default.CheckCircle,
+                                        contentDescription = "Completed",
+                                        tint = Color(0xFF4CAF50),
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+        }
     }
 
     if (showCongratsDialog) {
@@ -409,25 +517,49 @@ private fun MainStepCard(
             modifier = Modifier.padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            Text(
-                stringResource(R.string.execution_current_instruction),
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.SemiBold,
-                letterSpacing = 1.sp
-            )
-            AnimatedContent(targetState = uiState.currentStep, label = "step-card") { step ->
-                if (step != null) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    stringResource(R.string.execution_current_instruction),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.SemiBold,
+                    letterSpacing = 1.sp
+                )
+
+                val sectionTitle = uiState.currentInstruction?.sectionTitle
+                if (!sectionTitle.isNullOrBlank()) {
+                    Text(
+                        text = sectionTitle,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = onBgColor.copy(alpha = 0.6f)
+                    )
+                }
+            }
+
+            AnimatedContent(
+                targetState = uiState.currentInstruction?.id ?: uiState.currentStep?.id,
+                label = "step-card"
+            ) { _ ->
+                val instructionText = uiState.currentInstruction?.displayText
+                    ?: uiState.currentStep?.instructionData.orEmpty()
+
+                if (instructionText.isNotBlank()) {
                     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         StitchLinkText(
-                            text = step.instructionData,
+                            text = instructionText,
                             knownStitches = KNOWN_STITCHES,
                             onStitchClick = onStitchClick,
                             textColor = onBgColor
                         )
-                        if (step.stitchCountData != null) {
+
+                        val targetCount = uiState.targetCount
+                        if (targetCount != null && targetCount > 0) {
                             val targetBgColor = if (isTargetReached) {
-                                Color(0xFF2E7D32).copy(alpha = 0.2f)
+                                Color(0xFF2E7D32).copy(alpha = 0.25f)
                             } else {
                                 MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
                             }
@@ -442,9 +574,9 @@ private fun MainStepCard(
                             ) {
                                 Text(
                                     text = if (isTargetReached) {
-                                        "✓ " + stringResource(R.string.execution_target_stitches, step.stitchCountData.orEmpty())
+                                        "✓ " + stringResource(R.string.execution_target_stitches, targetCount.toString())
                                     } else {
-                                        stringResource(R.string.execution_target_stitches, step.stitchCountData.orEmpty())
+                                        stringResource(R.string.execution_target_stitches, targetCount.toString())
                                     },
                                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                                     style = MaterialTheme.typography.bodyMedium,
@@ -466,19 +598,26 @@ private fun MainStepCard(
     }
 }
 
-// ---- Row Counter Card ----
+// ---- Instruction Counter Card with Divisor Increments ----
 @Composable
-private fun RowCounterCard(
-    counter: Int,
+private fun InstructionCounterCard(
+    uiState: ProjectExecutionUiState,
     onBgColor: Color,
     theme: ExecutionTheme,
-    onCounterChange: (Int) -> Unit
+    onIncrement: () -> Unit,
+    onDecrement: () -> Unit,
+    onSetIncrement: (Int) -> Unit
 ) {
     val cardBg = when (theme) {
         ExecutionTheme.DARK -> Color(0xFF1E1E38)
         ExecutionTheme.LIGHT -> MaterialTheme.colorScheme.surface
         ExecutionTheme.WARM -> Color(0xFF2C1A0E)
     }
+
+    val isCounted = uiState.currentInstruction == null ||
+            uiState.currentInstruction?.type == InstructionNodeType.COUNTED_ACTION
+    val target = uiState.targetCount
+
     Card(
         colors = CardDefaults.cardColors(containerColor = cardBg),
         shape = RoundedCornerShape(16.dp),
@@ -486,7 +625,7 @@ private fun RowCounterCard(
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -494,73 +633,106 @@ private fun RowCounterCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    stringResource(R.string.execution_row_counter),
+                    stringResource(R.string.execution_counter_label),
                     style = MaterialTheme.typography.titleSmall,
                     color = onBgColor.copy(alpha = 0.8f),
                     fontWeight = FontWeight.SemiBold
                 )
-                IconButton(
-                    onClick = { onCounterChange(0) },
-                    modifier = Modifier.size(32.dp)
-                ) {
-                    Icon(
-                        Icons.Default.Refresh,
-                        contentDescription = stringResource(R.string.execution_reset_counter),
-                        tint = onBgColor.copy(alpha = 0.6f),
-                        modifier = Modifier.size(18.dp)
-                    )
+
+                if (isCounted && uiState.suggestedIncrements.size > 1) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        uiState.suggestedIncrements.forEach { inc ->
+                            val isSelected = uiState.selectedIncrement == inc
+                            FilterChip(
+                                selected = isSelected,
+                                onClick = { onSetIncrement(inc) },
+                                label = { Text("+$inc") }
+                            )
+                        }
+                    }
                 }
             }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                CounterButton(label = "-10", onClick = { onCounterChange((counter - 10).coerceAtLeast(0)) })
-                CounterButton(label = "-1", onClick = { onCounterChange((counter - 1).coerceAtLeast(0)) })
 
+            if (isCounted) {
+                // Large counter and primary action button
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Decrement
+                    Surface(
+                        modifier = Modifier
+                            .size(52.dp)
+                            .clip(CircleShape)
+                            .clickable { onDecrement() },
+                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f),
+                        shape = CircleShape
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                Icons.Default.Remove,
+                                contentDescription = "Decrement",
+                                tint = onBgColor
+                            )
+                        }
+                    }
+
+                    // Large Count Display
+                    Row(
+                        verticalAlignment = Alignment.Bottom,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = "${uiState.currentCount}",
+                            style = MaterialTheme.typography.displayMedium,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = if (target != null && uiState.currentCount >= target) Color(0xFF4CAF50) else MaterialTheme.colorScheme.primary
+                        )
+                        if (target != null) {
+                            Text(
+                                text = " / $target",
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = onBgColor.copy(alpha = 0.6f),
+                                modifier = Modifier.padding(bottom = 6.dp, start = 4.dp)
+                            )
+                        }
+                    }
+
+                    // Primary Increment Button
+                    Surface(
+                        modifier = Modifier
+                            .size(56.dp)
+                            .clip(CircleShape)
+                            .clickable { onIncrement() },
+                        color = MaterialTheme.colorScheme.primary,
+                        shape = CircleShape
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Text(
+                                text = "+${uiState.selectedIncrement}",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onPrimary
+                            )
+                        }
+                    }
+                }
+            } else if (uiState.currentInstruction?.type == InstructionNodeType.MEASUREMENT_CHECK) {
                 Text(
-                    text = "$counter",
-                    style = MaterialTheme.typography.displaySmall,
-                    fontWeight = FontWeight.Bold,
+                    text = "Target: ${uiState.currentInstruction?.measurementValue} ${uiState.currentInstruction?.measurementUnit}",
+                    style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.width(80.dp),
-                    textAlign = TextAlign.Center
+                    fontWeight = FontWeight.Bold
                 )
-
-                CounterButton(label = "+1", positive = true, onClick = { onCounterChange(counter + 1) })
-                CounterButton(label = "+10", positive = true, onClick = { onCounterChange(counter + 10) })
+            } else {
+                Text(
+                    text = uiState.currentInstruction?.displayText ?: "Non-counted action",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = onBgColor
+                )
             }
-        }
-    }
-}
-
-@Composable
-private fun CounterButton(label: String, positive: Boolean = false, onClick: () -> Unit) {
-    val bgColor = if (positive)
-        MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
-    else
-        MaterialTheme.colorScheme.outline.copy(alpha = 0.12f)
-    val textColor = if (positive)
-        MaterialTheme.colorScheme.primary
-    else
-        MaterialTheme.colorScheme.onSurfaceVariant
-
-    Surface(
-        modifier = Modifier
-            .size(52.dp)
-            .clip(CircleShape)
-            .clickable { onClick() },
-        color = bgColor,
-        shape = CircleShape
-    ) {
-        Box(contentAlignment = Alignment.Center) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Bold,
-                color = textColor
-            )
         }
     }
 }
@@ -627,7 +799,7 @@ private fun NoteCard(
                 }
             }
 
-            val currentNote = uiState.currentStepProgress?.note
+            val currentNote = uiState.currentNote
             if (isExpanded) {
                 Spacer(modifier = Modifier.height(10.dp))
                 Text(
@@ -696,13 +868,13 @@ private fun NavigationControls(
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Previous
+        // Undo previous step
         FilledTonalIconButton(
-            onClick = viewModel::previousStep,
+            onClick = viewModel::undoPreviousStep,
             enabled = uiState.canGoPrevious,
             modifier = Modifier.size(52.dp)
         ) {
-            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_previous))
+            Icon(Icons.AutoMirrored.Filled.Undo, contentDescription = stringResource(R.string.execution_undo_step))
         }
 
         // Mark Done / Next / Finish

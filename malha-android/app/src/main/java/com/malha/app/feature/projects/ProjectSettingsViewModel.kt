@@ -372,6 +372,16 @@ class ProjectSettingsViewModel(
                         materialIds = materialIds,
                         status = ProjectStatus.ACTIVE.value
                     )
+                    // Generate immutable ProjectPatternSnapshot and expanded instructions
+                    val pId = state.selectedPatternId
+                    val sSize = state.selectedSize
+                    if (!pId.isNullOrBlank() && !sSize.isNullOrBlank()) {
+                        appContainer.projectSnapshotRepository.createAndSaveSnapshot(
+                            projectId = projectId,
+                            patternId = pId,
+                            sizeKey = sSize
+                        )
+                    }
                     appContainer.projectRepository.startProject(projectId)
                     onNavigateToExecution(projectId)
                 } else {

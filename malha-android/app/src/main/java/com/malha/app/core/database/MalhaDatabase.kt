@@ -24,9 +24,18 @@ import com.malha.app.core.database.entity.*
         CommentEntity::class,
         VariantEntity::class,
         ReviewEntity::class,
-        AIRequestEntity::class
+        AIRequestEntity::class,
+        TechniqueEntity::class,
+        TechniqueAliasEntity::class,
+        PatternVersionEntity::class,
+        PatternSizeEntity::class,
+        PatternParameterEntity::class,
+        InstructionNodeEntity::class,
+        ProjectPatternSnapshotEntity::class,
+        ProjectInstructionSnapshotEntity::class,
+        InstructionProgressEntity::class
     ],
-    version = 12,
+    version = 13,
     exportSchema = false
 )
 @TypeConverters(RoomConverters::class)
@@ -39,6 +48,10 @@ abstract class MalhaDatabase : RoomDatabase() {
     abstract fun variantDao(): VariantDao
     abstract fun reviewDao(): ReviewDao
     abstract fun aiRequestDao(): AIRequestDao
+    abstract fun techniqueDao(): TechniqueDao
+    abstract fun patternVersionDao(): PatternVersionDao
+    abstract fun projectSnapshotDao(): ProjectSnapshotDao
+    abstract fun instructionProgressDao(): InstructionProgressDao
 
     companion object {
         val MIGRATION_6_7 = object : Migration(6, 7) {
@@ -77,7 +90,217 @@ abstract class MalhaDatabase : RoomDatabase() {
                 database.execSQL("ALTER TABLE projects ADD COLUMN patternSnapshotJson TEXT DEFAULT NULL")
             }
         }
+        val MIGRATION_12_13 = object : Migration(12, 13) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                // 1. Create techniques table
+                database.execSQL("""
+                    CREATE TABLE IF NOT EXISTS `techniques` (
+                        `id` TEXT NOT NULL,
+                        `craftType` TEXT NOT NULL,
+                        `canonicalNameKey` TEXT NOT NULL,
+                        `descriptionKey` TEXT,
+                        `customName` TEXT,
+                        `customDescription` TEXT,
+                        `mediaUrl` TEXT,
+                        `sourceType` TEXT NOT NULL,
+                        `ownerId` TEXT,
+                        `version` INTEGER NOT NULL,
+                        `isArchived` INTEGER NOT NULL,
+                        PRIMARY KEY(`id`)
+                    )
+                """.trimIndent())
+                database.execSQL("CREATE INDEX IF NOT EXISTS `index_techniques_craftType` ON `techniques` (`craftType`)")
+                database.execSQL("CREATE INDEX IF NOT EXISTS `index_techniques_sourceType` ON `techniques` (`sourceType`)")
+                database.execSQL("CREATE INDEX IF NOT EXISTS `index_techniques_isArchived` ON `techniques` (`isArchived`)")
+
+                // 2. Create technique_aliases table
+                database.execSQL("""
+                    CREATE TABLE IF NOT EXISTS `technique_aliases` (
+                        `id` TEXT NOT NULL,
+                        `techniqueId` TEXT NOT NULL,
+                        `normalizedAlias` TEXT NOT NULL,
+                        `locale` TEXT NOT NULL,
+                        `displayAlias` TEXT NOT NULL,
+                        PRIMARY KEY(`id`)
+                    )
+                """.trimIndent())
+                database.execSQL("CREATE INDEX IF NOT EXISTS `index_technique_aliases_techniqueId` ON `technique_aliases` (`techniqueId`)")
+                database.execSQL("CREATE INDEX IF NOT EXISTS `index_technique_aliases_normalizedAlias` ON `technique_aliases` (`normalizedAlias`)")
+
+                // 3. Create pattern_versions table
+                database.execSQL("""
+                    CREATE TABLE IF NOT EXISTS `pattern_versions` (
+                        `id` TEXT NOT NULL,
+                        `patternId` TEXT NOT NULL,
+                        `versionNumber` INTEGER NOT NULL,
+                        `schemaVersion` INTEGER NOT NULL,
+                        `status` TEXT NOT NULL,
+                        `createdAt` INTEGER NOT NULL,
+                        `checksum` TEXT NOT NULL,
+                        PRIMARY KEY(`id`)
+                    )
+                """.trimIndent())
+                database.execSQL("CREATE INDEX IF NOT EXISTS `index_pattern_versions_patternId` ON `pattern_versions` (`patternId`)")
+
+                // 4. Create pattern_sizes table
+                database.execSQL("""
+                    CREATE TABLE IF NOT EXISTS `pattern_sizes` (
+                        `id` TEXT NOT NULL,
+                        `patternVersionId` TEXT NOT NULL,
+                        `sizeKey` TEXT NOT NULL,
+                        `displayName` TEXT NOT NULL,
+                        `orderIndex` INTEGER NOT NULL,
+                        `measurementsJson` TEXT,
+                        PRIMARY KEY(`id`)
+                    )
+                """.trimIndent())
+                database.execSQL("CREATE INDEX IF NOT EXISTS `index_pattern_sizes_patternVersionId` ON `pattern_sizes` (`patternVersionId`)")
+
+                // 5. Create pattern_parameters table
+                database.execSQL("""
+                    CREATE TABLE IF NOT EXISTS `pattern_parameters` (
+                        `id` TEXT NOT NULL,
+                        `patternVersionId` TEXT NOT NULL,
+                        `sizeKey` TEXT NOT NULL,
+                        `paramKey` TEXT NOT NULL,
+                        `value` TEXT NOT NULL,
+                        `unit` TEXT,
+                        PRIMARY KEY(`id`)
+                    )
+                """.trimIndent())
+                database.execSQL("CREATE INDEX IF NOT EXISTS `index_pattern_parameters_patternVersionId` ON `pattern_parameters` (`patternVersionId`)")
+                database.execSQL("CREATE INDEX IF NOT EXISTS `index_pattern_parameters_sizeKey` ON `pattern_parameters` (`sizeKey`)")
+
+                // 6. Create instruction_nodes table
+                database.execSQL("""
+                    CREATE TABLE IF NOT EXISTS `instruction_nodes` (
+                        `id` TEXT NOT NULL,
+                        `sectionId` TEXT NOT NULL,
+                        `parentNodeId` TEXT,
+                        `orderIndex` INTEGER NOT NULL,
+                        `nodeType` TEXT NOT NULL,
+                        `techniqueId` TEXT,
+                        `targetLiteral` INTEGER,
+                        `targetParamKey` TEXT,
+                        `countUnit` TEXT NOT NULL,
+                        `repeatTimesLiteral` INTEGER,
+                        `repeatTimesParamKey` TEXT,
+                        `displayText` TEXT,
+                        `measurementValue` REAL,
+                        `measurementUnit` TEXT,
+                        `isDestructive` INTEGER NOT NULL,
+                        PRIMARY KEY(`id`)
+                    )
+                """.trimIndent())
+                database.execSQL("CREATE INDEX IF NOT EXISTS `index_instruction_nodes_sectionId` ON `instruction_nodes` (`sectionId`)")
+                database.execSQL("CREATE INDEX IF NOT EXISTS `index_instruction_nodes_parentNodeId` ON `instruction_nodes` (`parentNodeId`)")
+
+                // 7. Create project_pattern_snapshots table
+                database.execSQL("""
+                    CREATE TABLE IF NOT EXISTS `project_pattern_snapshots` (
+                        `id` TEXT NOT NULL,
+                        `projectId` TEXT NOT NULL,
+                        `sourcePatternId` TEXT NOT NULL,
+                        `sourceVersionId` TEXT NOT NULL,
+                        `selectedSizeKey` TEXT NOT NULL,
+                        `schemaVersion` INTEGER NOT NULL,
+                        `checksum` TEXT NOT NULL,
+                        `totalInstructionCount` INTEGER NOT NULL,
+                        `createdAt` INTEGER NOT NULL,
+                        PRIMARY KEY(`id`)
+                    )
+                """.trimIndent())
+                database.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_project_pattern_snapshots_projectId` ON `project_pattern_snapshots` (`projectId`)")
+                database.execSQL("CREATE INDEX IF NOT EXISTS `index_project_pattern_snapshots_sourcePatternId` ON `project_pattern_snapshots` (`sourcePatternId`)")
+
+                // 8. Create project_instruction_snapshots table
+                database.execSQL("""
+                    CREATE TABLE IF NOT EXISTS `project_instruction_snapshots` (
+                        `id` TEXT NOT NULL,
+                        `snapshotId` TEXT NOT NULL,
+                        `ordinal` INTEGER NOT NULL,
+                        `stablePath` TEXT NOT NULL,
+                        `type` TEXT NOT NULL,
+                        `techniqueId` TEXT,
+                        `targetCount` INTEGER,
+                        `countUnit` TEXT NOT NULL,
+                        `sectionTitle` TEXT NOT NULL,
+                        `displayText` TEXT NOT NULL,
+                        `measurementValue` REAL,
+                        `measurementUnit` TEXT,
+                        `isDestructive` INTEGER NOT NULL,
+                        PRIMARY KEY(`id`)
+                    )
+                """.trimIndent())
+                database.execSQL("CREATE INDEX IF NOT EXISTS `index_project_instruction_snapshots_snapshotId` ON `project_instruction_snapshots` (`snapshotId`)")
+                database.execSQL("CREATE INDEX IF NOT EXISTS `index_project_instruction_snapshots_snapshotId_ordinal` ON `project_instruction_snapshots` (`snapshotId`, `ordinal`)")
+
+                // 9. Create instruction_progress table
+                database.execSQL("""
+                    CREATE TABLE IF NOT EXISTS `instruction_progress` (
+                        `id` TEXT NOT NULL,
+                        `projectId` TEXT NOT NULL,
+                        `instructionSnapshotId` TEXT NOT NULL,
+                        `currentCount` INTEGER NOT NULL,
+                        `isCompleted` INTEGER NOT NULL,
+                        `completedAt` INTEGER,
+                        `selectedIncrement` INTEGER NOT NULL,
+                        `note` TEXT,
+                        PRIMARY KEY(`id`)
+                    )
+                """.trimIndent())
+                database.execSQL("CREATE INDEX IF NOT EXISTS `index_instruction_progress_projectId` ON `instruction_progress` (`projectId`)")
+                database.execSQL("CREATE INDEX IF NOT EXISTS `index_instruction_progress_instructionSnapshotId` ON `instruction_progress` (`instructionSnapshotId`)")
+                database.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_instruction_progress_projectId_instructionSnapshotId` ON `instruction_progress` (`projectId`, `instructionSnapshotId`)")
+
+                // 10. Data migration from legacy patterns:
+                // Create pattern_versions and instruction_nodes for existing patterns
+                val cursor = database.query("SELECT id FROM patterns")
+                val now = System.currentTimeMillis()
+                try {
+                    while (cursor.moveToNext()) {
+                        val patternId = cursor.getString(0)
+                        val versionId = "v1_$patternId"
+                        database.execSQL("""
+                            INSERT OR IGNORE INTO pattern_versions (id, patternId, versionNumber, schemaVersion, status, createdAt, checksum)
+                            VALUES ('$versionId', '$patternId', 1, 1, 'PUBLISHED', $now, '')
+                        """)
+
+                        // Migrate pattern steps to instruction nodes
+                        database.execSQL("""
+                            INSERT OR IGNORE INTO instruction_nodes (
+                                id, sectionId, parentNodeId, orderIndex, nodeType, techniqueId, 
+                                targetLiteral, targetParamKey, countUnit, repeatTimesLiteral, 
+                                repeatTimesParamKey, displayText, measurementValue, measurementUnit, isDestructive
+                            )
+                            SELECT 
+                                id, 
+                                sectionId, 
+                                NULL, 
+                                orderIndex, 
+                                CASE 
+                                    WHEN type = 'REPEAT' OR type = 'REPEAT_BLOCK' THEN 'REPEAT_BLOCK'
+                                    WHEN type = 'FINISHING' OR type = 'JOIN' THEN 'BINARY_ACTION'
+                                    ELSE 'COUNTED_ACTION'
+                                END,
+                                LOWER(type),
+                                CAST(stitchCountData AS INTEGER),
+                                NULL,
+                                'STITCH',
+                                CAST(repeatCount AS INTEGER),
+                                NULL,
+                                instructionData,
+                                NULL,
+                                NULL,
+                                CASE WHEN type = 'BIND_OFF' THEN 1 ELSE 0 END
+                            FROM pattern_steps 
+                            WHERE patternId = '$patternId'
+                        """)
+                    }
+                } finally {
+                    cursor.close()
+                }
+            }
+        }
     }
 }
-
-

@@ -70,20 +70,9 @@ fun StitchDetailDialog(
     stitchName: String,
     onDismiss: () -> Unit
 ) {
-    androidx.compose.material3.AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stitchName, style = MaterialTheme.typography.headlineSmall) },
-        text = {
-            Text(
-                text = "Learn how to do the $stitchName stitch. This would typically include a description, diagrams, or a video link.",
-                style = MaterialTheme.typography.bodyLarge
-            )
-        },
-        confirmButton = {
-            androidx.compose.material3.Button(onClick = onDismiss) {
-                Text("Got it")
-            }
-        }
+    TechniqueHelpBottomSheet(
+        techniqueId = stitchName.trim().lowercase().replace(" ", "-"),
+        onDismiss = onDismiss
     )
 }
 

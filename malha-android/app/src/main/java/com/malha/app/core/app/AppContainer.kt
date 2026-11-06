@@ -35,6 +35,10 @@ import com.malha.app.data.review.CloudBackedReviewRepository
 import com.malha.app.data.airequest.AIRequestRepository
 import com.malha.app.data.airequest.RoomAIRequestRepository
 import com.malha.app.data.airequest.CloudBackedAIRequestRepository
+import com.malha.app.data.snapshot.ProjectSnapshotRepository
+import com.malha.app.data.snapshot.RoomProjectSnapshotRepository
+import com.malha.app.data.technique.RoomTechniqueRepository
+import com.malha.app.data.technique.TechniqueRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.Dispatchers
@@ -121,11 +125,23 @@ class AppContainer(context: Context) {
 
     val preferencesRepository = PreferencesRepository(context)
 
+    val techniqueRepository: TechniqueRepository = RoomTechniqueRepository(database.techniqueDao())
+
+    val projectSnapshotRepository: ProjectSnapshotRepository = RoomProjectSnapshotRepository(
+        database = database,
+        projectSnapshotDao = database.projectSnapshotDao(),
+        instructionProgressDao = database.instructionProgressDao(),
+        patternVersionDao = database.patternVersionDao(),
+        patternDao = database.patternDao()
+    )
+
     val databaseSeeder = DatabaseSeeder(
         patternDao = database.patternDao(),
         projectDao = database.projectDao(),
         materialDao = database.materialDao(),
-        socialDao = database.socialDao()
+        socialDao = database.socialDao(),
+        techniqueDao = database.techniqueDao(),
+        patternVersionDao = database.patternVersionDao()
     )
 
     private val localSocialRepository: SocialRepository =

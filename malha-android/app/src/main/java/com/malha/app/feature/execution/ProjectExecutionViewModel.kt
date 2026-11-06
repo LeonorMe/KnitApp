@@ -5,21 +5,18 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.malha.app.MalhaApplication
 import com.malha.app.core.app.appContainer
+import com.malha.app.core.util.SocialDefaults.COINS_PER_PROJECT
+import com.malha.app.domain.engine.IncrementSuggestionPolicy
+import com.malha.app.domain.engine.ProgressCalculator
 import com.malha.app.domain.model.Pattern
 import com.malha.app.domain.model.Project
 import com.malha.app.domain.model.ProjectStepProgress
+import com.malha.app.domain.pattern.InstructionProgress
+import com.malha.app.domain.pattern.ProjectInstructionSnapshot
+import com.malha.app.domain.pattern.ProjectPatternSnapshot
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-//import com.malha.app.core.gamification.GamificationService.calculateCoins
-import com.malha.app.core.util.SocialDefaults.COINS_PER_PROJECT
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ProjectExecutionViewModel(
@@ -37,6 +34,16 @@ class ProjectExecutionViewModel(
         appContainer.patternRepository.observePattern(patternId)
     }
 
+    private val snapshotFlow = appContainer.projectSnapshotRepository.observeSnapshot(projectId)
+
+    private val instructionsFlow = snapshotFlow.flatMapLatest { snapshot ->
+        if (snapshot == null) flowOf(emptyList())
+        else appContainer.projectSnapshotRepository.observeInstructions(snapshot.id)
+    }
+
+    private val progressListFlow = appContainer.projectSnapshotRepository.observeProgress(projectId)
+
+    // Legacy fallback progress flow
     private val currentStepProgressFlow = combine(projectFlow, patternFlow) { project, pattern ->
         val currentStep = pattern?.allSteps?.getOrNull(project?.currentStepIndex ?: 0)
         project to currentStep
@@ -51,14 +58,31 @@ class ProjectExecutionViewModel(
     val uiState: StateFlow<ProjectExecutionUiState> = combine(
         projectFlow,
         patternFlow,
+        snapshotFlow,
+        instructionsFlow,
+        progressListFlow,
         currentStepProgressFlow,
         selectedSizeState,
         errorMessage
-    ) { project: Project?, pattern: Pattern?, stepProgress: ProjectStepProgress?, selectedSize: String?, error: String? ->
+    ) { args: Array<Any?> ->
+        val project = args[0] as? Project
+        val pattern = args[1] as? Pattern
+        val snapshot = args[2] as? ProjectPatternSnapshot
+        @Suppress("UNCHECKED_CAST")
+        val instructions = args[3] as? List<ProjectInstructionSnapshot> ?: emptyList()
+        @Suppress("UNCHECKED_CAST")
+        val progressList = args[4] as? List<InstructionProgress> ?: emptyList()
+        val stepProgress = args[5] as? ProjectStepProgress
+        val selectedSize = args[6] as? String
+        val error = args[7] as? String
+
         ProjectExecutionUiState(
             isLoading = false,
             project = project,
             pattern = pattern,
+            snapshot = snapshot,
+            instructions = instructions,
+            progressList = progressList,
             currentStepProgress = stepProgress,
             selectedSize = selectedSize ?: project?.selectedSize ?: pattern?.selectedSize,
             errorMessage = error
@@ -69,13 +93,181 @@ class ProjectExecutionViewModel(
         initialValue = ProjectExecutionUiState()
     )
 
+    init {
+        // Ensure snapshot exists for active project
+        viewModelScope.launch {
+            projectFlow.filterNotNull().firstOrNull()?.let { project ->
+                val pId = project.patternId
+                val size = project.selectedSize ?: "Default"
+                val existingSnapshot = appContainer.projectSnapshotRepository.getSnapshot(projectId)
+                if (existingSnapshot == null && !pId.isNullOrBlank()) {
+                    runCatching {
+                        appContainer.projectSnapshotRepository.createAndSaveSnapshot(
+                            projectId = projectId,
+                            patternId = pId,
+                            sizeKey = size
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    fun incrementCounter() {
+        val state = uiState.value
+        val project = state.project ?: return
+
+        if (state.isSnapshotMode) {
+            val instruction = state.currentInstruction ?: return
+            val target = instruction.targetCount ?: 1
+            val current = state.currentCount
+            val inc = state.selectedIncrement
+            val next = IncrementSuggestionPolicy.nextCount(current, inc, target)
+
+            viewModelScope.launch {
+                appContainer.projectSnapshotRepository.updateCount(
+                    projectId = project.id,
+                    instructionId = instruction.id,
+                    count = next,
+                    increment = inc
+                )
+            }
+        } else {
+            // Legacy fallback
+            val target = state.targetCount ?: 1
+            val next = minOf(state.currentCount + 1, target)
+            // handled locally in screen or legacy step
+        }
+    }
+
+    fun decrementCounter() {
+        val state = uiState.value
+        val project = state.project ?: return
+
+        if (state.isSnapshotMode) {
+            val instruction = state.currentInstruction ?: return
+            val current = state.currentCount
+            val inc = state.selectedIncrement
+            val prev = IncrementSuggestionPolicy.previousCount(current, inc)
+
+            viewModelScope.launch {
+                appContainer.projectSnapshotRepository.updateCount(
+                    projectId = project.id,
+                    instructionId = instruction.id,
+                    count = prev,
+                    increment = inc
+                )
+            }
+        }
+    }
+
+    fun setIncrement(increment: Int) {
+        if (increment <= 0) return
+        val state = uiState.value
+        val project = state.project ?: return
+        val instruction = state.currentInstruction ?: return
+
+        viewModelScope.launch {
+            appContainer.projectSnapshotRepository.updateCount(
+                projectId = project.id,
+                instructionId = instruction.id,
+                count = state.currentCount,
+                increment = increment
+            )
+        }
+    }
+
+    fun markCurrentStepDone() {
+        val state = uiState.value
+        val project = state.project ?: return
+        if (state.totalSteps == 0) return
+
+        val isLastStep = (project.currentStepIndex >= state.totalSteps - 1)
+        val nextIndex = if (!isLastStep) project.currentStepIndex + 1 else project.currentStepIndex
+
+        viewModelScope.launch {
+            if (state.isSnapshotMode) {
+                val instruction = state.currentInstruction ?: return@launch
+                appContainer.projectSnapshotRepository.markCompleted(
+                    projectId = project.id,
+                    instructionId = instruction.id,
+                    completed = true
+                )
+
+                // Re-calculate progress percent: completed / total
+                val currentCompletedCount = state.progressList.count { it.isCompleted || it.instructionSnapshotId == instruction.id }
+                val newProgress = ProgressCalculator.calculatePercentage(currentCompletedCount, state.totalSteps)
+                val maxProgress = maxOf(project.progressPercent, newProgress)
+                appContainer.projectRepository.updateProgress(projectId, nextIndex, maxProgress)
+            } else {
+                // Legacy
+                val currentStep = state.currentStep ?: return@launch
+                appContainer.projectRepository.saveStepProgress(
+                    projectId = project.id,
+                    patternStepId = currentStep.id,
+                    isDone = true,
+                    note = state.currentStepProgress?.note
+                )
+                val completedCount = if (isLastStep) state.totalSteps else nextIndex
+                val newProgress = ProgressCalculator.calculatePercentage(completedCount, state.totalSteps)
+                val maxProgress = maxOf(project.progressPercent, newProgress)
+                appContainer.projectRepository.updateProgress(projectId, nextIndex, maxProgress)
+            }
+        }
+    }
+
+    fun undoPreviousStep() {
+        val state = uiState.value
+        val project = state.project ?: return
+        if (project.currentStepIndex <= 0) return
+
+        val prevIndex = project.currentStepIndex - 1
+
+        viewModelScope.launch {
+            if (state.isSnapshotMode) {
+                val prevInstruction = state.instructions.getOrNull(prevIndex)
+                if (prevInstruction != null) {
+                    appContainer.projectSnapshotRepository.markCompleted(
+                        projectId = project.id,
+                        instructionId = prevInstruction.id,
+                        completed = false
+                    )
+                }
+                val newCompletedCount = state.progressList.count { it.isCompleted && it.instructionSnapshotId != prevInstruction?.id }
+                val newProgress = ProgressCalculator.calculatePercentage(newCompletedCount, state.totalSteps)
+                appContainer.projectRepository.updateProgress(projectId, prevIndex, newProgress)
+            } else {
+                val currentStep = state.allSteps.getOrNull(prevIndex)
+                if (currentStep != null) {
+                    appContainer.projectRepository.saveStepProgress(
+                        projectId = project.id,
+                        patternStepId = currentStep.id,
+                        isDone = false,
+                        note = null
+                    )
+                }
+                val newProgress = ProgressCalculator.calculatePercentage(prevIndex, state.totalSteps)
+                appContainer.projectRepository.updateProgress(projectId, prevIndex, newProgress)
+            }
+        }
+    }
+
+    fun jumpToStep(index: Int) {
+        val state = uiState.value
+        val project = state.project ?: return
+        if (index < 0 || index >= state.totalSteps) return
+
+        viewModelScope.launch {
+            appContainer.projectRepository.updateProgress(projectId, index, project.progressPercent)
+        }
+    }
+
     fun previousStep() {
         val state = uiState.value
         val project = state.project ?: return
-        val nextIndex = (project.currentStepIndex - 1).coerceAtLeast(0)
+        val prevIndex = (project.currentStepIndex - 1).coerceAtLeast(0)
         viewModelScope.launch {
-            // Keep existing progress percent when navigating back so viewing previous steps doesn't downgrade progress
-            appContainer.projectRepository.updateProgress(projectId, nextIndex, project.progressPercent)
+            appContainer.projectRepository.updateProgress(projectId, prevIndex, project.progressPercent)
         }
     }
 
@@ -89,46 +281,28 @@ class ProjectExecutionViewModel(
         }
     }
 
-    fun markCurrentStepDone() {
-        val state = uiState.value
-        val project = state.project ?: return
-        val currentStep = state.currentStep ?: return
-        if (state.totalSteps == 0) return
-
-        val isLastStep = project.currentStepIndex >= state.totalSteps - 1
-        val nextIndex = if (!isLastStep) project.currentStepIndex + 1 else project.currentStepIndex
-
-        viewModelScope.launch {
-            appContainer.projectRepository.saveStepProgress(
-                projectId = project.id,
-                patternStepId = currentStep.id,
-                isDone = true,
-                note = state.currentStepProgress?.note
-            )
-            // If it's the last step and marked done, completed = totalSteps -> 100%
-            val completedCount = if (isLastStep) state.totalSteps else nextIndex
-            val newProgress = if (state.totalSteps > 0) ((completedCount.toFloat() / state.totalSteps.toFloat()) * 100).toInt() else 0
-            val maxProgress = maxOf(project.progressPercent, newProgress)
-            appContainer.projectRepository.updateProgress(projectId, nextIndex, maxProgress)
-        }
-    }
-
-    /**
-     * Save or update a personal note for the current step.
-     */
     fun saveNote(note: String) {
         val state = uiState.value
         val project = state.project ?: return
-        val currentStep = state.currentStep ?: return
 
         viewModelScope.launch {
             runCatching {
-                appContainer.projectRepository.saveStepProgress(
-                    projectId = project.id,
-                    patternStepId = currentStep.id,
-                    isDone = state.currentStepProgress?.isDone ?: false,
-                    note = note.trim().takeIf { it.isNotBlank() }
-                )
+                if (state.isSnapshotMode) {
+                    val instruction = state.currentInstruction ?: return@launch
+                    appContainer.projectSnapshotRepository.saveNote(
+                        projectId = project.id,
+                        instructionId = instruction.id,
+                        note = note.trim().takeIf { it.isNotBlank() }
+                    )
+                } else {
+                    val currentStep = state.currentStep ?: return@launch
+                    appContainer.projectRepository.saveStepProgress(
+                        projectId = project.id,
+                        patternStepId = currentStep.id,
+                        isDone = state.currentStepProgress?.isDone ?: false,
+                        note = note.trim().takeIf { it.isNotBlank() }
+                    )
+                }
             }.onFailure { error ->
                 errorMessage.update { error.message ?: "Could not save note." }
             }
