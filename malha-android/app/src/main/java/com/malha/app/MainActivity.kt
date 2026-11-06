@@ -50,10 +50,10 @@ class MainActivity : ComponentActivity() {
     private fun applyLocale(language: AppLanguage) {
         if (language == AppLanguage.SYSTEM) return
         
-        val locale = Locale(language.localeTag)
+        val locale = Locale.forLanguageTag(language.localeTag)
         val currentLocale = resources.configuration.locales[0]
         
-        if (currentLocale.language != locale.language) {
+        if (currentLocale.language != locale.language || currentLocale.country != locale.country) {
             Locale.setDefault(locale)
             val config = resources.configuration
             config.setLocale(locale)

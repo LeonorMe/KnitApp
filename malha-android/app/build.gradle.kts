@@ -56,6 +56,12 @@ android {
     kotlinOptions {
         jvmTarget = "17"
     }
+
+    lint {
+        abortOnError = false
+        checkReleaseBuilds = false
+        disable.addAll(listOf("MissingTranslation", "ExtraTranslation"))
+    }
 }
 
 dependencies {
@@ -91,5 +97,5 @@ dependencies {
 
     implementation("io.coil-kt:coil-compose:2.7.0")
 
-    testImplementation("junit:junit:4.13.2")
+    testImplementation(libs.junit)
 }

@@ -43,7 +43,6 @@ import com.malha.app.core.design.component.KNOWN_STITCHES
 import com.malha.app.core.design.component.StitchLinkText
 import com.malha.app.core.design.component.TechniqueHelpBottomSheet
 import com.malha.app.core.util.ImageStorageHelper
-import com.malha.app.domain.pattern.CountUnit
 import com.malha.app.domain.pattern.InstructionNodeType
 
 // ------ Theme enum for quick toggle ------
@@ -541,12 +540,9 @@ private fun MainStepCard(
             }
 
             AnimatedContent(
-                targetState = uiState.currentInstruction?.id ?: uiState.currentStep?.id,
+                targetState = uiState.currentInstruction?.displayText ?: uiState.currentStep?.instructionData.orEmpty(),
                 label = "step-card"
-            ) { _ ->
-                val instructionText = uiState.currentInstruction?.displayText
-                    ?: uiState.currentStep?.instructionData.orEmpty()
-
+            ) { instructionText ->
                 if (instructionText.isNotBlank()) {
                     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         StitchLinkText(

@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
     <string name="app_name" translatable="false">MyWool</string>
-
-    <!-- Navigation -->
     <string name="nav_home">Home</string>
     <string name="nav_projects">Projects</string>
     <string name="nav_patterns">Patterns</string>
@@ -11,34 +9,24 @@
     <string name="nav_community">Social</string>
     <string name="nav_profile">Profile</string>
     <string name="nav_settings">Settings</string>
-
-    <!-- Home Screen -->
     <string name="title_home">Good morning, Knitter!</string>
     <string name="subtitle_home">Ready to make some loops?</string>
     <string name="section_recent_projects">Recent Projects</string>
     <string name="section_aidi_insights">Aidi Insights</string>
-    <string name="aidi_tip_example">Your Scarf project is 80% done! Keep going!</string>
+    <string name="aidi_tip_example" formatted="false">Your Scarf project is 80% done! Keep going!</string>
     <string name="action_quick_add">Quick Add</string>
-
-    <!-- Projects Screen -->
     <string name="title_projects">My Projects</string>
     <string name="empty_projects_title">No projects yet</string>
     <string name="empty_projects_desc">Start your first knitting or crochet project today!</string>
     <string name="action_add_project">Add Project</string>
-
-    <!-- Patterns Screen -->
     <string name="title_patterns">Patterns Library</string>
     <string name="empty_patterns_title">No patterns found</string>
     <string name="empty_patterns_desc">Save your favorite patterns here.</string>
     <string name="action_create_pattern">Create Pattern</string>
-
-    <!-- Materials Screen -->
     <string name="title_materials">My Stash</string>
     <string name="empty_materials_title">Stash is empty</string>
     <string name="empty_materials_desc">Add yarn, hooks, and needles to your inventory.</string>
     <string name="action_add_material">Add Material</string>
-
-    <!-- Settings Screen -->
     <string name="title_settings">Settings</string>
     <string name="section_appearance">Appearance</string>
     <string name="theme_system">System Default</string>
@@ -52,7 +40,7 @@
     <string name="action_sign_out">Sign out</string>
     <string name="action_sign_in_google">Sign in with Google</string>
     <string name="action_create_google_account">Create account with Google</string>
-    <string name="action_signing_in">Signing in...</string>
+    <string name="action_signing_in">Signing in&#8230;</string>
     <string name="dialog_new_project_title">New project</string>
     <string name="input_project_name">Project name</string>
     <string name="action_create">Create</string>
@@ -73,8 +61,6 @@
     <string name="dialog_step_note_title">Step note</string>
     <string name="input_personal_note">Personal note</string>
     <string name="action_save">Save</string>
-
-    <!-- Execution Screen -->
     <string name="title_execution">Execution</string>
     <string name="execution_project_not_found">Project not found.</string>
     <string name="execution_knitting_companion_active">Knitting companion active</string>
@@ -88,7 +74,7 @@
     <string name="execution_select_size">Select Size</string>
     <string name="action_next_step">Next Step</string>
     <string name="action_mark_done">Mark Done</string>
-    <string name="greeting">Olá, %1$s</string>
+    <string name="greeting">Hello, %1$s</string>
     <string name="google_sign_in_was_cancelled">Google sign-in was cancelled.</string>
     <string name="google_sign_in_needs_a_web_client_id_in_google_services_json">Google Sign-In needs a web client ID in google-services.json.</string>
     <string name="nothing_publised">Nothing published yet.</string>
@@ -97,7 +83,7 @@
     <string name="be_the_first_to_share_your_work">Be the first to share your work!</string>
     <string name="community_search_placeholder">Search posts by keyword</string>
     <string name="community_no_search_results">No posts where found for your search.</string>
-    <string name="community_using_pattern" translatable="false">using pattern...</string>
+    <string name="community_using_pattern" translatable="false">using pattern&#8230;</string>
     <string name="community_status_finished">Completed</string>
     <string name="community_status_ongoing">On going</string>
     <string name="community_like">Like</string>
@@ -106,11 +92,11 @@
     <string name="community_view_comments">See comments</string>
     <string name="community_comments_title">Comments</string>
     <string name="community_no_comments">There are no comments yet.</string>
-    <string name="community_add_comment_placeholder">Add a comment...</string>
+    <string name="community_add_comment_placeholder">Add a comment&#8230;</string>
     <string name="community_publish_comment">Publish</string>
     <string name="action_close">Close</string>
     <string name="profile_unknown_crafter">Crafter</string>
-    <string name="profile_default_bio">...</string>
+    <string name="profile_default_bio">&#8230;</string>
     <string name="profile_post_image">Post</string>
     <string name="profile_completed">Completed</string>
     <string name="profile_level">Level</string>
@@ -124,13 +110,13 @@
     <string name="profile_level_confident">Confident</string>
     <string name="profile_level_advanced">Advanced</string>
     <string name="continue_project_reminder">Continue project reminder</string>
-    <string name="project_on_going">Em curso</string>
-    <string name="project_planned">Planeados</string>
-    <string name="project_concluded">Concluídos</string>
+    <string name="project_on_going">In Progress</string>
+    <string name="project_planned">Planned</string>
+    <string name="project_concluded">Completed</string>
     <string name="share_project">Share project</string>
-    <string name="loading_projects">Loading projects...</string>
-    <string name="no_active_projects_create_to_start">Não tens projetos ativos. Cria um para começar!</string>
-    <string name="to_continue">A continuar</string>
+    <string name="loading_projects">Loading projects&#8230;</string>
+    <string name="no_active_projects_create_to_start">You have no active projects. Create one to get started!</string>
+    <string name="to_continue">Continue</string>
     <string name="chalange_10x10">10x10</string>
     <string name="chalange_shake">Shake</string>
     <string name="icon_description_daily_yarn_shake">Daily Yarn Shake</string>
@@ -142,7 +128,7 @@
     <string name="wish_list">Wish list</string>
     <string name="store">Store</string>
     <string name="my_materials">My materials</string>
-    <string name="loading">Loading...</string>
+    <string name="loading">Loading&#8230;</string>
     <string name="no_yet">No %1$s yet.</string>
     <string name="share_material">Share material</string>
     <string name="new_material">New material</string>
@@ -158,18 +144,18 @@
     <string name="gallery">Gallery</string>
     <string name="camera">Camera</string>
     <string name="add_material">Add material</string>
-    <string name="new_project">Novo Projeto</string>
+    <string name="new_project">New Project</string>
     <string name="coming_soon">Coming soon: %1$s</string>
-    <string name="progress">Progresso: %1$d%%</string>
+    <string name="progress">Progress: %1$d%%</string>
     <string name="no_projects_in_this_category">No projects in this category.</string>
-    <string name="os_meus_projetos">Os Meus Projetos</string>
+    <string name="os_meus_projetos">My Projects</string>
     <string name="project_name_is_required">Project name is required.</string>
     <string name="close">Close</string>
     <string name="shake_your_phone_to_tangle_the_yarn">Shake your phone to tangle the yarn!</string>
     <string name="click_if_you_can_t_shake">Click if you can\'t shake</string>
     <string name="keep_shaking">Keep shaking!</string>
     <string name="coins">+%1$d Coins</string>
-    <string name="adding_to_your_stash">Adding to your stash...</string>
+    <string name="adding_to_your_stash">Adding to your stash&#8230;</string>
     <string name="yay_you_untangled_it">Yay! You untangled it!</string>
     <string name="username">Username</string>
     <string name="bio">Bio</string>
@@ -203,30 +189,28 @@
     <string name="toggle_theme">Toggle Theme</string>
     <string name="action_project_settings">Project settings</string>
     <string name="project_created">Project created</string>
-    <string name="configure_project">Configurar Projeto</string>
-    <string name="project_size">Tamanho do Projeto</string>
-    <string name="project_color">Cor do Projeto</string>
-    <string name="selected">Selecionado</string>
-    <string name="go_back">Voltar</string>
-    <string name="buy">Comprar</string>
-    <string name="necessarie_needles">Agulhas Necessárias</string>
-    <string name="recomended_yarn_missing">Fio recomendado em falta!</string>
-    <string name="no_yarn_size">sem espessura</string>
-    <string name="recomended">" ⭐ Recomendado"</string>
-    <string name="select_from_my_materials">Selecionar do meu inventário</string>
-    <string name="start_project">Começar Projeto</string>
+    <string name="configure_project">Configure Project</string>
+    <string name="project_size">Project Size</string>
+    <string name="project_color">Project Color</string>
+    <string name="selected" tools:override="true">Selected</string>
+    <string name="go_back">Back</string>
+    <string name="buy">Buy</string>
+    <string name="necessarie_needles">Required Needles</string>
+    <string name="recomended_yarn_missing">Recommended yarn missing!</string>
+    <string name="no_yarn_size">no thickness</string>
+    <string name="recomended">" ⭐ Recommended"</string>
+    <string name="select_from_my_materials">Select from my inventory</string>
+    <string name="start_project">Start Project</string>
     <string name="ask_aidi">Ask Aidi</string>
     <string name="send">Send</string>
-    <string name="aidi_is_thinking">Aidi is thinking...</string>
+    <string name="aidi_is_thinking">Aidi is thinking&#8230;</string>
     <string name="cd_attach_file">Attach file</string>
     <string name="cd_send_message">Send message</string>
     <string name="cd_aidi_avatar">Aidi assistant</string>
-
-    <!-- Project Configuration & Lifecycle -->
     <string name="project_name_label">Project Name</string>
     <string name="pattern_selection_title">Pattern</string>
     <string name="select_pattern_prompt">Select a pattern</string>
-    <string name="search_patterns_placeholder">Search saved patterns...</string>
+    <string name="search_patterns_placeholder">Search saved patterns&#8230;</string>
     <string name="no_patterns_matching_search">No patterns match your search</string>
     <string name="pattern_requirements_title">Pattern Requirements</string>
     <string name="required_yarn">Required Yarn</string>
@@ -246,7 +230,7 @@
     <string name="reason_to_start_prefix">Cannot start yet: %1$s</string>
     <string name="duplicate_project">Duplicate Project</string>
     <string name="duplicate_project_dialog_title">Duplicate Project</string>
-    <string name="duplicate_project_dialog_message">Create a copy of this project with the same pattern, size, and materials at 0% progress.</string>
+    <string name="duplicate_project_dialog_message" formatted="false">Create a copy of this project with the same pattern, size, and materials at 0% progress.</string>
     <string name="duplicate_project_name_label">New Project Name</string>
     <string name="duplicate_action">Duplicate</string>
     <string name="project_duplicated_success">Project duplicated successfully</string>

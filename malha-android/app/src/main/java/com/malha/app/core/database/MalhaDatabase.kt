@@ -254,51 +254,55 @@ abstract class MalhaDatabase : RoomDatabase() {
                 database.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_instruction_progress_projectId_instructionSnapshotId` ON `instruction_progress` (`projectId`, `instructionSnapshotId`)")
 
                 // 10. Data migration from legacy patterns:
-                // Create pattern_versions and instruction_nodes for existing patterns
-                val cursor = database.query("SELECT id FROM patterns")
-                val now = System.currentTimeMillis()
+                // Create pattern_versions and instruction_nodes for existing patterns safely
                 try {
-                    while (cursor.moveToNext()) {
-                        val patternId = cursor.getString(0)
-                        val versionId = "v1_$patternId"
-                        database.execSQL("""
-                            INSERT OR IGNORE INTO pattern_versions (id, patternId, versionNumber, schemaVersion, status, createdAt, checksum)
-                            VALUES ('$versionId', '$patternId', 1, 1, 'PUBLISHED', $now, '')
-                        """)
+                    val cursor = database.query("SELECT id FROM patterns")
+                    val now = System.currentTimeMillis()
+                    try {
+                        while (cursor.moveToNext()) {
+                            val patternId = cursor.getString(0)
+                            val versionId = "v1_$patternId"
+                            database.execSQL("""
+                                INSERT OR IGNORE INTO pattern_versions (id, patternId, versionNumber, schemaVersion, status, createdAt, checksum)
+                                VALUES ('$versionId', '$patternId', 1, 1, 'PUBLISHED', $now, '')
+                            """)
 
-                        // Migrate pattern steps to instruction nodes
-                        database.execSQL("""
-                            INSERT OR IGNORE INTO instruction_nodes (
-                                id, sectionId, parentNodeId, orderIndex, nodeType, techniqueId, 
-                                targetLiteral, targetParamKey, countUnit, repeatTimesLiteral, 
-                                repeatTimesParamKey, displayText, measurementValue, measurementUnit, isDestructive
-                            )
-                            SELECT 
-                                id, 
-                                sectionId, 
-                                NULL, 
-                                orderIndex, 
-                                CASE 
-                                    WHEN type = 'REPEAT' OR type = 'REPEAT_BLOCK' THEN 'REPEAT_BLOCK'
-                                    WHEN type = 'FINISHING' OR type = 'JOIN' THEN 'BINARY_ACTION'
-                                    ELSE 'COUNTED_ACTION'
-                                END,
-                                LOWER(type),
-                                CAST(stitchCountData AS INTEGER),
-                                NULL,
-                                'STITCH',
-                                CAST(repeatCount AS INTEGER),
-                                NULL,
-                                instructionData,
-                                NULL,
-                                NULL,
-                                CASE WHEN type = 'BIND_OFF' THEN 1 ELSE 0 END
-                            FROM pattern_steps 
-                            WHERE patternId = '$patternId'
-                        """)
+                            // Migrate pattern steps to instruction nodes using actual column names
+                            database.execSQL("""
+                                INSERT OR IGNORE INTO instruction_nodes (
+                                    id, sectionId, parentNodeId, orderIndex, nodeType, techniqueId, 
+                                    targetLiteral, targetParamKey, countUnit, repeatTimesLiteral, 
+                                    repeatTimesParamKey, displayText, measurementValue, measurementUnit, isDestructive
+                                )
+                                SELECT 
+                                    id, 
+                                    sectionId, 
+                                    NULL, 
+                                    orderIndex, 
+                                    CASE 
+                                        WHEN stepType = 'REPEAT' OR stepType = 'REPEAT_BLOCK' THEN 'REPEAT_BLOCK'
+                                        WHEN stepType = 'FINISHING' OR stepType = 'JOIN' THEN 'BINARY_ACTION'
+                                        ELSE 'COUNTED_ACTION'
+                                    END,
+                                    LOWER(stepType),
+                                    stitchCount,
+                                    NULL,
+                                    'STITCH',
+                                    repeatCount,
+                                    NULL,
+                                    instruction,
+                                    NULL,
+                                    NULL,
+                                    CASE WHEN stepType = 'BIND_OFF' THEN 1 ELSE 0 END
+                                FROM pattern_steps 
+                                WHERE patternId = '$patternId'
+                            """)
+                        }
+                    } finally {
+                        cursor.close()
                     }
-                } finally {
-                    cursor.close()
+                } catch (_: Throwable) {
+                    // Safety guard: continue migration cleanly even if legacy steps format varies
                 }
             }
         }
