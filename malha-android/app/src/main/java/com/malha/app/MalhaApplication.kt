@@ -1,6 +1,7 @@
 package com.malha.app
 
 import android.app.Application
+import android.util.Log
 import com.malha.app.core.app.AppContainer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -11,7 +12,6 @@ class MalhaApplication : Application() {
     lateinit var appContainer: AppContainer
         private set
 
-    // only used to lauch databaseSeeder
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     override fun onCreate() {
@@ -19,7 +19,11 @@ class MalhaApplication : Application() {
         instance = this
         appContainer = AppContainer(this)
         applicationScope.launch {
-            appContainer.databaseSeeder.seed()
+            runCatching {
+                appContainer.databaseSeeder.seed()
+            }.onFailure { error ->
+                Log.e("MalhaApplication", "Database seeding error", error)
+            }
         }
     }
 
@@ -28,4 +32,3 @@ class MalhaApplication : Application() {
             private set
     }
 }
-

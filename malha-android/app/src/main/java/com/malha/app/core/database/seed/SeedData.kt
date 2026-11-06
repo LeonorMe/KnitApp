@@ -428,7 +428,8 @@ object SeedData {
             startedAt = now,
             completedAt = null,
             createdAt = now,
-            updatedAt = now
+            updatedAt = now,
+            patternTitle = "Starter Garter Scarf"
         ),
         ProjectEntity(
             id = "project-demo-beanie",
@@ -442,7 +443,8 @@ object SeedData {
             startedAt = now,
             completedAt = null,
             createdAt = now,
-            updatedAt = now
+            updatedAt = now,
+            patternTitle = "Simple Everyday Beanie"
         )
     )
 

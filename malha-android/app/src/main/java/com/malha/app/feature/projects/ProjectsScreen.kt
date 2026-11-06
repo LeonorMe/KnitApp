@@ -10,8 +10,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -118,16 +123,17 @@ fun ProjectsScreen(
         ) {
             val filteredProjects = when (selectedTabIndex) {
                 0 -> uiState.projects.filter {
-                    it.progressPercent in 1..99
-                } // Ongoing
-
+                    val isConcluded = it.projectStatus == com.malha.app.domain.model.ProjectStatus.FINISHED || it.progressPercent >= 100
+                    !isConcluded && it.progressPercent > 0
+                } // Ongoing: active with progress > 0
                 1 -> uiState.projects.filter {
-                    it.progressPercent == 0
-                } // Planned
-
+                    val isConcluded = it.projectStatus == com.malha.app.domain.model.ProjectStatus.FINISHED || it.progressPercent >= 100
+                    !isConcluded && it.progressPercent == 0
+                } // Planned: in planning (0% progress, step 1 not completed yet)
                 else -> uiState.projects.filter {
+                    it.projectStatus == com.malha.app.domain.model.ProjectStatus.FINISHED ||
                     it.progressPercent >= 100
-                } // Completed
+                } // Concluded
             }
 
             AnimatedContent(
@@ -135,10 +141,10 @@ fun ProjectsScreen(
                 label = "projects-tab-content"
             ) { (isLoading, isEmpty) ->
                 when {
-                    isLoading -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
+                    isLoading -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text(stringResource(R.string.loading_projects))
                     }
-                    isEmpty -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
+                    isEmpty -> Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text(stringResource(R.string.no_projects_in_this_category), color = colorScheme.onSurfaceVariant)
                     }
                     else -> LazyColumn(
@@ -146,49 +152,51 @@ fun ProjectsScreen(
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         items(filteredProjects) { project ->
+                            var showMenu by remember { mutableStateOf(false) }
+                            var showDuplicateCardDialog by remember { mutableStateOf(false) }
+                            var showDeleteDialog by remember { mutableStateOf(false) }
+
                             val animatedProgress by animateFloatAsState(
                                 targetValue = project.progressPercent / 100f,
                                 animationSpec = tween(durationMillis = 700),
-                                label = "project-list-progress" // todo string
+                                label = "project-list-progress"
                             )
                             val projectDefaultColor = colorScheme.primary
                             val projectColor = project.colorHex?.let { hex ->
-                                    runCatching {
-                                        Color(hex.toColorInt())
-                                    }.getOrNull()
-                                } ?: projectDefaultColor
+                                runCatching { Color(hex.toColorInt()) }.getOrNull()
+                            } ?: projectDefaultColor
 
                             Card(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .animateContentSize()
                                     .clickable {
-                                        // Intent-based routing:
-                                        // Planned projects (0% progress) or done open in settings
-                                        // so the user can finish configuring them.
-                                        // Anything in progress opens in execution.
-                                        if (project.progressPercent == 0 || project.progressPercent == 100) {
-                                            onOpenProjectSettings(project.id)
-                                        } else {
+                                        val isOngoing = project.projectStatus != com.malha.app.domain.model.ProjectStatus.FINISHED && project.progressPercent > 0
+                                        if (isOngoing) {
                                             onOpenProjectExecution(project.id)
+                                        } else {
+                                            onOpenProjectSettings(project.id)
                                         }
                                     },
                                 colors = CardDefaults.cardColors(
-                                        containerColor = projectColor.copy(alpha = 0.15f)
+                                    containerColor = projectColor.copy(alpha = 0.15f)
                                 )
                             ) {
                                 Row(
                                     modifier = Modifier.padding(16.dp),
-                                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     ImagePlaceholder(label = project.name, imageUri = project.imageUri)
                                     Column(modifier = Modifier.weight(1f)) {
-                                        Text(project.name, style = MaterialTheme.typography.titleMedium)
+                                        Text(project.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                                         Text(
                                             stringResource(
                                                 R.string.progress,
                                                 project.progressPercent
-                                            ), style = MaterialTheme.typography.bodyMedium)
+                                            ),
+                                            style = MaterialTheme.typography.bodyMedium
+                                        )
                                         Spacer(modifier = Modifier.height(8.dp))
                                         LinearProgressIndicator(
                                             progress = { animatedProgress },
@@ -197,12 +205,134 @@ fun ProjectsScreen(
                                             trackColor = projectColor.copy(0.2f)
                                         )
                                     }
-                                    IconButton(onClick = { MalhaShare.shareProject(context, project) }) {
-                                        Icon(Icons.Default.Share, contentDescription = stringResource(
-                                            R.string.share_project
-                                        ))
+
+                                    Box {
+                                        IconButton(onClick = { showMenu = true }) {
+                                            Icon(
+                                                imageVector = Icons.Default.MoreVert,
+                                                contentDescription = stringResource(R.string.more_options)
+                                            )
+                                        }
+                                        DropdownMenu(
+                                            expanded = showMenu,
+                                            onDismissRequest = { showMenu = false }
+                                        ) {
+                                            DropdownMenuItem(
+                                                text = { Text(stringResource(R.string.duplicate_project)) },
+                                                onClick = {
+                                                    showMenu = false
+                                                    showDuplicateCardDialog = true
+                                                },
+                                                leadingIcon = {
+                                                    Icon(
+                                                        imageVector = Icons.Default.ContentCopy,
+                                                        contentDescription = null
+                                                    )
+                                                }
+                                            )
+                                            DropdownMenuItem(
+                                                text = { Text(stringResource(R.string.share_project)) },
+                                                onClick = {
+                                                    showMenu = false
+                                                    MalhaShare.shareProject(context, project)
+                                                },
+                                                leadingIcon = {
+                                                    Icon(
+                                                        imageVector = androidx.compose.material.icons.Icons.Default.Share,
+                                                        contentDescription = null
+                                                    )
+                                                }
+                                            )
+                                            DropdownMenuItem(
+                                                text = {
+                                                    Text(
+                                                        stringResource(R.string.delete_project),
+                                                        color = MaterialTheme.colorScheme.error
+                                                    )
+                                                },
+                                                onClick = {
+                                                    showMenu = false
+                                                    showDeleteDialog = true
+                                                },
+                                                leadingIcon = {
+                                                    Icon(
+                                                        imageVector = Icons.Default.Delete,
+                                                        contentDescription = null,
+                                                        tint = MaterialTheme.colorScheme.error
+                                                    )
+                                                }
+                                            )
+                                        }
                                     }
                                 }
+                            }
+
+                            if (showDuplicateCardDialog) {
+                                var copyName by remember { mutableStateOf("${project.name} (Copy)") }
+                                AlertDialog(
+                                    onDismissRequest = { showDuplicateCardDialog = false },
+                                    title = { Text(stringResource(R.string.duplicate_project_dialog_title)) },
+                                    text = {
+                                        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                                            Text(stringResource(R.string.duplicate_project_dialog_message))
+                                            OutlinedTextField(
+                                                value = copyName,
+                                                onValueChange = { copyName = it },
+                                                label = { Text(stringResource(R.string.duplicate_project_name_label)) },
+                                                singleLine = true,
+                                                modifier = Modifier.fillMaxWidth()
+                                            )
+                                        }
+                                    },
+                                    confirmButton = {
+                                        Button(
+                                            onClick = {
+                                                viewModel.duplicateProject(project.id, copyName)
+                                                showDuplicateCardDialog = false
+                                            }
+                                        ) {
+                                            Text(stringResource(R.string.duplicate_action))
+                                        }
+                                    },
+                                    dismissButton = {
+                                        TextButton(onClick = { showDuplicateCardDialog = false }) {
+                                            Text(stringResource(R.string.cancel_action))
+                                        }
+                                    }
+                                )
+                            }
+
+                            if (showDeleteDialog) {
+                                AlertDialog(
+                                    onDismissRequest = { showDeleteDialog = false },
+                                    title = { Text(stringResource(R.string.delete_project_dialog_title)) },
+                                    text = {
+                                        Text(
+                                            stringResource(
+                                                R.string.delete_project_dialog_message,
+                                                project.name
+                                            )
+                                        )
+                                    },
+                                    confirmButton = {
+                                        Button(
+                                            onClick = {
+                                                viewModel.deleteProject(project.id)
+                                                showDeleteDialog = false
+                                            },
+                                            colors = ButtonDefaults.buttonColors(
+                                                containerColor = MaterialTheme.colorScheme.error
+                                            )
+                                        ) {
+                                            Text(stringResource(R.string.delete_action))
+                                        }
+                                    },
+                                    dismissButton = {
+                                        TextButton(onClick = { showDeleteDialog = false }) {
+                                            Text(stringResource(R.string.cancel_action))
+                                        }
+                                    }
+                                )
                             }
                         }
                     }

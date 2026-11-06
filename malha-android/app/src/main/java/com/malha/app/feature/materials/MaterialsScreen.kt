@@ -18,9 +18,13 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddAPhoto
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
+import com.malha.app.core.util.ImageStorageHelper
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -49,6 +53,8 @@ fun MaterialsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var showCreateDialog by remember { mutableStateOf(false) }
+    var materialToEdit by remember { mutableStateOf<Material?>(null) }
+    var materialToDelete by remember { mutableStateOf<Material?>(null) }
 
     data class MaterialTab(
         val label: String,
@@ -226,7 +232,9 @@ fun MaterialsScreen(
                             MaterialCategoryCard(
                                 type = selectedType,
                                 materials = uiState.materials.filter { it.type == selectedType },
-                                isLoading = uiState.isLoading
+                                isLoading = uiState.isLoading,
+                                onEdit = { materialToEdit = it },
+                                onDelete = { materialToDelete = it }
                             )
                         } else {
                             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = androidx.compose.ui.Alignment.Center) {
@@ -253,13 +261,62 @@ fun MaterialsScreen(
             }
         )
     }
+
+    materialToEdit?.let { material ->
+        EditMaterialDialog(
+            material = material,
+            isSaving = uiState.isCreating,
+            onDismiss = { materialToEdit = null },
+            onSave = { name, type, quantity, unit, imageUri ->
+                viewModel.updateMaterial(
+                    id = material.id,
+                    name = name,
+                    type = type,
+                    quantityText = quantity,
+                    unit = unit,
+                    imageUri = imageUri
+                )
+                materialToEdit = null
+            }
+        )
+    }
+
+    materialToDelete?.let { material ->
+        AlertDialog(
+            onDismissRequest = { materialToDelete = null },
+            title = { Text(stringResource(R.string.delete_material_dialog_title)) },
+            text = {
+                Text(stringResource(R.string.delete_material_dialog_message, material.name))
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        viewModel.deleteMaterial(material.id)
+                        materialToDelete = null
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error
+                    )
+                ) {
+                    Text(stringResource(R.string.delete_action))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { materialToDelete = null }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
 }
 
 @Composable
 private fun MaterialCategoryCard(
     type: MaterialType,
     materials: List<Material>,
-    isLoading: Boolean
+    isLoading: Boolean,
+    onEdit: (Material) -> Unit,
+    onDelete: (Material) -> Unit
 ) {
     Card(
         colors = CardDefaults.cardColors(
@@ -293,7 +350,11 @@ private fun MaterialCategoryCard(
                 )
             } else {
                 materials.forEach { material ->
-                    MaterialRow(material = material)
+                    MaterialRow(
+                        material = material,
+                        onEdit = { onEdit(material) },
+                        onDelete = { onDelete(material) }
+                    )
                 }
             }
         }
@@ -301,10 +362,17 @@ private fun MaterialCategoryCard(
 }
 
 @Composable
-private fun MaterialRow(material: Material) {
+private fun MaterialRow(
+    material: Material,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit
+) {
     val context = LocalContext.current
+    var showMenu by remember { mutableStateOf(false) }
+
     Row(
         horizontalArrangement = Arrangement.spacedBy(14.dp),
+        verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
             .animateContentSize()
@@ -317,16 +385,73 @@ private fun MaterialRow(material: Material) {
             Text(
                 text = material.name,
                 style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Medium,
                 color = colorScheme.onSurface
             )
             Text(
                 text = "${material.quantity} ${material.unit}",
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.bodyMedium,
                 color = colorScheme.onSurfaceVariant
             )
         }
-        IconButton(onClick = { MalhaShare.shareMaterial(context, material) }) {
-            Icon(Icons.Default.Share, contentDescription = stringResource(R.string.share_material))
+
+        Box {
+            IconButton(onClick = { showMenu = true }) {
+                Icon(
+                    imageVector = Icons.Default.MoreVert,
+                    contentDescription = stringResource(R.string.more_options)
+                )
+            }
+            DropdownMenu(
+                expanded = showMenu,
+                onDismissRequest = { showMenu = false }
+            ) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.edit_material)) },
+                    onClick = {
+                        showMenu = false
+                        onEdit()
+                    },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = null
+                        )
+                    }
+                )
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.share_material)) },
+                    onClick = {
+                        showMenu = false
+                        MalhaShare.shareMaterial(context, material)
+                    },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Share,
+                            contentDescription = null
+                        )
+                    }
+                )
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            text = stringResource(R.string.delete_material),
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    },
+                    onClick = {
+                        showMenu = false
+                        onDelete()
+                    },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                    }
+                )
+            }
         }
     }
 }
@@ -337,6 +462,7 @@ private fun CreateMaterialDialog(
     onDismiss: () -> Unit,
     onCreate: (String, MaterialType, String, String, String?) -> Unit
 ) {
+    val context = LocalContext.current
     var name by remember { mutableStateOf("") }
     var quantity by remember { mutableStateOf("") }
     var selectedType by remember { mutableStateOf(MaterialType.Yarn) }
@@ -346,7 +472,12 @@ private fun CreateMaterialDialog(
 
     val photoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
-        onResult = { uri -> imageUri = uri }
+        onResult = { uri ->
+            if (uri != null) {
+                val persistent = ImageStorageHelper.saveImageToInternalStorage(context, uri) ?: uri.toString()
+                imageUri = Uri.parse(persistent)
+            }
+        }
     )
 
     AlertDialog(
@@ -460,6 +591,142 @@ private fun CreateMaterialDialog(
         dismissButton = {
             TextButton(
                 enabled = !isCreating,
+                onClick = onDismiss
+            ) {
+                Text(stringResource(R.string.cancel))
+            }
+        }
+    )
+}
+
+@Composable
+private fun EditMaterialDialog(
+    material: Material,
+    isSaving: Boolean,
+    onDismiss: () -> Unit,
+    onSave: (String, MaterialType, String, String, String?) -> Unit
+) {
+    val context = LocalContext.current
+    var name by remember { mutableStateOf(material.name) }
+    var quantity by remember { mutableStateOf(material.quantity.toString().removeSuffix(".0")) }
+    var selectedType by remember { mutableStateOf(material.type) }
+    var unit by remember(selectedType) { mutableStateOf(material.unit) }
+    var imageUri by remember { mutableStateOf(material.imageUri?.let { Uri.parse(it) }) }
+    var localError by remember { mutableStateOf<String?>(null) }
+
+    val photoPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+        onResult = { uri ->
+            if (uri != null) {
+                val persistent = ImageStorageHelper.saveImageToInternalStorage(context, uri) ?: uri.toString()
+                imageUri = Uri.parse(persistent)
+            }
+        }
+    )
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.edit_material)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    MaterialType.entries.forEach { type ->
+                        FilterChip(
+                            selected = selectedType == type,
+                            onClick = {
+                                selectedType = type
+                                if (unit.isBlank() || unit == defaultUnitFor(selectedType)) {
+                                    unit = defaultUnitFor(type)
+                                }
+                            },
+                            label = { Text(type.label) }
+                        )
+                    }
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Box(modifier = Modifier.size(80.dp)) {
+                        ImagePlaceholder(label = stringResource(R.string.photo), imageUri = imageUri?.toString())
+                    }
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        OutlinedButton(
+                            onClick = {
+                                photoPickerLauncher.launch(
+                                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                                )
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Icon(Icons.Default.PhotoLibrary, contentDescription = null)
+                            Spacer(Modifier.width(8.dp))
+                            Text(stringResource(R.string.gallery))
+                        }
+                    }
+                }
+
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = {
+                        name = it
+                        localError = null
+                    },
+                    label = { Text(stringResource(R.string.material_name)) },
+                    singleLine = true
+                )
+                OutlinedTextField(
+                    value = quantity,
+                    onValueChange = {
+                        quantity = it
+                        localError = null
+                    },
+                    label = { Text(stringResource(R.string.quantity)) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    singleLine = true
+                )
+                OutlinedTextField(
+                    value = unit,
+                    onValueChange = { unit = it },
+                    label = { Text(stringResource(R.string.unit)) },
+                    supportingText = {
+                        if (localError != null) {
+                            Text(localError.orEmpty())
+                        }
+                    },
+                    isError = localError != null,
+                    singleLine = true
+                )
+            }
+        },
+        confirmButton = {
+            val materialNameRequired = stringResource(R.string.material_name_is_required)
+            val quantityMustBeNumber = stringResource(R.string.quantity_must_be_a_number)
+            Button(
+                enabled = !isSaving,
+                onClick = {
+                    localError = when {
+                        name.isBlank() -> materialNameRequired
+                        quantity.replace(',', '.').toDoubleOrNull() == null -> quantityMustBeNumber
+                        else -> null
+                    }
+                    if (localError == null) {
+                        onSave(name, selectedType, quantity, unit, imageUri?.toString())
+                    }
+                }
+            ) {
+                Text(stringResource(R.string.save_action))
+            }
+        },
+        dismissButton = {
+            TextButton(
+                enabled = !isSaving,
                 onClick = onDismiss
             ) {
                 Text(stringResource(R.string.cancel))

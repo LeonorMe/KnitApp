@@ -27,7 +27,8 @@ import kotlinx.coroutines.delay
 @Composable
 fun DailySquareChallengeDialog(
     onDismiss: () -> Unit,
-    onRewardClaimed: (Int) -> Unit
+    onRewardClaimed: (Int) -> Unit,
+    onStartChallengePattern: () -> Unit = {}
 ) {
     var isClaimed by remember { mutableStateOf(false) }
     val rewardAmount = 3
@@ -56,7 +57,7 @@ fun DailySquareChallengeDialog(
                         .background(MaterialTheme.colorScheme.background)
                         .padding(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(20.dp)
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     if (!isClaimed) {
                         Text(
@@ -78,15 +79,24 @@ fun DailySquareChallengeDialog(
                         SwatchGridPreview()
 
                         Button(
-                            onClick = {
-                                isClaimed = true
-                            },
+                            onClick = onStartChallengePattern,
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.primary
                             ),
-                            modifier = Modifier.fillMaxWidth().height(48.dp)
+                            modifier = Modifier.fillMaxWidth().height(48.dp),
+                            shape = RoundedCornerShape(12.dp)
                         ) {
-                            Text("Concluí o quadrado! (+3 Moedas)", fontWeight = FontWeight.Bold)
+                            Text("Abrir Receita 10x10 na Execução", fontWeight = FontWeight.Bold)
+                        }
+
+                        OutlinedButton(
+                            onClick = {
+                                isClaimed = true
+                            },
+                            modifier = Modifier.fillMaxWidth().height(44.dp),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Text("Já concluí! (+3 Moedas)", fontWeight = FontWeight.Medium)
                         }
                     } else {
                         // Claiming animation / Success message

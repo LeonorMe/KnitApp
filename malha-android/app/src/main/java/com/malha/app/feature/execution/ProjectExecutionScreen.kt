@@ -2,16 +2,19 @@ package com.malha.app.feature.execution
 
 import android.app.Activity
 import android.view.WindowManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
@@ -22,21 +25,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.malha.app.R
 import com.malha.app.core.design.component.AidiCompanion
+import com.malha.app.core.design.component.ImagePlaceholder
 import com.malha.app.core.design.component.KNOWN_STITCHES
 import com.malha.app.core.design.component.StitchDetailDialog
+import com.malha.app.core.util.ImageStorageHelper
 import com.malha.app.core.design.component.StitchLinkText
-import com.malha.app.domain.model.PatternStep
-import com.malha.app.R
-import androidx.compose.ui.res.stringResource
 
 // ------ Theme enum for quick toggle ------
 enum class ExecutionTheme { DARK, LIGHT, WARM }
@@ -44,7 +47,7 @@ enum class ExecutionTheme { DARK, LIGHT, WARM }
 @Composable
 fun ProjectExecutionScreen(
     projectId: String,
-    onBack: () -> Unit, //(() -> Unit)? = null,
+    onBack: () -> Unit,
     onOpenSettings: (String) -> Unit,
     viewModel: ProjectExecutionViewModel = viewModel(
         factory = ProjectExecutionViewModel.factory(projectId)
@@ -57,7 +60,9 @@ fun ProjectExecutionScreen(
     var showCongratsDialog by remember { mutableStateOf(false) }
     var rowCounter by remember { mutableStateOf(0) }
 
-    // Quick theme toggle (purely local to execution screen for now)
+
+
+    // Quick theme toggle
     var executionTheme by remember { mutableStateOf(ExecutionTheme.DARK) }
 
     // Keep screen on toggle
@@ -99,6 +104,23 @@ fun ProjectExecutionScreen(
         if (allDone) showCongratsDialog = true
     }
 
+    // Calculate target stitches count and whether row counter matches or reaches it
+    val targetStitchCount = remember(uiState.currentStep?.stitchCountData) {
+        uiState.currentStep?.stitchCountData?.toIntOrNull()
+    }
+    val isTargetReached = targetStitchCount != null && targetStitchCount > 0 && rowCounter >= targetStitchCount
+
+    // Synchronize row counter with step target when step changes
+    LaunchedEffect(uiState.currentStep?.id) {
+        val step = uiState.currentStep
+        val extractedRow = step?.rowNumber ?: run {
+            val text = step?.instructionData.orEmpty()
+            val regex = Regex("""(?:Row|Rnd|Carreira)\s*(\d+)""", RegexOption.IGNORE_CASE)
+            regex.find(text)?.groupValues?.getOrNull(1)?.toIntOrNull() ?: 0
+        }
+        rowCounter = extractedRow
+    }
+
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = bgColor
@@ -106,68 +128,102 @@ fun ProjectExecutionScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 20.dp, vertical = 14.dp)
+                .padding(horizontal = 16.dp, vertical = 10.dp)
         ) {
             // ---- Top bar ----
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 6.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                // Leading: actual back navigation
-                IconButton(onClick = onBack) {
+                // Leading: back navigation
+                IconButton(
+                    onClick = onBack,
+                    modifier = Modifier.size(36.dp)
+                ) {
                     Icon(
                         Icons.AutoMirrored.Filled.ArrowBack,
-                        //Icons.Default.Settings,
-                        contentDescription = stringResource(R.string.action_back_to_settings),
-                        tint = onBgColor
+                        contentDescription = stringResource(R.string.action_back),
+                        tint = onBgColor,
+                        modifier = Modifier.size(20.dp)
                     )
                 }
 
-                Text(
-                    text = project?.name ?: stringResource(R.string.title_execution),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = onBgColor,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.weight(1f),
-                    textAlign = TextAlign.Center
-                )
+                Spacer(modifier = Modifier.width(6.dp))
 
-                // Trailing: utility icons + settings gear
-                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    // Settings gear → go to ProjectSettingsScreen for THIS project
-                    IconButton(onClick = { onOpenSettings(projectId) }) {
-                        Icon(
-                            Icons.Default.Settings,
-                            contentDescription = stringResource(R.string.action_project_settings),
-                            tint = onBgColor
+                // Project name & size subtitle – takes remaining horizontal space without squeezing
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = project?.name ?: stringResource(R.string.title_execution),
+                        style = MaterialTheme.typography.titleMedium,
+                        color = onBgColor,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                    )
+                    if (!project?.selectedSize.isNullOrBlank()) {
+                        Text(
+                            text = stringResource(R.string.execution_size_label, project?.selectedSize.orEmpty()),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Medium,
+                            maxLines = 1
                         )
                     }
+                }
 
-                    // Theme quick toggle
-                    val themeIcon = when (executionTheme) {
-                        ExecutionTheme.DARK -> Icons.Default.DarkMode
-                        ExecutionTheme.LIGHT -> Icons.Default.LightMode
-                        ExecutionTheme.WARM -> Icons.Default.WbSunny
-                    }
-                    IconButton(onClick = {
+                Spacer(modifier = Modifier.width(4.dp))
+
+                // Trailing: essential quick actions (Theme, Keep Awake, Settings)
+                val themeIcon = when (executionTheme) {
+                    ExecutionTheme.DARK -> Icons.Default.DarkMode
+                    ExecutionTheme.LIGHT -> Icons.Default.LightMode
+                    ExecutionTheme.WARM -> Icons.Default.WbSunny
+                }
+                IconButton(
+                    onClick = {
                         executionTheme = when (executionTheme) {
                             ExecutionTheme.DARK -> ExecutionTheme.LIGHT
                             ExecutionTheme.LIGHT -> ExecutionTheme.WARM
                             ExecutionTheme.WARM -> ExecutionTheme.DARK
                         }
-                    }) {
-                        Icon(themeIcon, contentDescription = stringResource(R.string.toggle_theme), tint = onBgColor)
-                    }
+                    },
+                    modifier = Modifier.size(36.dp)
+                ) {
+                    Icon(
+                        themeIcon,
+                        contentDescription = stringResource(R.string.toggle_theme),
+                        tint = onBgColor,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
 
-                    // Keep screen on toggle
-                    IconButton(onClick = { keepScreenOn = !keepScreenOn }) {
-                        Icon(
-                            if (keepScreenOn) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                            contentDescription = "Keep Screen On",
-                            tint = if (keepScreenOn) MaterialTheme.colorScheme.primary else onBgColor.copy(alpha = 0.5f)
-                        )
-                    }
+                IconButton(
+                    onClick = { keepScreenOn = !keepScreenOn },
+                    modifier = Modifier.size(36.dp)
+                ) {
+                    Icon(
+                        if (keepScreenOn) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                        contentDescription = stringResource(R.string.execution_keep_screen_on),
+                        tint = if (keepScreenOn) MaterialTheme.colorScheme.primary else onBgColor.copy(alpha = 0.5f),
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+
+                IconButton(
+                    onClick = { onOpenSettings(projectId) },
+                    modifier = Modifier.size(36.dp)
+                ) {
+                    Icon(
+                        Icons.Default.Settings,
+                        contentDescription = stringResource(R.string.action_project_settings),
+                        tint = onBgColor,
+                        modifier = Modifier.size(20.dp)
+                    )
                 }
             }
 
@@ -202,17 +258,20 @@ fun ProjectExecutionScreen(
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         ExecutionProgressBar(uiState = uiState, onBgColor = onBgColor)
-                        val pattern = uiState.pattern
-                        if (pattern != null && pattern.availableSizes.isNotEmpty()) {
-                            SizeSelector(
-                                sizes = pattern.availableSizes,
-                                selectedSize = uiState.selectedSize,
-                                onSizeSelected = viewModel::selectSize
-                            )
-                        }
-                        MainStepCard(uiState = uiState, onBgColor = onBgColor, theme = executionTheme) { selectedStitch = it }
+                        MainStepCard(
+                            uiState = uiState,
+                            onBgColor = onBgColor,
+                            theme = executionTheme,
+                            isTargetReached = isTargetReached
+                        ) { selectedStitch = it }
                         RowCounterCard(counter = rowCounter, onBgColor = onBgColor, theme = executionTheme) { rowCounter = it }
-                        NavigationControls(uiState = uiState, viewModel = viewModel, onBgColor = onBgColor)
+                        NavigationControls(
+                            uiState = uiState,
+                            viewModel = viewModel,
+                            onBgColor = onBgColor,
+                            isTargetReached = isTargetReached,
+                            onFinishClick = { showCongratsDialog = true }
+                        )
                     }
                     Column(
                         modifier = Modifier
@@ -220,7 +279,6 @@ fun ProjectExecutionScreen(
                             .verticalScroll(rememberScrollState()),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        VoiceStubCard(theme = executionTheme)
                         AidiCompanion(modifier = Modifier.fillMaxWidth())
                         NoteCard(uiState, theme = executionTheme) { showNoteDialog = true }
                     }
@@ -233,19 +291,21 @@ fun ProjectExecutionScreen(
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     ExecutionProgressBar(uiState = uiState, onBgColor = onBgColor)
-                    val pattern = uiState.pattern
-                    if (pattern != null && pattern.availableSizes.isNotEmpty()) {
-                        SizeSelector(
-                            sizes = pattern.availableSizes,
-                            selectedSize = uiState.selectedSize,
-                            onSizeSelected = viewModel::selectSize
-                        )
-                    }
-                    VoiceStubCard(theme = executionTheme)
-                    MainStepCard(uiState = uiState, onBgColor = onBgColor, theme = executionTheme) { selectedStitch = it }
+                    MainStepCard(
+                        uiState = uiState,
+                        onBgColor = onBgColor,
+                        theme = executionTheme,
+                        isTargetReached = isTargetReached
+                    ) { selectedStitch = it }
                     RowCounterCard(counter = rowCounter, onBgColor = onBgColor, theme = executionTheme) { rowCounter = it }
                     NoteCard(uiState, theme = executionTheme) { showNoteDialog = true }
-                    NavigationControls(uiState = uiState, viewModel = viewModel, onBgColor = onBgColor)
+                    NavigationControls(
+                        uiState = uiState,
+                        viewModel = viewModel,
+                        onBgColor = onBgColor,
+                        isTargetReached = isTargetReached,
+                        onFinishClick = { showCongratsDialog = true }
+                    )
                 }
             }
         }
@@ -274,7 +334,11 @@ fun ProjectExecutionScreen(
         CongratsDialog(
             projectName = project?.name ?: "Your Project",
             onDismiss = { showCongratsDialog = false },
-            onNavigateBack = onBack
+            onConfirmFinish = { photoUri ->
+                viewModel.finishProject(photoUri = photoUri, publishToFeed = true)
+                showCongratsDialog = false
+                onBack()
+            }
         )
     }
 }
@@ -286,7 +350,7 @@ private fun ExecutionProgressBar(
     onBgColor: Color
 ) {
     val animatedProgress by animateFloatAsState(
-        targetValue = if (uiState.totalSteps > 0) (uiState.project?.currentStepIndex ?: 0).toFloat() / uiState.totalSteps else 0f,
+        targetValue = uiState.progressFloat,
         animationSpec = tween(durationMillis = 600),
         label = "execution-progress"
     )
@@ -296,12 +360,13 @@ private fun ExecutionProgressBar(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                "Step ${uiState.currentStepNumber} of ${uiState.totalSteps}",
+                stringResource(R.string.execution_step_of, uiState.currentStepNumber, uiState.totalSteps),
                 style = MaterialTheme.typography.bodyMedium,
-                color = onBgColor.copy(alpha = 0.8f)
+                color = onBgColor.copy(alpha = 0.9f),
+                fontWeight = FontWeight.Medium
             )
             Text(
-                "${uiState.project?.progressPercent ?: 0}%",
+                stringResource(R.string.execution_progress, uiState.progressPercent),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Bold
@@ -319,71 +384,13 @@ private fun ExecutionProgressBar(
     }
 }
 
-// ---- Voice Stub Card ----
-@Composable
-private fun VoiceStubCard(theme: ExecutionTheme) {
-    val cardBg = when (theme) {
-        ExecutionTheme.DARK -> Color(0xFF252540)
-        ExecutionTheme.LIGHT -> MaterialTheme.colorScheme.surfaceVariant
-        ExecutionTheme.WARM -> Color(0xFF3D2510)
-    }
-    Card(
-        colors = CardDefaults.cardColors(containerColor = cardBg),
-        shape = RoundedCornerShape(16.dp),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 14.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            VoiceIconButton(
-                icon = Icons.Default.Mic,
-                label = "Voice Input",
-                tint = MaterialTheme.colorScheme.primary,
-                enabled = false
-            )
-            Divider(
-                modifier = Modifier
-                    .height(36.dp)
-                    .width(1.dp),
-                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
-            )
-            VoiceIconButton(
-                icon = Icons.Default.VolumeUp,
-                label = "Read Aloud",
-                tint = MaterialTheme.colorScheme.secondary,
-                enabled = false
-            )
-            Text(
-                text = "Voice AI — coming soon",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                modifier = Modifier.weight(1f),
-                textAlign = TextAlign.End
-            )
-        }
-    }
-}
-
-@Composable
-private fun VoiceIconButton(icon: ImageVector, label: String, tint: Color, enabled: Boolean) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        IconButton(onClick = {}, enabled = enabled, modifier = Modifier.size(48.dp)) {
-            Icon(icon, contentDescription = label, tint = tint.copy(alpha = if (enabled) 1f else 0.4f), modifier = Modifier.size(28.dp))
-        }
-        Text(label, style = MaterialTheme.typography.labelSmall, color = tint.copy(alpha = 0.5f))
-    }
-}
-
 // ---- Main Step Card ----
 @Composable
 private fun MainStepCard(
     uiState: ProjectExecutionUiState,
     onBgColor: Color,
     theme: ExecutionTheme,
+    isTargetReached: Boolean = false,
     onStitchClick: (String) -> Unit
 ) {
     val cardBg = when (theme) {
@@ -403,7 +410,7 @@ private fun MainStepCard(
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             Text(
-                "Current Instruction",
+                stringResource(R.string.execution_current_instruction),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.SemiBold,
@@ -415,26 +422,41 @@ private fun MainStepCard(
                         StitchLinkText(
                             text = step.instructionData,
                             knownStitches = KNOWN_STITCHES,
-                            onStitchClick = onStitchClick
+                            onStitchClick = onStitchClick,
+                            textColor = onBgColor
                         )
                         if (step.stitchCountData != null) {
+                            val targetBgColor = if (isTargetReached) {
+                                Color(0xFF2E7D32).copy(alpha = 0.2f)
+                            } else {
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+                            }
+                            val targetTextColor = if (isTargetReached) {
+                                Color(0xFF4CAF50)
+                            } else {
+                                MaterialTheme.colorScheme.primary
+                            }
                             Surface(
-                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+                                color = targetBgColor,
                                 shape = RoundedCornerShape(8.dp)
                             ) {
                                 Text(
-                                    "Target: ${step.stitchCountData} stitches",
+                                    text = if (isTargetReached) {
+                                        "✓ " + stringResource(R.string.execution_target_stitches, step.stitchCountData.orEmpty())
+                                    } else {
+                                        stringResource(R.string.execution_target_stitches, step.stitchCountData.orEmpty())
+                                    },
                                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                                     style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    fontWeight = FontWeight.Medium
+                                    color = targetTextColor,
+                                    fontWeight = FontWeight.Bold
                                 )
                             }
                         }
                     }
                 } else {
                     Text(
-                        "🎉 All steps completed!",
+                        stringResource(R.string.execution_all_steps_done),
                         style = MaterialTheme.typography.headlineSmall,
                         color = onBgColor
                     )
@@ -472,9 +494,9 @@ private fun RowCounterCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    "Row Counter",
+                    stringResource(R.string.execution_row_counter),
                     style = MaterialTheme.typography.titleSmall,
-                    color = onBgColor.copy(alpha = 0.7f),
+                    color = onBgColor.copy(alpha = 0.8f),
                     fontWeight = FontWeight.SemiBold
                 )
                 IconButton(
@@ -483,8 +505,8 @@ private fun RowCounterCard(
                 ) {
                     Icon(
                         Icons.Default.Refresh,
-                        contentDescription = "Reset counter",
-                        tint = onBgColor.copy(alpha = 0.4f),
+                        contentDescription = stringResource(R.string.execution_reset_counter),
+                        tint = onBgColor.copy(alpha = 0.6f),
                         modifier = Modifier.size(18.dp)
                     )
                 }
@@ -494,12 +516,9 @@ private fun RowCounterCard(
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // -10 button
                 CounterButton(label = "-10", onClick = { onCounterChange((counter - 10).coerceAtLeast(0)) })
-                // -1 button
                 CounterButton(label = "-1", onClick = { onCounterChange((counter - 1).coerceAtLeast(0)) })
 
-                // Big counter display
                 Text(
                     text = "$counter",
                     style = MaterialTheme.typography.displaySmall,
@@ -509,9 +528,7 @@ private fun RowCounterCard(
                     textAlign = TextAlign.Center
                 )
 
-                // +1 button
                 CounterButton(label = "+1", positive = true, onClick = { onCounterChange(counter + 1) })
-                // +10 button
                 CounterButton(label = "+10", positive = true, onClick = { onCounterChange(counter + 10) })
             }
         }
@@ -548,40 +565,94 @@ private fun CounterButton(label: String, positive: Boolean = false, onClick: () 
     }
 }
 
-// ---- Note Card ----
+// ---- Expandable Note Card ----
 @Composable
 private fun NoteCard(
     uiState: ProjectExecutionUiState,
     theme: ExecutionTheme,
     onEditNote: () -> Unit
 ) {
+    var isExpanded by remember { mutableStateOf(false) }
     val cardBg = when (theme) {
         ExecutionTheme.DARK -> Color(0xFF1E1E38)
         ExecutionTheme.LIGHT -> MaterialTheme.colorScheme.surface
         ExecutionTheme.WARM -> Color(0xFF2C1A0E)
     }
+    val noteTextColor = when (theme) {
+        ExecutionTheme.DARK -> Color(0xFFE8E8F0)
+        ExecutionTheme.LIGHT -> MaterialTheme.colorScheme.onSurface
+        ExecutionTheme.WARM -> Color(0xFFF5E6D3)
+    }
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .animateContentSize()
-            .clickable { onEditNote() },
+            .animateContentSize(),
         colors = CardDefaults.cardColors(containerColor = cardBg),
         shape = RoundedCornerShape(16.dp)
     ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.Top
-        ) {
-            Icon(Icons.Default.EditNote, contentDescription = "Notes", tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(20.dp))
-            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text("My Notes", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.secondary)
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { isExpanded = !isExpanded },
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        Icons.Default.EditNote,
+                        contentDescription = stringResource(R.string.execution_my_notes),
+                        tint = MaterialTheme.colorScheme.secondary,
+                        modifier = Modifier.size(22.dp)
+                    )
+                    Text(
+                        stringResource(R.string.execution_my_notes),
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.secondary,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+                IconButton(
+                    onClick = { isExpanded = !isExpanded },
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    Icon(
+                        imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                        contentDescription = stringResource(R.string.execution_my_notes),
+                        tint = noteTextColor.copy(alpha = 0.7f)
+                    )
+                }
+            }
+
+            val currentNote = uiState.currentStepProgress?.note
+            if (isExpanded) {
+                Spacer(modifier = Modifier.height(10.dp))
                 Text(
-                    text = uiState.currentStepProgress?.note ?: "Tap to add a note for this step…",
+                    text = currentNote ?: stringResource(R.string.execution_no_notes),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = if (currentNote == null)
+                        noteTextColor.copy(alpha = 0.6f)
+                    else noteTextColor
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                OutlinedButton(
+                    onClick = onEditNote,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(if (currentNote.isNullOrBlank()) stringResource(R.string.execution_add_note) else stringResource(R.string.execution_edit_note))
+                }
+            } else if (!currentNote.isNullOrBlank()) {
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    text = currentNote,
                     style = MaterialTheme.typography.bodySmall,
-                    color = if (uiState.currentStepProgress?.note == null)
-                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                    else MaterialTheme.colorScheme.onSurface
+                    color = noteTextColor.copy(alpha = 0.85f),
+                    maxLines = 1
                 )
             }
         }
@@ -593,8 +664,33 @@ private fun NoteCard(
 private fun NavigationControls(
     uiState: ProjectExecutionUiState,
     viewModel: ProjectExecutionViewModel,
-    onBgColor: Color
+    onBgColor: Color,
+    isTargetReached: Boolean = false,
+    onFinishClick: () -> Unit = {}
 ) {
+    val isLastStep = uiState.totalSteps > 0 && (uiState.project?.currentStepIndex ?: 0) >= uiState.totalSteps - 1
+
+    // Wave / pulse animation when target stitches is reached
+    val infiniteTransition = rememberInfiniteTransition(label = "waveTransition")
+    val waveScale by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = 1.06f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(650, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "waveScale"
+    )
+    val waveRotation by infiniteTransition.animateFloat(
+        initialValue = -1.5f,
+        targetValue = 1.5f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(350, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "waveRotation"
+    )
+
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -609,19 +705,52 @@ private fun NavigationControls(
             Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_previous))
         }
 
-        // Mark Done / Next
-        Button(
-            onClick = viewModel::markCurrentStepDone,
-            enabled = uiState.canGoNext || (!uiState.isCurrentStepDone && uiState.totalSteps > 0),
-            modifier = Modifier
+        // Mark Done / Next / Finish
+        val buttonColors = when {
+            isTargetReached -> ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF2E7D32),
+                contentColor = Color.White
+            )
+            isLastStep -> ButtonDefaults.buttonColors(
+                containerColor = Color(0xFFE65100),
+                contentColor = Color.White
+            )
+            else -> ButtonDefaults.buttonColors()
+        }
+
+        val buttonModifier = if (isTargetReached && !uiState.isCurrentStepDone) {
+            Modifier
                 .weight(1f)
-                .height(52.dp),
+                .height(52.dp)
+                .graphicsLayer {
+                    scaleX = waveScale
+                    scaleY = waveScale
+                    rotationZ = waveRotation
+                }
+        } else {
+            Modifier
+                .weight(1f)
+                .height(52.dp)
+        }
+
+        Button(
+            onClick = {
+                if (isLastStep) {
+                    onFinishClick()
+                } else {
+                    viewModel.markCurrentStepDone()
+                }
+            },
+            enabled = uiState.canGoNext || isLastStep || (!uiState.isCurrentStepDone && uiState.totalSteps > 0),
+            colors = buttonColors,
+            modifier = buttonModifier,
             shape = RoundedCornerShape(14.dp)
         ) {
             val label = when {
-                uiState.isCurrentStepDone -> "Next Step →"
-                uiState.totalSteps > 0 && (uiState.project?.currentStepIndex ?: 0) == uiState.totalSteps - 1 -> "Finish ✓"
-                else -> "Mark Done ✓"
+                uiState.isCurrentStepDone -> stringResource(R.string.execution_next_step_arrow)
+                isLastStep -> stringResource(R.string.execution_finish_check)
+                isTargetReached -> "✓ " + stringResource(R.string.execution_mark_done_check)
+                else -> stringResource(R.string.execution_mark_done_check)
             }
             Text(label, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
         }
@@ -632,7 +761,7 @@ private fun NavigationControls(
             enabled = uiState.canGoNext,
             modifier = Modifier.size(52.dp)
         ) {
-            Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Next")
+            Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = stringResource(R.string.action_next))
         }
     }
 }
@@ -665,51 +794,25 @@ private fun StepNoteDialog(
     )
 }
 
-// ---- Size Selector ----
-@Composable
-private fun SizeSelector(
-    sizes: List<String>,
-    selectedSize: String?,
-    onSizeSelected: (String) -> Unit
-) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(
-            text = stringResource(R.string.execution_select_size),
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            sizes.forEach { size ->
-                val isSelected = size == selectedSize
-                OutlinedButton(
-                    onClick = { onSizeSelected(size) },
-                    modifier = Modifier.weight(1f),
-                    colors = if (isSelected) {
-                        ButtonDefaults.outlinedButtonColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                    } else {
-                        ButtonDefaults.outlinedButtonColors()
-                    }
-                ) {
-                    Text(size)
-                }
-            }
-        }
-    }
-}
-
-// ---- Congratulations Dialog ----
+// ---- Congratulations & Finished Photo Dialog ----
 @Composable
 private fun CongratsDialog(
     projectName: String,
     onDismiss: () -> Unit,
-    onNavigateBack: () -> Unit
+    onConfirmFinish: (String?) -> Unit
 ) {
+    var selectedPhotoUri by remember { mutableStateOf<String?>(null) }
+    val context = LocalContext.current
+
+    val photoPicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+        onResult = { uri ->
+            if (uri != null) {
+                selectedPhotoUri = ImageStorageHelper.saveImageToInternalStorage(context, uri) ?: uri.toString()
+            }
+        }
+    )
+
     AlertDialog(
         onDismissRequest = onDismiss,
         icon = {
@@ -717,7 +820,7 @@ private fun CongratsDialog(
         },
         title = {
             Text(
-                "Project Complete!",
+                stringResource(R.string.congrats_dialog_title),
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center
@@ -726,10 +829,10 @@ private fun CongratsDialog(
         text = {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
                 Text(
-                    text = "Congratulations! You've finished \"$projectName\".",
+                    text = stringResource(R.string.congrats_dialog_message, projectName),
                     style = MaterialTheme.typography.bodyLarge,
                     textAlign = TextAlign.Center
                 )
@@ -739,21 +842,69 @@ private fun CongratsDialog(
                 ) {
                     Row(
                         modifier = Modifier.padding(16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text("🪙", fontSize = 28.sp)
                         Column {
                             Text(
-                                "+50 coins earned!",
+                                stringResource(R.string.congrats_coins_earned),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer
                             )
                             Text(
-                                "Reward for completing your project",
+                                stringResource(R.string.congrats_coins_description),
                                 style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                            )
+                        }
+                    }
+                }
+
+                // Photo attachment section
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            photoPicker.launch(
+                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                            )
+                        },
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        if (selectedPhotoUri != null) {
+                            ImagePlaceholder(
+                                label = "P",
+                                imageUri = selectedPhotoUri,
+                                size = 48.dp,
+                                modifier = Modifier.clip(RoundedCornerShape(8.dp))
+                            )
+                        } else {
+                            Icon(
+                                Icons.Default.AddAPhoto,
+                                contentDescription = stringResource(R.string.congrats_photo_prompt),
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(32.dp)
+                            )
+                        }
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = if (selectedPhotoUri != null) stringResource(R.string.congrats_photo_added) else stringResource(R.string.congrats_photo_prompt),
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                text = stringResource(R.string.congrats_showcase_subtext),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                             )
                         }
                     }
@@ -763,17 +914,16 @@ private fun CongratsDialog(
         confirmButton = {
             Button(
                 onClick = {
-                    onDismiss()
-                    onNavigateBack()
+                    onConfirmFinish(selectedPhotoUri)
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Share & Finish 🎊")
+                Text(stringResource(R.string.congrats_share_and_finish))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Close")
+                Text(stringResource(R.string.congrats_close))
             }
         }
     )

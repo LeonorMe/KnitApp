@@ -54,4 +54,26 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
             appContainer.preferencesRepository.updateLastSquareChallenge(System.currentTimeMillis())
         }
     }
+
+    fun startSquareChallengeProject(onProjectReady: (String) -> Unit) {
+        viewModelScope.launch {
+            // Find existing challenge project or create a new one with square_purl_001
+            val existing = appContainer.projectRepository.observeAllProjects().firstOrNull()
+                ?.firstOrNull { it.patternId == "square_purl_001" }
+
+            val projectId = if (existing != null) {
+                existing.id
+            } else {
+                appContainer.projectRepository.createProject(
+                    name = "Daily 10x10 Swatch",
+                    patternId = "square_purl_001"
+                )
+            }
+            // Mark project as active so it executes immediately
+            appContainer.projectRepository.startProject(projectId)
+            // Mark challenge as started/done for today so badge disappears
+            appContainer.preferencesRepository.updateLastSquareChallenge(System.currentTimeMillis())
+            onProjectReady(projectId)
+        }
+    }
 }

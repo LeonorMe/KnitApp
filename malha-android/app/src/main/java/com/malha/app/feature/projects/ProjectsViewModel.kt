@@ -16,7 +16,7 @@ class ProjectsViewModel(application: Application) : AndroidViewModel(application
     private val creationState = MutableStateFlow(ProjectsCreationState())
 
     val uiState: StateFlow<ProjectsUiState> = appContainer.projectRepository
-        .observeActiveProjects()
+        .observeAllProjects()
         .combine(creationState) { projects, creation ->
             ProjectsUiState(
                 isLoading = false,
@@ -48,11 +48,10 @@ class ProjectsViewModel(application: Application) : AndroidViewModel(application
         viewModelScope.launch {
             creationState.update { it.copy(isCreating = true, errorMessage = null) }
             runCatching {
-                val patternId = appContainer.patternRepository.getFirstPatternId()
-
+                // Step 1: User provides name, pattern is configured in Step 2 (Project Configuration)
                 appContainer.projectRepository.createProject(
                     name = trimmedName,
-                    patternId = patternId
+                    patternId = null
                 )
             }.onSuccess { created ->
                 creationState.update {
@@ -66,6 +65,30 @@ class ProjectsViewModel(application: Application) : AndroidViewModel(application
                     it.copy(
                         isCreating = false,
                         errorMessage = error.message ?: "Could not create project.")
+                }
+            }
+        }
+    }
+
+    fun duplicateProject(projectId: String, newName: String? = null) {
+        viewModelScope.launch {
+            runCatching {
+                appContainer.projectRepository.duplicateProject(projectId, newName)
+            }.onFailure { error ->
+                creationState.update {
+                    it.copy(errorMessage = error.message ?: "Could not duplicate project.")
+                }
+            }
+        }
+    }
+
+    fun deleteProject(projectId: String) {
+        viewModelScope.launch {
+            runCatching {
+                appContainer.projectRepository.deleteProject(projectId)
+            }.onFailure { error ->
+                creationState.update {
+                    it.copy(errorMessage = error.message ?: "Could not delete project.")
                 }
             }
         }
@@ -85,3 +108,4 @@ private data class ProjectsCreationState(
     val errorMessage: String? = null,
     val createdProjectId: String? = null
 )
+

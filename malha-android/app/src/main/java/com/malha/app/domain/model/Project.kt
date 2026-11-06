@@ -9,5 +9,13 @@ data class Project(
     val currentStepIndex: Int,
     val updatedAt: Long,
     val colorHex: String? = null,
-    val selectedSize: String? = null
-)
+    val selectedSize: String? = null,
+    val status: String = "draft",
+    val completedAt: Long? = null,
+    val patternTitle: String? = null,
+    val patternSnapshotJson: String? = null
+) {
+    val projectStatus: ProjectStatus
+        get() = ProjectStatus.from(status)
+}
+

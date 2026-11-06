@@ -19,7 +19,8 @@ fun StitchLinkText(
     text: String,
     knownStitches: List<String>,
     onStitchClick: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    textColor: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.onSurface
 ) {
     val annotatedString = buildAnnotatedString {
         var currentIndex = 0
@@ -59,7 +60,7 @@ fun StitchLinkText(
         text = annotatedString,
         modifier = modifier,
         style = MaterialTheme.typography.bodyLarge.copy(
-            color = MaterialTheme.colorScheme.onSurface
+            color = textColor
         )
     )
 }

@@ -42,4 +42,16 @@ data class ProjectExecutionUiState(
 
     val currentNote: String?
         get() = currentStepProgress?.note
+
+    val completedStepCount: Int
+        get() {
+            val idx = (project?.currentStepIndex ?: 0)
+            return if (isCurrentStepDone) (idx + 1).coerceAtMost(totalSteps) else idx.coerceAtMost(totalSteps)
+        }
+
+    val progressPercent: Int
+        get() = if (totalSteps > 0) ((completedStepCount.toFloat() / totalSteps.toFloat()) * 100).toInt() else 0
+
+    val progressFloat: Float
+        get() = if (totalSteps > 0) (completedStepCount.toFloat() / totalSteps.toFloat()) else 0f
 }

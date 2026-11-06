@@ -125,7 +125,7 @@ fun ProfileScreen(
     val displayName = user?.name ?: posts.firstOrNull()?.userName ?: stringResource(R.string.profile_unknown_crafter)
     val displayBio = user?.bio ?: stringResource(R.string.profile_default_bio)
     val displayPhoto = user?.profilePicUri ?: posts.firstOrNull()?.userProfilePic
-    val completedProjects = posts.count { it.status == "finished" }
+    val completedProjects = posts.count { it.status == "completed" || it.status == "finished" }
     val level = craftLevelFor(completedProjects)
 
     Surface(

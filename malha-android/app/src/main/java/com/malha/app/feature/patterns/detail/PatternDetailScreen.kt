@@ -25,6 +25,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -65,7 +66,7 @@ fun PatternDetailScreen(
             if (uiState.isLoading) {
                 item {
                     Text(
-                        text = "Loading pattern...",
+                        text = stringResource(com.malha.app.R.string.loading),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -76,7 +77,7 @@ fun PatternDetailScreen(
             if (pattern == null) {
                 item {
                     Text(
-                        text = "Pattern not found.",
+                        text = stringResource(com.malha.app.R.string.no_patterns_found),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.error
                     )
@@ -103,7 +104,7 @@ fun PatternDetailScreen(
                     enabled = !uiState.isStartingProject,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Start project from this pattern")
+                    Text(stringResource(com.malha.app.R.string.action_start_project_pattern))
                 }
             }
 
@@ -168,10 +169,11 @@ private fun StartProjectDialog(
 ) {
     var projectName by remember(initialName) { mutableStateOf(initialName) }
     var localError by remember { mutableStateOf<String?>(null) }
+    val requiredMsg = stringResource(com.malha.app.R.string.project_name_is_required)
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Start project") },
+        title = { Text(stringResource(com.malha.app.R.string.dialog_start_project_title)) },
         text = {
             OutlinedTextField(
                 value = projectName,
@@ -179,7 +181,7 @@ private fun StartProjectDialog(
                     projectName = it
                     localError = null
                 },
-                label = { Text("Project name") },
+                label = { Text(stringResource(com.malha.app.R.string.input_project_name)) },
                 supportingText = {
                     if (localError != null) {
                         Text(localError.orEmpty())
@@ -194,13 +196,13 @@ private fun StartProjectDialog(
                 enabled = !isStarting,
                 onClick = {
                     if (projectName.isBlank()) {
-                        localError = "Project name is required."
+                        localError = requiredMsg
                     } else {
                         onStart(projectName)
                     }
                 }
             ) {
-                Text("Start")
+                Text(stringResource(com.malha.app.R.string.action_start))
             }
         },
         dismissButton = {
@@ -208,9 +210,10 @@ private fun StartProjectDialog(
                 enabled = !isStarting,
                 onClick = onDismiss
             ) {
-                Text("Cancel")
+                Text(stringResource(com.malha.app.R.string.action_cancel))
             }
         }
     )
 }
+
 

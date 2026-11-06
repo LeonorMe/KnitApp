@@ -6,11 +6,16 @@ import kotlinx.coroutines.flow.Flow
 
 interface ProjectRepository {
     fun observeActiveProjects(): Flow<List<Project>>
+    fun observeAllProjects(): Flow<List<Project>>
     fun observeProject(projectId: String): Flow<Project?>
+    suspend fun getProject(projectId: String): Project?
     fun observeStepProgress(projectId: String, patternStepId: String): Flow<ProjectStepProgress?>
     suspend fun createProject(name: String, patternId: String?): String
+    suspend fun duplicateProject(sourceProjectId: String, newName: String? = null): String
+    suspend fun startProject(projectId: String)
     suspend fun archiveProject(projectId: String)
-    //suspend fun completeProject(projectId: String)
+    suspend fun deleteProject(projectId: String)
+    suspend fun completeProject(projectId: String, photoUri: String? = null)
     suspend fun updateProgress(projectId: String, stepIndex: Int, progressPercent: Int)
     suspend fun updateProjectColor(projectId: String, colorHex: String?)
     suspend fun saveStepProgress(
@@ -26,5 +31,17 @@ interface ProjectRepository {
         selectedSize: String?,
         materialIds: List<String>
     )
+    suspend fun updateProjectConfiguration(
+        projectId: String,
+        name: String,
+        colorHex: String?,
+        selectedSize: String?,
+        patternId: String?,
+        patternTitle: String?,
+        patternSnapshotJson: String?,
+        materialIds: List<String>,
+        status: String
+    )
     fun observeProjectMaterials(projectId: String): Flow<List<String>>
 }
+

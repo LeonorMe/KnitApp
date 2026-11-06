@@ -31,5 +31,8 @@ data class ProjectEntity(
     val createdAt: Long,
     val updatedAt: Long,
     val colorHex: String? = null,
-    val selectedSize: String? = null
+    val selectedSize: String? = null,
+    val patternTitle: String? = null,
+    val patternSnapshotJson: String? = null
 )
+

@@ -26,7 +26,7 @@ import com.malha.app.core.database.entity.*
         ReviewEntity::class,
         AIRequestEntity::class
     ],
-    version = 10,
+    version = 12,
     exportSchema = false
 )
 @TypeConverters(RoomConverters::class)
@@ -52,5 +52,32 @@ abstract class MalhaDatabase : RoomDatabase() {
                 database.execSQL("ALTER TABLE projects ADD COLUMN selectedSize TEXT DEFAULT NULL")
             }
         }
+        // Recreate project_materials without FK constraints to prevent SQLiteConstraintException
+        // during Firebase sync when parent rows haven't arrived yet.
+        val MIGRATION_10_11 = object : Migration(10, 11) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("DROP TABLE IF EXISTS `project_materials`")
+                database.execSQL("""
+                    CREATE TABLE IF NOT EXISTS `project_materials` (
+                        `id` TEXT NOT NULL,
+                        `projectId` TEXT NOT NULL,
+                        `materialId` TEXT NOT NULL,
+                        `plannedQuantity` REAL,
+                        `usedQuantity` REAL,
+                        PRIMARY KEY(`id`)
+                    )
+                """.trimIndent())
+                database.execSQL("CREATE INDEX IF NOT EXISTS `index_project_materials_projectId` ON `project_materials` (`projectId`)")
+                database.execSQL("CREATE INDEX IF NOT EXISTS `index_project_materials_materialId` ON `project_materials` (`materialId`)")
+            }
+        }
+        val MIGRATION_11_12 = object : Migration(11, 12) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE projects ADD COLUMN patternTitle TEXT DEFAULT NULL")
+                database.execSQL("ALTER TABLE projects ADD COLUMN patternSnapshotJson TEXT DEFAULT NULL")
+            }
+        }
     }
 }
+
+

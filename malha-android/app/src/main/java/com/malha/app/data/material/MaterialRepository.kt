@@ -13,4 +13,13 @@ interface MaterialRepository {
         unit: String,
         imageUri: String? = null
     ): String
+    suspend fun updateMaterial(
+        id: String,
+        name: String,
+        type: MaterialType,
+        quantity: Double,
+        unit: String,
+        imageUri: String? = null
+    )
+    suspend fun deleteMaterial(id: String)
 }

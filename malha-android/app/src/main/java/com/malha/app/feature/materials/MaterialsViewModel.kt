@@ -81,6 +81,61 @@ class MaterialsViewModel(application: Application) : AndroidViewModel(applicatio
         }
     }
 
+    fun updateMaterial(
+        id: String,
+        name: String,
+        type: MaterialType,
+        quantityText: String,
+        unit: String,
+        imageUri: String? = null
+    ) {
+        val trimmedName = name.trim()
+        val trimmedUnit = unit.trim().ifBlank { defaultUnitFor(type) }
+        val quantity = quantityText.trim().replace(',', '.').toDoubleOrNull()
+
+        when {
+            trimmedName.isBlank() -> {
+                creationState.update { it.copy(errorMessage = "Material name is required.") }
+                return
+            }
+            quantity == null || quantity <= 0.0 -> {
+                creationState.update { it.copy(errorMessage = "Quantity must be greater than 0.") }
+                return
+            }
+        }
+
+        viewModelScope.launch {
+            creationState.update { it.copy(isCreating = true, errorMessage = null) }
+            runCatching {
+                appContainer.materialRepository.updateMaterial(
+                    id = id,
+                    name = trimmedName,
+                    type = type,
+                    quantity = quantity,
+                    unit = trimmedUnit,
+                    imageUri = imageUri
+                )
+            }.onFailure { error ->
+                creationState.update {
+                    it.copy(errorMessage = error.message ?: "Could not update material.")
+                }
+            }
+            creationState.update { it.copy(isCreating = false) }
+        }
+    }
+
+    fun deleteMaterial(id: String) {
+        viewModelScope.launch {
+            runCatching {
+                appContainer.materialRepository.deleteMaterial(id)
+            }.onFailure { error ->
+                creationState.update {
+                    it.copy(errorMessage = error.message ?: "Could not delete material.")
+                }
+            }
+        }
+    }
+
     fun clearError() {
         creationState.update { it.copy(errorMessage = null) }
     }

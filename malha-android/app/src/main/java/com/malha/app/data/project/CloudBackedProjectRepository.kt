@@ -1,6 +1,7 @@
 package com.malha.app.data.project
 
 import android.util.Log
+import com.malha.app.core.database.dao.MaterialDao
 import com.malha.app.core.database.dao.ProjectDao
 import com.malha.app.core.database.entity.ProjectEntity
 import com.malha.app.core.database.entity.ProjectMaterialEntity
@@ -23,6 +24,7 @@ private const val TAG = "CloudProjectRepo"
 class CloudBackedProjectRepository(
     private val local: ProjectRepository,
     private val projectDao: ProjectDao,
+    private val materialDao: MaterialDao,
     private val authService: AuthService,
     private val cloudDataService: CloudDataService,
     private val syncScope: CoroutineScope
@@ -37,6 +39,7 @@ class CloudBackedProjectRepository(
     private fun startProjectSync() {
         syncJob?.cancel()
         syncJob = syncScope.launch {
+            runCatching {
             authService.authState
                 .flatMapLatest { authUser ->
                     val userId = authUser?.id
@@ -55,50 +58,69 @@ class CloudBackedProjectRepository(
                                         val selectedSize = map["selectedSize"] as? String
                                         val updatedAt = (map["updatedAt"] as? Long) ?: System.currentTimeMillis()
 
-                                        projectDao.insertProject(
-                                            ProjectEntity(
-                                                id = id,
-                                                name = name,
-                                                imageUri = null,
-                                                craftType = "knitting",
-                                                patternId = patternId,
-                                                status = status,
-                                                currentStepIndex = currentStepIndex,
-                                                progressPercent = progressPercent,
-                                                startedAt = updatedAt,
-                                                completedAt = null,
-                                                createdAt = updatedAt,
-                                                updatedAt = updatedAt,
-                                                colorHex = colorHex,
-                                                selectedSize = selectedSize
+                                        runCatching {
+                                            projectDao.insertProject(
+                                                ProjectEntity(
+                                                    id = id,
+                                                    name = name,
+                                                    imageUri = null,
+                                                    craftType = "knitting",
+                                                    patternId = patternId,
+                                                    status = status,
+                                                    currentStepIndex = currentStepIndex,
+                                                    progressPercent = progressPercent,
+                                                    startedAt = updatedAt,
+                                                    completedAt = null,
+                                                    createdAt = updatedAt,
+                                                    updatedAt = updatedAt,
+                                                    colorHex = colorHex,
+                                                    selectedSize = selectedSize
+                                                )
                                             )
-                                        )
+                                        }.onFailure { e -> Log.w(TAG, "Failed to insert remote project $id", e) }
                                     }
                                 }
                         }
                         launch {
-                            cloudDataService.observeProjectMaterials(userId)
-                                .collectLatest { remotePMs ->
-                                    remotePMs.forEach { map ->
-                                        val id = map["id"] as? String ?: return@forEach
-                                        val projectId = map["projectId"] as? String ?: return@forEach
-                                        val materialId = map["materialId"] as? String ?: return@forEach
-                                        val plannedQuantity = map["plannedQuantity"] as? Double
-                                        val usedQuantity = map["usedQuantity"] as? Double
+                            try {
+                                cloudDataService.observeProjectMaterials(userId)
+                                    .collectLatest { remotePMs ->
+                                        remotePMs.forEach { map ->
+                                            val id = map["id"] as? String ?: return@forEach
+                                            val projectId = map["projectId"] as? String ?: return@forEach
+                                            val materialId = map["materialId"] as? String ?: return@forEach
+                                            val plannedQuantity = map["plannedQuantity"] as? Double
+                                            val usedQuantity = map["usedQuantity"] as? Double
 
-                                        projectDao.insertProjectMaterials(
-                                            listOf(
-                                                ProjectMaterialEntity(
-                                                    id = id,
-                                                    projectId = projectId,
-                                                    materialId = materialId,
-                                                    plannedQuantity = plannedQuantity,
-                                                    usedQuantity = usedQuantity
+                                            // Guard: only insert if both parent rows exist to avoid FK violation
+                                            val projectExists = projectDao.countProjects() > 0 &&
+                                                projectDao.projectExistsById(projectId)
+                                            val materialExists = materialDao.countMaterialsById(materialId) > 0
+                                            if (!projectExists || !materialExists) {
+                                                Log.d(TAG, "Skipping PM $id: project=$projectExists material=$materialExists")
+                                                return@forEach
+                                            }
+
+                                            try {
+                                                projectDao.insertProjectMaterials(
+                                                    listOf(
+                                                        ProjectMaterialEntity(
+                                                            id = id,
+                                                            projectId = projectId,
+                                                            materialId = materialId,
+                                                            plannedQuantity = plannedQuantity,
+                                                            usedQuantity = usedQuantity
+                                                        )
+                                                    )
                                                 )
-                                            )
-                                        )
+                                            } catch (e: Exception) {
+                                                Log.w(TAG, "FK violation syncing project material $id", e)
+                                            }
+                                        }
                                     }
-                                }
+                            } catch (e: Exception) {
+                                Log.e(TAG, "Project materials sync failed", e)
+                            }
                         }
                         flowOf(null)
                     } else {
@@ -106,12 +128,17 @@ class CloudBackedProjectRepository(
                     }
                 }
                 .collectLatest {}
+            }.onFailure { e -> Log.e(TAG, "Project sync coroutine failed", e) }
         }
     }
 
     override fun observeActiveProjects(): Flow<List<Project>> = local.observeActiveProjects()
 
+    override fun observeAllProjects(): Flow<List<Project>> = local.observeAllProjects()
+
     override fun observeProject(projectId: String): Flow<Project?> = local.observeProject(projectId)
+
+    override suspend fun getProject(projectId: String): Project? = local.getProject(projectId)
 
     override fun observeStepProgress(projectId: String, patternStepId: String): Flow<ProjectStepProgress?> {
         return local.observeStepProgress(projectId, patternStepId)
@@ -119,6 +146,7 @@ class CloudBackedProjectRepository(
 
     override suspend fun createProject(name: String, patternId: String?): String {
         val projectId = local.createProject(name, patternId)
+        val initialStatus = if (patternId != null) "ready" else "draft"
         val user = authService.currentUser
         Log.d(TAG, "createProject: id=$projectId user=${user?.id}")
         if (user != null) {
@@ -130,7 +158,7 @@ class CloudBackedProjectRepository(
                     patternId = patternId,
                     currentStepIndex = 0,
                     progressPercent = 0,
-                    status = "active"
+                    status = initialStatus
                 )
                 Log.d(TAG, "createProject: Firestore write OK for $projectId")
             } catch (e: Exception) {
@@ -141,6 +169,50 @@ class CloudBackedProjectRepository(
         }
         return projectId
     }
+
+    override suspend fun duplicateProject(sourceProjectId: String, newName: String?): String {
+        val newProjectId = local.duplicateProject(sourceProjectId, newName)
+        val newProj = local.getProject(newProjectId)
+        val user = authService.currentUser
+        if (user != null && newProj != null) {
+            try {
+                cloudDataService.upsertProject(
+                    userId = user.id,
+                    projectId = newProjectId,
+                    name = newProj.name,
+                    patternId = newProj.patternId,
+                    currentStepIndex = 0,
+                    progressPercent = 0,
+                    status = newProj.status
+                )
+            } catch (e: Exception) {
+                Log.e(TAG, "duplicateProject: Firestore write FAILED for $newProjectId", e)
+            }
+        }
+        return newProjectId
+    }
+
+    override suspend fun startProject(projectId: String) {
+        local.startProject(projectId)
+        val user = authService.currentUser
+        if (user != null) {
+            try {
+                val proj = local.getProject(projectId)
+                cloudDataService.upsertProject(
+                    userId = user.id,
+                    projectId = projectId,
+                    name = proj?.name ?: "",
+                    patternId = proj?.patternId,
+                    currentStepIndex = proj?.currentStepIndex ?: 0,
+                    progressPercent = proj?.progressPercent ?: 0,
+                    status = "active"
+                )
+            } catch (e: Exception) {
+                Log.e(TAG, "startProject: Firestore write FAILED for $projectId", e)
+            }
+        }
+    }
+
 
     override suspend fun archiveProject(projectId: String) {
         local.archiveProject(projectId)
@@ -158,6 +230,39 @@ class CloudBackedProjectRepository(
                 )
             } catch (e: Exception) {
                 Log.e(TAG, "archiveProject: Firestore write FAILED for $projectId", e)
+            }
+        }
+    }
+
+    override suspend fun deleteProject(projectId: String) {
+        local.deleteProject(projectId)
+        val user = authService.currentUser
+        if (user != null) {
+            try {
+                cloudDataService.deleteProject(userId = user.id, projectId = projectId)
+            } catch (e: Exception) {
+                // Local delete succeeded — log and swallow the cloud error
+                Log.e(TAG, "deleteProject: Firestore delete FAILED for $projectId", e)
+            }
+        }
+    }
+
+    override suspend fun completeProject(projectId: String, photoUri: String?) {
+        local.completeProject(projectId, photoUri)
+        val user = authService.currentUser
+        if (user != null) {
+            try {
+                cloudDataService.upsertProject(
+                    userId = user.id,
+                    projectId = projectId,
+                    name = "",
+                    patternId = null,
+                    currentStepIndex = 0,
+                    progressPercent = 100,
+                    status = "completed"
+                )
+            } catch (e: Exception) {
+                Log.e(TAG, "completeProject: Firestore write FAILED for $projectId", e)
             }
         }
     }
@@ -226,6 +331,57 @@ class CloudBackedProjectRepository(
             }
         }
     }
+
+    override suspend fun updateProjectConfiguration(
+        projectId: String,
+        name: String,
+        colorHex: String?,
+        selectedSize: String?,
+        patternId: String?,
+        patternTitle: String?,
+        patternSnapshotJson: String?,
+        materialIds: List<String>,
+        status: String
+    ) {
+        local.updateProjectConfiguration(
+            projectId,
+            name,
+            colorHex,
+            selectedSize,
+            patternId,
+            patternTitle,
+            patternSnapshotJson,
+            materialIds,
+            status
+        )
+        val user = authService.currentUser
+        if (user != null) {
+            try {
+                cloudDataService.upsertProject(
+                    userId = user.id,
+                    projectId = projectId,
+                    name = name,
+                    patternId = patternId,
+                    currentStepIndex = 0,
+                    progressPercent = 0,
+                    status = status
+                )
+                materialIds.forEach { materialId ->
+                    cloudDataService.upsertProjectMaterial(
+                        userId = user.id,
+                        id = "$projectId:$materialId",
+                        projectId = projectId,
+                        materialId = materialId,
+                        plannedQuantity = null,
+                        usedQuantity = null
+                    )
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "updateProjectConfiguration: Firestore write FAILED for $projectId", e)
+            }
+        }
+    }
+
 
     override fun observeProjectMaterials(projectId: String): Flow<List<String>> {
         return local.observeProjectMaterials(projectId)

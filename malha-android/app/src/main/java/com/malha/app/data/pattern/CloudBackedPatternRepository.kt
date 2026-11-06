@@ -24,104 +24,112 @@ class CloudBackedPatternRepository(
     init {
         // Continuous Firestore -> Room sync for Patterns
         syncScope.launch {
-            cloudDataService.observePatterns()
-                .collectLatest { remotePatterns ->
-                    remotePatterns.forEach { map ->
-                        val id = map["id"] as? String ?: return@forEach
-                        val title = map["title"] as? String ?: return@forEach
-                        val designer = map["designer"] as? String
-                        val year = (map["year"] as? Long)?.toInt()
-                        val craftStr = map["craft"] as? String ?: "KNITTING"
-                        val diffStr = map["difficulty"] as? String ?: "BEGINNER"
-                        val sourceStr = map["sourceType"] as? String ?: "MANUAL"
-                        val verStr = map["verificationStatus"] as? String ?: "UNVERIFIED"
-                        
-                        val craft = runCatching { CraftType.valueOf(craftStr) }.getOrDefault(CraftType.KNITTING)
-                        val difficulty = runCatching { SkillLevel.valueOf(diffStr) }.getOrDefault(SkillLevel.BEGINNER)
-                        val sourceType = runCatching { SourceType.valueOf(sourceStr) }.getOrDefault(SourceType.MANUAL)
-                        val verificationStatus = runCatching { VerificationStatus.valueOf(verStr) }.getOrDefault(VerificationStatus.UNVERIFIED)
+            runCatching {
+                cloudDataService.observePatterns()
+                    .collectLatest { remotePatterns ->
+                        remotePatterns.forEach { map ->
+                            val id = map["id"] as? String ?: return@forEach
+                            val title = map["title"] as? String ?: return@forEach
+                            val designer = map["designer"] as? String
+                            val year = (map["year"] as? Long)?.toInt()
+                            val craftStr = map["craft"] as? String ?: "KNITTING"
+                            val diffStr = map["difficulty"] as? String ?: "BEGINNER"
+                            val sourceStr = map["sourceType"] as? String ?: "MANUAL"
+                            val verStr = map["verificationStatus"] as? String ?: "UNVERIFIED"
+                            
+                            val craft = runCatching { CraftType.valueOf(craftStr) }.getOrDefault(CraftType.KNITTING)
+                            val difficulty = runCatching { SkillLevel.valueOf(diffStr) }.getOrDefault(SkillLevel.BEGINNER)
+                            val sourceType = runCatching { SourceType.valueOf(sourceStr) }.getOrDefault(SourceType.MANUAL)
+                            val verificationStatus = runCatching { VerificationStatus.valueOf(verStr) }.getOrDefault(VerificationStatus.UNVERIFIED)
 
-                        val gaugeWidth = (map["gaugeWidth"] as? Long)?.toInt()
-                        val gaugeHeight = (map["gaugeHeight"] as? Long)?.toInt()
-                        val gaugeUnit = map["gaugeUnit"] as? String
-                        val originalText = map["originalText"] as? String
-                        val aiConfidence = (map["aiConfidence"] as? Double) ?: 1.0
-                        val isPremium = (map["isPremium"] as? Boolean) ?: false
-                        val availableSizes = map["availableSizes"] as? String
-                        val selectedSize = map["selectedSize"] as? String
-                        val updatedAt = (map["updatedAt"] as? Long) ?: System.currentTimeMillis()
+                            val gaugeWidth = (map["gaugeWidth"] as? Long)?.toInt()
+                            val gaugeHeight = (map["gaugeHeight"] as? Long)?.toInt()
+                            val gaugeUnit = map["gaugeUnit"] as? String
+                            val originalText = map["originalText"] as? String
+                            val aiConfidence = (map["aiConfidence"] as? Double) ?: 1.0
+                            val isPremium = (map["isPremium"] as? Boolean) ?: false
+                            val availableSizes = map["availableSizes"] as? String
+                            val selectedSize = map["selectedSize"] as? String
+                            val updatedAt = (map["updatedAt"] as? Long) ?: System.currentTimeMillis()
 
-                        patternDao.insertPattern(
-                            PatternEntity(
-                                id = id,
-                                title = title,
-                                designer = designer,
-                                year = year,
-                                craft = craft,
-                                difficulty = difficulty,
-                                gaugeWidth = gaugeWidth,
-                                gaugeHeight = gaugeHeight,
-                                gaugeUnit = gaugeUnit,
-                                sourceType = sourceType,
-                                originalText = originalText,
-                                verificationStatus = verificationStatus,
-                                aiConfidence = aiConfidence,
-                                isPremium = isPremium,
-                                availableSizes = availableSizes,
-                                selectedSize = selectedSize,
-                                updatedAt = updatedAt
-                            )
-                        )
+                            runCatching {
+                                patternDao.insertPattern(
+                                    PatternEntity(
+                                        id = id,
+                                        title = title,
+                                        designer = designer,
+                                        year = year,
+                                        craft = craft,
+                                        difficulty = difficulty,
+                                        gaugeWidth = gaugeWidth,
+                                        gaugeHeight = gaugeHeight,
+                                        gaugeUnit = gaugeUnit,
+                                        sourceType = sourceType,
+                                        originalText = originalText,
+                                        verificationStatus = verificationStatus,
+                                        aiConfidence = aiConfidence,
+                                        isPremium = isPremium,
+                                        availableSizes = availableSizes,
+                                        selectedSize = selectedSize,
+                                        updatedAt = updatedAt
+                                    )
+                                )
+                            }.onFailure { e -> android.util.Log.w("CloudPatternRepo", "Failed to insert remote pattern $id", e) }
+                        }
                     }
-                }
+            }.onFailure { e -> android.util.Log.e("CloudPatternRepo", "Pattern sync coroutine failed", e) }
         }
 
         // Continuous Firestore -> Room sync for Pattern Steps
         syncScope.launch {
-            cloudDataService.observePatternSteps()
-                .collectLatest { remoteSteps ->
-                    remoteSteps.forEach { map ->
-                        val id = map["id"] as? String ?: return@forEach
-                        val patternId = map["patternId"] as? String ?: return@forEach
-                        val sectionId = map["sectionId"] as? String ?: return@forEach
-                        val orderIndex = (map["orderIndex"] as? Long)?.toInt() ?: 0
-                        val stepTypeStr = map["stepType"] as? String ?: "NORMAL"
-                        val stepType = runCatching { StepType.valueOf(stepTypeStr) }.getOrDefault(StepType.NORMAL)
-                        val instruction = map["instruction"] as? String ?: ""
-                        val rowNumber = (map["rowNumber"] as? Long)?.toInt()
-                        val stitchCount = (map["stitchCount"] as? Long)?.toInt()
-                        val confidence = (map["confidence"] as? Double) ?: 1.0
-                        
-                        val repeatCount = (map["repeatCount"] as? Long)?.toInt()
-                        val everyNRows = (map["everyNRows"] as? Long)?.toInt()
-                        val startRow = (map["startRow"] as? Long)?.toInt()
-                        val endRow = (map["endRow"] as? Long)?.toInt()
-                        val condition = map["condition"] as? String
-                        val stitchPatternId = map["stitchPatternId"] as? String
-                        val updatedAt = (map["updatedAt"] as? Long) ?: System.currentTimeMillis()
+            runCatching {
+                cloudDataService.observePatternSteps()
+                    .collectLatest { remoteSteps ->
+                        remoteSteps.forEach { map ->
+                            val id = map["id"] as? String ?: return@forEach
+                            val patternId = map["patternId"] as? String ?: return@forEach
+                            val sectionId = map["sectionId"] as? String ?: return@forEach
+                            val orderIndex = (map["orderIndex"] as? Long)?.toInt() ?: 0
+                            val stepTypeStr = map["stepType"] as? String ?: "NORMAL"
+                            val stepType = runCatching { StepType.valueOf(stepTypeStr) }.getOrDefault(StepType.NORMAL)
+                            val instruction = map["instruction"] as? String ?: ""
+                            val rowNumber = (map["rowNumber"] as? Long)?.toInt()
+                            val stitchCount = (map["stitchCount"] as? Long)?.toInt()
+                            val confidence = (map["confidence"] as? Double) ?: 1.0
+                            
+                            val repeatCount = (map["repeatCount"] as? Long)?.toInt()
+                            val everyNRows = (map["everyNRows"] as? Long)?.toInt()
+                            val startRow = (map["startRow"] as? Long)?.toInt()
+                            val endRow = (map["endRow"] as? Long)?.toInt()
+                            val condition = map["condition"] as? String
+                            val stitchPatternId = map["stitchPatternId"] as? String
+                            val updatedAt = (map["updatedAt"] as? Long) ?: System.currentTimeMillis()
 
-                        patternDao.insertStep(
-                            PatternStepEntity(
-                                id = id,
-                                patternId = patternId,
-                                sectionId = sectionId,
-                                orderIndex = orderIndex,
-                                stepType = stepType,
-                                instruction = instruction,
-                                rowNumber = rowNumber,
-                                stitchCount = stitchCount,
-                                confidence = confidence,
-                                repeatCount = repeatCount,
-                                everyNRows = everyNRows,
-                                startRow = startRow,
-                                endRow = endRow,
-                                condition = condition,
-                                stitchPatternId = stitchPatternId,
-                                updatedAt = updatedAt
-                            )
-                        )
+                            runCatching {
+                                patternDao.insertStep(
+                                    PatternStepEntity(
+                                        id = id,
+                                        patternId = patternId,
+                                        sectionId = sectionId,
+                                        orderIndex = orderIndex,
+                                        stepType = stepType,
+                                        instruction = instruction,
+                                        rowNumber = rowNumber,
+                                        stitchCount = stitchCount,
+                                        confidence = confidence,
+                                        repeatCount = repeatCount,
+                                        everyNRows = everyNRows,
+                                        startRow = startRow,
+                                        endRow = endRow,
+                                        condition = condition,
+                                        stitchPatternId = stitchPatternId,
+                                        updatedAt = updatedAt
+                                    )
+                                )
+                            }.onFailure { e -> android.util.Log.w("CloudPatternRepo", "Failed to insert remote step $id", e) }
+                        }
                     }
-                }
+            }.onFailure { e -> android.util.Log.e("CloudPatternRepo", "Step sync coroutine failed", e) }
         }
     }
 

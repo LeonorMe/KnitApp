@@ -44,4 +44,42 @@ class RoomMaterialRepository(
         )
         return materialId
     }
+
+    override suspend fun updateMaterial(
+        id: String,
+        name: String,
+        type: MaterialType,
+        quantity: Double,
+        unit: String,
+        imageUri: String?
+    ) {
+        val now = System.currentTimeMillis()
+        val existing = materialDao.getMaterialById(id)
+        val updated = existing?.copy(
+            name = name,
+            type = type.storageValue,
+            quantity = quantity,
+            unit = unit,
+            imageUri = imageUri ?: existing.imageUri,
+            updatedAt = now
+        ) ?: MaterialEntity(
+            id = id,
+            name = name,
+            imageUri = imageUri,
+            type = type.storageValue,
+            quantity = quantity,
+            unit = unit,
+            fiber = null,
+            gramsPerBall = null,
+            needleType = null,
+            sizeMm = null,
+            lengthCm = null,
+            updatedAt = now
+        )
+        materialDao.insertMaterial(updated)
+    }
+
+    override suspend fun deleteMaterial(id: String) {
+        materialDao.deleteMaterial(id)
+    }
 }

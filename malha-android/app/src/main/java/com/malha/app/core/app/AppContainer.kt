@@ -54,6 +54,7 @@ class AppContainer(context: Context) {
     val projectRepository: ProjectRepository = CloudBackedProjectRepository(
         local = localProjectRepository,
         projectDao = database.projectDao(),
+        materialDao = database.materialDao(),
         authService = authService,
         cloudDataService = cloudDataService,
         syncScope = applicationScope

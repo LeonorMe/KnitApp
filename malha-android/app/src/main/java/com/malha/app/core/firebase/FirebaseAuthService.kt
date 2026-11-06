@@ -9,26 +9,34 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 
 class FirebaseAuthService(
-    private val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
+    private val firebaseAuth: FirebaseAuth? = runCatching { FirebaseAuth.getInstance() }.getOrNull()
 ) : AuthService {
+
     override val currentUser: AuthUser?
-        get() = firebaseAuth.currentUser?.toAuthUser()
+        get() = firebaseAuth?.currentUser?.toAuthUser()
 
     override val authState: Flow<AuthUser?> = callbackFlow {
-        val listener = FirebaseAuth.AuthStateListener { auth ->
-            trySend(auth.currentUser?.toAuthUser())
+        val auth = firebaseAuth
+        if (auth == null) {
+            trySend(null)
+            awaitClose { }
+            return@callbackFlow
         }
-        firebaseAuth.addAuthStateListener(listener)
-        awaitClose { firebaseAuth.removeAuthStateListener(listener) }
+        val listener = FirebaseAuth.AuthStateListener { a ->
+            trySend(a.currentUser?.toAuthUser())
+        }
+        auth.addAuthStateListener(listener)
+        awaitClose { auth.removeAuthStateListener(listener) }
     }
 
     override fun isSignedIn(): Boolean {
-        return firebaseAuth.currentUser != null
+        return firebaseAuth?.currentUser != null
     }
 
     override suspend fun signInWithGoogleIdToken(idToken: String): AuthUser {
+        val auth = checkNotNull(firebaseAuth) { "Firebase Auth is not available." }
         val credential = GoogleAuthProvider.getCredential(idToken, null)
-        val result = firebaseAuth.signInWithCredential(credential).await()
+        val result = auth.signInWithCredential(credential).await()
         val user = requireNotNull(result.user) {
             "Google sign-in completed without a Firebase user."
         }
@@ -37,7 +45,8 @@ class FirebaseAuthService(
     }
 
     override suspend fun signInAnonymously(): AuthUser {
-        val result = firebaseAuth.signInAnonymously().await()
+        val auth = checkNotNull(firebaseAuth) { "Firebase Auth is not available." }
+        val result = auth.signInAnonymously().await()
         val user = requireNotNull(result.user) {
             "Anonymous sign-in completed without a Firebase user."
         }
@@ -45,7 +54,7 @@ class FirebaseAuthService(
     }
 
     override fun signOut() {
-        firebaseAuth.signOut()
+        firebaseAuth?.signOut()
     }
 
     private fun FirebaseUser.toAuthUser(): AuthUser {

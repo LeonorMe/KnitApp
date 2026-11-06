@@ -32,6 +32,7 @@ interface CloudDataService {
         status: String
     )
     suspend fun updateProjectColor(userId: String, projectId: String, colorHex: String?)
+    suspend fun deleteProject(userId: String, projectId: String)
     suspend fun upsertMaterial(
         userId: String,
         materialId: String,
@@ -41,6 +42,7 @@ interface CloudDataService {
         unit: String,
         imageUri: String?
     )
+    suspend fun deleteMaterial(userId: String, materialId: String)
 
     suspend fun createPost(
         userId: String,

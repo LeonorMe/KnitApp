@@ -15,7 +15,11 @@ fun ProjectEntity.toDomain(): Project {
         currentStepIndex = currentStepIndex,
         updatedAt = updatedAt,
         colorHex = colorHex,
-        selectedSize = selectedSize
+        selectedSize = selectedSize,
+        status = status,
+        completedAt = completedAt,
+        patternTitle = patternTitle,
+        patternSnapshotJson = patternSnapshotJson
     )
 }
 

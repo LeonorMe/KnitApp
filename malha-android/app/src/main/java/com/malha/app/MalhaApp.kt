@@ -4,13 +4,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.List
 import androidx.compose.material.icons.outlined.AccountCircle
-import androidx.compose.material.icons.outlined.Build
-import androidx.compose.material.icons.outlined.Face
-import androidx.compose.material.icons.outlined.Folder
 import androidx.compose.material.icons.outlined.Groups
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -32,11 +28,14 @@ fun MalhaApp() {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
 
+    val isExecutionPage = currentRoute?.startsWith("project/") == true ||
+                          currentRoute?.startsWith("project_execution") == true ||
+                          currentRoute?.startsWith("project_settings/") == true
+
     val isHomeHierarchy = currentRoute == "home" || 
                           currentRoute == "profile" || 
                           currentRoute == "settings" || 
-                          currentRoute == "profile_edit" || 
-                          currentRoute?.startsWith("project/") == true
+                          currentRoute == "profile_edit"
                           
     val isCommunityHierarchy = currentRoute == "community" || 
                                currentRoute == "create_post" ||
@@ -44,55 +43,60 @@ fun MalhaApp() {
 
     Scaffold(
         bottomBar = {
-            NavigationBar {
-                MalhaDestination.topLevel.forEach { destination ->
-                    val isSelected = when (destination) {
-                        MalhaDestination.Home -> isHomeHierarchy
-                        MalhaDestination.Community -> isCommunityHierarchy
-                        else -> currentRoute == destination.route
-                    }
+            if (!isExecutionPage) {
+                NavigationBar(
+                    containerColor = androidx.compose.material3.MaterialTheme.colorScheme.surface,
+                    contentColor = androidx.compose.material3.MaterialTheme.colorScheme.onSurface
+                ) {
+                    MalhaDestination.topLevel.forEach { destination ->
+                        val isSelected = when (destination) {
+                            MalhaDestination.Home -> isHomeHierarchy
+                            MalhaDestination.Community -> isCommunityHierarchy
+                            else -> currentRoute == destination.route
+                        }
 
-                    NavigationBarItem(
-                        selected = isSelected,
-                        onClick = {
-                            if (destination == MalhaDestination.Home) {
-                                // Clear all subpages of Home and return directly to root Home
-                                navController.navigate(destination.route) {
-                                    popUpTo(navController.graph.startDestinationId) {
-                                        saveState = false
-                                        inclusive = false
+                        NavigationBarItem(
+                            selected = isSelected,
+                            onClick = {
+                                if (destination == MalhaDestination.Home) {
+                                    // Clear all subpages of Home and return directly to root Home
+                                    navController.navigate(destination.route) {
+                                        popUpTo(navController.graph.startDestinationId) {
+                                            saveState = false
+                                            inclusive = false
+                                        }
+                                        launchSingleTop = true
+                                        restoreState = false
                                     }
-                                    launchSingleTop = true
-                                    restoreState = false
-                                }
-                            } else {
-                                navController.navigate(destination.route) {
-                                    popUpTo(navController.graph.startDestinationId) {
-                                        saveState = true
+                                } else {
+                                    navController.navigate(destination.route) {
+                                        popUpTo(navController.graph.startDestinationId) {
+                                            saveState = true
+                                        }
+                                        launchSingleTop = true
+                                        restoreState = true
                                     }
-                                    launchSingleTop = true
-                                    restoreState = true
                                 }
-                            }
-                        },
-                        icon = {
-                            Icon(
-                                imageVector = when (destination) {
-                                    MalhaDestination.Home -> androidx.compose.ui.graphics.vector.ImageVector.vectorResource(id = R.drawable.home_24px)
-                                    MalhaDestination.Projects -> androidx.compose.ui.graphics.vector.ImageVector.vectorResource(id = R.drawable.ic_project)
-                                    MalhaDestination.Patterns -> Icons.AutoMirrored.Outlined.List
-                                    MalhaDestination.Materials -> androidx.compose.ui.graphics.vector.ImageVector.vectorResource(id = R.drawable.ic_materials)
-                                    MalhaDestination.Community -> Icons.Outlined.Groups
-                                    MalhaDestination.Aidi -> androidx.compose.ui.graphics.vector.ImageVector.vectorResource(id = R.drawable.ic_aidi)
-                                    MalhaDestination.Profile -> Icons.Outlined.AccountCircle
-                                    MalhaDestination.Settings -> Icons.Outlined.Settings
-                                    else -> Icons.Outlined.Home
-                                },
-                                contentDescription = androidx.compose.ui.res.stringResource(destination.titleResId)
-                            )
-                        },
-                        label = { Text(androidx.compose.ui.res.stringResource(destination.titleResId)) }
-                    )
+                            },
+                            icon = {
+                                Icon(
+                                    imageVector = when (destination) {
+                                        MalhaDestination.Home -> androidx.compose.ui.graphics.vector.ImageVector.vectorResource(id = R.drawable.home_24px)
+                                        MalhaDestination.Projects -> androidx.compose.ui.graphics.vector.ImageVector.vectorResource(id = R.drawable.ic_project)
+                                        MalhaDestination.Patterns -> Icons.AutoMirrored.Outlined.List
+                                        MalhaDestination.Materials -> androidx.compose.ui.graphics.vector.ImageVector.vectorResource(id = R.drawable.ic_materials)
+                                        MalhaDestination.Community -> Icons.Outlined.Groups
+                                        MalhaDestination.Aidi -> androidx.compose.ui.graphics.vector.ImageVector.vectorResource(id = R.drawable.ic_aidi)
+                                        MalhaDestination.Profile -> Icons.Outlined.AccountCircle
+                                        MalhaDestination.Settings -> Icons.Outlined.Settings
+                                        else -> Icons.Outlined.Home
+                                    },
+                                    contentDescription = androidx.compose.ui.res.stringResource(destination.titleResId)
+                                )
+                            },
+                            label = { Text(androidx.compose.ui.res.stringResource(destination.titleResId)) }
+                        )
+                    }
                 }
             }
         }

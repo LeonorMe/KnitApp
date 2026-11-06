@@ -160,6 +160,16 @@ class FirebaseCloudDataService(
             .await()
     }
 
+    override suspend fun deleteProject(userId: String, projectId: String) {
+        firestore
+            .collection(CloudCollections.USERS)
+            .document(userId)
+            .collection(CloudCollections.PROJECTS)
+            .document(projectId)
+            .delete()
+            .await()
+    }
+
     override suspend fun upsertMaterial(
         userId: String,
         materialId: String,
@@ -186,6 +196,16 @@ class FirebaseCloudDataService(
             .collection(CloudCollections.MATERIALS)
             .document(materialId)
             .set(material, SetOptions.merge())
+            .await()
+    }
+
+    override suspend fun deleteMaterial(userId: String, materialId: String) {
+        firestore
+            .collection(CloudCollections.USERS)
+            .document(userId)
+            .collection(CloudCollections.MATERIALS)
+            .document(materialId)
+            .delete()
             .await()
     }
 

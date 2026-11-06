@@ -314,6 +314,12 @@ fun HomeScreen(
             onRewardClaimed = { amount ->
                 viewModel.claimSquareReward(amount)
                 showSquareDialog = false
+            },
+            onStartChallengePattern = {
+                showSquareDialog = false
+                viewModel.startSquareChallengeProject { challengeProjectId ->
+                    onOpenProject(challengeProjectId)
+                }
             }
         )
     }

@@ -10,6 +10,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import android.net.Uri
+import android.util.Log
+import com.malha.app.core.util.ImageStorageHelper
 import kotlinx.coroutines.flow.collectLatest
 
 class SettingsViewModel(application: Application) : AndroidViewModel(application) {
@@ -62,22 +64,35 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
     fun updateProfilePhoto(localUri: Uri){
         viewModelScope.launch {
-            val user = uiState.value.user ?: return@launch
+            val context = getApplication<Application>()
+            val persistentUri = ImageStorageHelper.saveImageToInternalStorage(context, localUri)
+                ?: localUri.toString()
 
-            val downloadUrl =
-                appContainer.cloudDataService.uploadProfilePhoto(
-                    userId = user.id,
-                    localUri = localUri
-                )
+            // 1. Immediately persist locally so it renders across all screens & restarts
+            appContainer.preferencesRepository.updateProfilePhoto(persistentUri)
+            _uiState.update {
+                it.copy(preferences = it.preferences.copy(profilePhotoUri = persistentUri))
+            }
 
-            appContainer.preferencesRepository.updateProfilePhoto(downloadUrl)
-
-            val prefs = uiState.value.preferences
-            appContainer.socialRepository.updateProfile(
-                name = prefs.username.toString() , // TODO doesn't get a new value??
-                bio = prefs.bio,
-                profilePicUri = downloadUrl
-            )
+            // 2. Safely sync to cloud if user is signed in
+            val user = uiState.value.user
+            if (user != null && !user.isAnonymous) {
+                runCatching {
+                    val downloadUrl = appContainer.cloudDataService.uploadProfilePhoto(
+                        userId = user.id,
+                        localUri = localUri
+                    )
+                    appContainer.preferencesRepository.updateProfilePhoto(downloadUrl)
+                    val prefs = uiState.value.preferences
+                    appContainer.socialRepository.updateProfile(
+                        name = prefs.username.orEmpty(),
+                        bio = prefs.bio,
+                        profilePicUri = downloadUrl
+                    )
+                }.onFailure { e ->
+                    Log.w("SettingsViewModel", "Failed to upload profile photo to cloud: ${e.message}")
+                }
+            }
         }
     }
 

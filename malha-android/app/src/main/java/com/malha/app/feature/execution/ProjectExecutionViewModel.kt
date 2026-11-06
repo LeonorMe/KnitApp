@@ -73,7 +73,10 @@ class ProjectExecutionViewModel(
         val state = uiState.value
         val project = state.project ?: return
         val nextIndex = (project.currentStepIndex - 1).coerceAtLeast(0)
-        viewModelScope.launch { updateStep(nextIndex, state.totalSteps) }
+        viewModelScope.launch {
+            // Keep existing progress percent when navigating back so viewing previous steps doesn't downgrade progress
+            appContainer.projectRepository.updateProgress(projectId, nextIndex, project.progressPercent)
+        }
     }
 
     fun nextStep() {
@@ -81,7 +84,9 @@ class ProjectExecutionViewModel(
         val project = state.project ?: return
         if (state.totalSteps == 0) return
         val nextIndex = (project.currentStepIndex + 1).coerceAtMost(state.totalSteps - 1)
-        viewModelScope.launch { updateStep(nextIndex, state.totalSteps) }
+        viewModelScope.launch {
+            appContainer.projectRepository.updateProgress(projectId, nextIndex, project.progressPercent)
+        }
     }
 
     fun markCurrentStepDone() {
@@ -90,7 +95,7 @@ class ProjectExecutionViewModel(
         val currentStep = state.currentStep ?: return
         if (state.totalSteps == 0) return
 
-        val isLastStep = project.currentStepIndex == state.totalSteps - 1
+        val isLastStep = project.currentStepIndex >= state.totalSteps - 1
         val nextIndex = if (!isLastStep) project.currentStepIndex + 1 else project.currentStepIndex
 
         viewModelScope.launch {
@@ -100,16 +105,11 @@ class ProjectExecutionViewModel(
                 isDone = true,
                 note = state.currentStepProgress?.note
             )
-            updateStep(nextIndex, state.totalSteps)
-            // Award coins on final step
-            if (isLastStep) {
-                runCatching {
-                    appContainer.socialRepository
-                        .addCoins(
-                            COINS_PER_PROJECT
-                            //calculateCoins(project) // TODO
-                        ) }
-            }
+            // If it's the last step and marked done, completed = totalSteps -> 100%
+            val completedCount = if (isLastStep) state.totalSteps else nextIndex
+            val newProgress = if (state.totalSteps > 0) ((completedCount.toFloat() / state.totalSteps.toFloat()) * 100).toInt() else 0
+            val maxProgress = maxOf(project.progressPercent, newProgress)
+            appContainer.projectRepository.updateProgress(projectId, nextIndex, maxProgress)
         }
     }
 
@@ -135,13 +135,28 @@ class ProjectExecutionViewModel(
         }
     }
 
-    private suspend fun updateStep(index: Int, total: Int) {
-        val progress = if (total > 0) (index.toFloat() / total.toFloat() * 100).toInt() else 0
-        appContainer.projectRepository.updateProgress(projectId, index, progress)
-    }
+    fun finishProject(photoUri: String?, publishToFeed: Boolean = true) {
+        val state = uiState.value
+        val project = state.project ?: return
 
-    fun selectSize(size: String) {
-        selectedSizeState.update { size }
+        viewModelScope.launch {
+            runCatching {
+                appContainer.projectRepository.completeProject(project.id, photoUri)
+                appContainer.socialRepository.addCoins(COINS_PER_PROJECT)
+
+                val effectivePhoto = photoUri ?: project.imageUri
+                if (publishToFeed && !effectivePhoto.isNullOrBlank()) {
+                    appContainer.socialRepository.createPost(
+                        patternId = project.patternId,
+                        imageUri = effectivePhoto,
+                        description = "Finished project: ${project.name} 🎉",
+                        status = "completed"
+                    )
+                }
+            }.onFailure { error ->
+                errorMessage.update { error.message ?: "Could not finish project." }
+            }
+        }
     }
 
     fun clearError() {
